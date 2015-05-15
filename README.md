@@ -1,3 +1,2 @@
-# Smart.js
-Lazy module controller
-d
+# iModalJs
+SAMD -  Selective Asynchronous Module Definition 
