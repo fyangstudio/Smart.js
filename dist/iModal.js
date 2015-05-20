@@ -1,3 +1,10 @@
+/*!
+ * iModal JavaScript Component v0.1.0
+ *
+ * Author YangFan(18767120422@163.com)
+ *
+ * Date: 2015-05-20
+ */
 (function (_doc, _win, undefined) {
 
     var $m = {};
@@ -39,7 +46,7 @@
     /* grammar fix
      ---------------------------------------------------------------------- */
 
-    // trim String
+    // The trim() method removes whitespace from both ends of a string.
     if (!String.prototype.trim) {
         String.prototype.trim = function () {
             return this.replace(/^\s+|\s+$/g, '');
