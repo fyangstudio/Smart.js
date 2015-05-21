@@ -71,5 +71,26 @@
         };
     }
 
+    // The forEach() method executes a provided function once per array element.
+    if (!Array.prototype.forEach) {
+        Array.prototype.forEach = function forEach(callback, thisArg) {
+            var T, k = 0;
+            if (this == null || !$t.$isFunction(callback)) return;
+
+            var O = Object(this);
+            var len = O.length >>> 0;
+            if (thisArg) T = thisArg;
+
+            while (k < len) {
+                var kValue;
+                if (Object.prototype.hasOwnProperty.call(O, k)) {
+                    kValue = O[k];
+                    callback.call(T, kValue, k, O);
+                }
+                k++;
+            }
+        };
+    }
+
     if (!_win.$m) _win.$m = $m;
 })(document, window)
