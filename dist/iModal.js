@@ -12,7 +12,7 @@
     var _noop = function () {
     };
 
-    /* event listener
+    /* Event listener
      ---------------------------------------------------------------------- */
     if (_doc.addEventListener) {
         $t.$addEvent = function (node, event, fn) {
@@ -30,7 +30,7 @@
         }
     }
 
-    /* type of
+    /* Type of
      ---------------------------------------------------------------------- */
     function _isType(type) {
         return function (obj) {
@@ -43,7 +43,7 @@
     $t.$isString = _isType('String');
     $t.$isFunction = _isType('Function');
 
-    /* grammar fix
+    /* Syntax fix
      ---------------------------------------------------------------------- */
 
     // The trim() method removes whitespace from both ends of a string.
