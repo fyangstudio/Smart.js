@@ -125,5 +125,37 @@
         })()
     }
 
+    if (!window.JSON) {
+        var _json = {};
+        // The JSON object contains methods for parsing JavaScript Object Notation (JSON) and converting values to JSON.
+        // It can't be called or constructed, and aside from its two method properties it has no interesting functionality of its own.
+        _json.parse = function (json) {
+            if (json === null) return json;
+            if ($t.$isString(json)) {
+                json = json.trim();
+                if (json) return ( new Function('return ' + json) )();
+            }
+            throw new Error('Invalid JSON: ' + json);
+        }
+        // The JSON.stringify() method converts a JavaScript value to a JSON string, optionally replacing values if a replacer function is specified,
+        // or optionally including only the specified properties if a replacer array is specified.
+        _json.stringify = function (obj) {
+            if (typeof (obj) != "object" || obj === null) {
+                if ($t.$isString(obj)) obj = '"' + obj + '"';
+                return String(obj);
+            } else {
+                var json = [], arr = $t.$isArray(obj), stringify = arguments.callee;
+                for (var key in obj) {
+                    var v = obj[key];
+                    if ($t.$isString(v)) v = '"' + v + '"';
+                    else if (typeof (v) == "object" && v !== null) v = stringify(v);
+                    json.push((arr ? "" : '"' + key + '":') + String(v));
+                }
+                return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            }
+        };
+        window.JSON = _json;
+    }
+
     if (!_win.$m) _win.$m = $m;
 })(document, window)
