@@ -125,7 +125,7 @@
         })()
     }
 
-    if (!window.JSON) {
+    if (!_win.JSON) {
         var _json = {};
         // The JSON object contains methods for parsing JavaScript Object Notation (JSON) and converting values to JSON.
         // It can't be called or constructed, and aside from its two method properties it has no interesting functionality of its own.
@@ -154,7 +154,16 @@
                 return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
             }
         };
-        window.JSON = _json;
+        _win.JSON = _json;
+    }
+
+    // The console object provides access to the browser's debugging console
+    if (!_win.console) {
+        _win.console = {
+            log: _noop,
+            warn: _noop,
+            error: _noop
+        };
     }
 
     if (!_win.$m) _win.$m = $m;
