@@ -1,4 +1,4 @@
-/*!
+/**
  * iModal JavaScript Component v0.1.0
  *
  * Author YangFan(18767120422@163.com)
@@ -6,7 +6,14 @@
  * Date: 2015-05-20
  */
 (function (_doc, _win, undefined) {
-
+    /*!
+     * iModal Tools Component
+     *
+     * #include
+     * Primary javascript API syntax fix
+     * Base function
+     *
+     */
     var $t = {};
     var _noop = function () {
     };
@@ -204,4 +211,21 @@
     }
 
     _win.$t = $t;
+
+    /*!
+     * iModal Modal Component
+     *
+     * #include
+     * Base Class
+     * Define (SAMD)
+     *
+     */
+    var $m = {
+        config: function (options) {
+            console.log(options);
+        }
+    }
+
+    _win.$m = $m;
+
 })(document, window)
