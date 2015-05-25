@@ -166,5 +166,43 @@
         };
     }
 
+    /* Custom event function
+     ---------------------------------------------------------------------- */
+    // Handles custom event
+    $t.$on = function (event, fn) {
+        if (typeof event === "object") {
+            var _on = arguments.callee;
+            for (var i in event) {
+                _on(i, event[i]);
+            }
+        } else {
+            var _handles = this._handles || (this._handles = {}),
+                _calls = _handles[event] || (_handles[event] = []);
+            _calls.push(fn);
+        }
+        return this;
+    }
+
+    // Relieve custom event
+    $t.$off = function (event, fn) {
+        if (!this._handles) return;
+        if (!event) this._handles = {};
+        var _handles = this._handles, _calls;
+
+        if (_calls = _handles[event]) {
+            if (!fn) {
+                _handles[event] = [];
+                return this;
+            }
+            for (var i = 0, l = _calls.length; i < l; i++) {
+                if (fn === _calls[i]) {
+                    _calls.splice(i, 1);
+                    return this;
+                }
+            }
+        }
+        return this;
+    }
+
     if (!_win.$m) _win.$m = $m;
 })(document, window)
