@@ -7,8 +7,7 @@
  */
 (function (_doc, _win, undefined) {
 
-    var $m = {};
-    var $t = {}
+    var $t = {};
     var _noop = function () {
     };
 
@@ -204,5 +203,5 @@
         return this;
     }
 
-    if (!_win.$m) _win.$m = $m;
+    _win.$t = $t;
 })(document, window)
