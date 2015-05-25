@@ -213,6 +213,20 @@
     _win.$t = $t;
 
     /*!
+     * iModal Templates Component
+     *
+     * #include
+     * Living dom
+     *
+     */
+    var $tpl = function () {
+
+    }
+    $tpl.prototype = {}
+
+    _win.$tpl = $tpl;
+
+    /*!
      * iModal Modal Component
      *
      * #include
