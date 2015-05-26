@@ -210,6 +210,22 @@
         return this;
     }
 
+    /* Parse
+     ---------------------------------------------------------------------- */
+    // The $t.$parseHTML() method can change a string of html to a html node.
+    $t.$parseHTML = function (txt) {
+        if (!txt) return;
+        var _reg = /<(.*?)(?=\s|>)/i, // first tag name
+            _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
+        var _tag;
+        if (_reg.test(txt)) _tag = _parentNodeMap[(RegExp.$1 || '').toLowerCase()] || '';
+        var _cnt = _doc.createElement(_tag || 'div');
+        _cnt.innerHTML = txt;
+        var _list = _cnt.childNodes;
+        return _list.length > 1 ? _cnt : _list[0];
+    };
+
+
     _win.$t = $t;
 
     /*!
