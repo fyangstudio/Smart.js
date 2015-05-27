@@ -242,6 +242,35 @@
         return null;
     };
 
+    // String to object
+    $t.$s2o = function (string, _split) {
+        var _obj = {};
+        var _arr = (string || '').split(_split);
+        _arr.forEach(function (_name) {
+            var _brr = _name.split('=');
+            if (!_brr || !_brr.length) return;
+            var _key = _brr.shift();
+            if (!_key) return;
+            _obj[decodeURIComponent(_key)] = decodeURIComponent(_brr.join('='));
+        });
+        return _obj;
+    };
+
+    // Object to string
+    $t.$o2s = function (_object, _split, _encode) {
+        if (typeof (_object) != "object" || _object === null) return JSON.stringify(_object);
+
+        var _arr = [];
+        $t.$forIn(_object, function (_value, _key) {
+            if ($t.$isFunction(_value)) return;
+            _value = JSON.stringify(_value);
+
+            if (!!_encode) _value = encodeURIComponent(_value);
+            _arr.push(encodeURIComponent(_key) + '=' + _value);
+        });
+        return _arr.join(_split || ',');
+    };
+
     _win.$t = $t;
 
     /*!
