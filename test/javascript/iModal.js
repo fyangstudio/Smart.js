@@ -44,6 +44,7 @@
         }
     }
 
+    // The $t.$isXXX() method returns true if an object is an XXX, false if it is not.
     $t.$isArray = Array.isArray || _isType('Array');
     $t.$isObject = _isType('Object');
     $t.$isString = _isType('String');
