@@ -11,10 +11,16 @@
     $m.config({1: 1});
     var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
     var t2 = $t.$o2s(t);
-    $t.$watchHash(function(_hash){
+    $t.$watchHash(function (_hash) {
         console.log(_hash);
     })
-    console.log($t.$hash());
+    $t.$ajax({
+        url: 'http://fed.hz.netease.com/api/getblogs',
+        data:{t:1},
+        success: function (_json) {
+            console.log(_json)
+        }
+    })
 </script>
 </body>
 </html>

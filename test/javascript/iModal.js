@@ -359,6 +359,62 @@
         }
     }
 
+    /* request
+     ---------------------------------------------------------------------- */
+    var _ajaxHandler = function () {
+    }
+    _ajaxHandler.prototype = {
+        _request: function (config) {
+            if (!!config.url) {
+                var
+                    _method = (config.method || 'GET').toLowerCase(),           // method
+                    _url = config.url,                                          // url
+                    _data = config.data || null,                                // send data
+                    _dataType = (config.dataType || 'JSON').toLowerCase(),      // request data type
+                    _success = config.success || _noop,                         // request success callback
+                    _error = config.error || _noop,                             // request fail callback
+                    _xhr = this._createXhrObject();                             // XMLHttpRequest
+                if (_data != null && _method == 'get') _url += ('?' + $t.$o2s(_data));
+                // On xhr ready state change
+                _xhr.onreadystatechange = function () {
+                    if (_xhr.readyState !== 4) return;
+                    var _responseData = _dataType == 'json' ? JSON.parse(_xhr.responseText) : _xhr.responseText;
+                    (_xhr.status === 200) ? _success(_responseData) : _error(_xhr.status);
+                };
+                _xhr.open(_method, _url, true);
+                _xhr.send(_data);
+            }
+        },
+        _createXhrObject: function () {
+            var _methods = [
+                function () {
+                    return new XMLHttpRequest();
+                },
+                function () {
+                    return new ActiveXObject('Msxml2.XMLHTTP');
+                },
+                function () {
+                    return new ActiveXObject('Microsoft.XMLHTTP');
+                }
+            ];
+            for (var i = 0, l = _methods.length; i < l; i++) {
+                try {
+                    _methods[i]();
+                } catch (e) {
+                    continue;
+                }
+                this._createXhrObject = _methods[i];
+                return _methods[i]();
+            }
+            throw new Error('Could not create an XHR object');
+        }
+    }
+
+    $t.$ajax = function (config) {
+        if ($t.$isObject(config)) return new _ajaxHandler()._request(config);
+        else throw new Error('Ajax parameter error');
+    }
+
 
     _win.$t = $t;
 
