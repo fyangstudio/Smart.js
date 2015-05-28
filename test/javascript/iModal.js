@@ -262,13 +262,13 @@
         if (typeof (_object) != "object" || _object === null) return JSON.stringify(_object);
 
         var _arr = [];
-        $t.$forIn(_object, function (_value, _key) {
-            if ($t.$isFunction(_value)) return;
+        this.$forIn(_object, function (_value, _key) {
+            if (this.$isFunction(_value)) return;
             _value = JSON.stringify(_value);
 
             if (!!_encode) _value = encodeURIComponent(_value);
             _arr.push(encodeURIComponent(_key) + '=' + _value);
-        });
+        }.bind(this));
         return _arr.join(_split || ',');
     };
 
@@ -276,11 +276,11 @@
      ---------------------------------------------------------------------- */
     // Clone
     $t.$clone = function (target, deep) {
-        var cloned, _deep = !!deep, cloneObject = arguments.callee;
+        var cloned, _deep = !!deep, cloneObject = arguments.callee.bind(this);
         if (!!target.nodeType) return target.cloneNode(_deep);
         if (target === null || target === undefined || typeof(target) !== 'object') return target;
 
-        if ($t.$isArray(target)) {
+        if (this.$isArray(target)) {
             if (!_deep) return target;
             cloned = [];
             for (var i in target) if (target.hasOwnProperty(i)) cloned.push(cloneObject(target[i], _deep));
