@@ -322,6 +322,41 @@
         return true;
     };
 
+    /* hash
+     ---------------------------------------------------------------------- */
+    var _hash = window.location.hash;
+    
+    $t.$hash = function (value) {
+        if (value != undefined) window.location.hash = value;
+        return window.location.hash.replace('#', '');
+    };
+
+    // The $t.$watchHash() method can check the location.hash at a regular interval,
+    // if location.hash changed, the callback function is called.
+    $t.$watchHash = function (callback) {
+        if (this.$isFunction(callback)) {
+            if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
+                this.$addEvent(window, 'hashchange', function () {
+                    _hash = this.$hash();
+                    callback(_hash);
+                }.bind(this))
+            } else {
+                var handles = this._hashFns || (this._hashFns = []);
+                handles.push(callback);
+                setInterval(function () {
+                    var _h = window.location.hash.replace('#', '');
+                    if (_h != _hash) {
+                        handles.forEach(function (_fn) {
+                            _fn.call(this, _h);
+                        })
+                        _hash = this.$hash();
+                    }
+                }.bind(this), 150);
+            }
+        }
+    }
+
+
     _win.$t = $t;
 
     /*!
