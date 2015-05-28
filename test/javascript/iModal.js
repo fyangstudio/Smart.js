@@ -410,10 +410,48 @@
         }
     }
 
+    // The $t.$ajax() method perform an asynchronous HTTP request.
     $t.$ajax = function (config) {
-        if ($t.$isObject(config)) return new _ajaxHandler()._request(config);
+        if (this.$isObject(config)) return new _ajaxHandler()._request(config);
         else throw new Error('Ajax parameter error');
     }
+
+    /* Encode & Decode
+     ---------------------------------------------------------------------- */
+    var _encode = function (map, content) {
+        content = '' + content;
+        if (!map || !content) return content || '';
+        return content.replace(map.r, function ($1) {
+            var _result = map[!map.i ? $1.toLowerCase() : $1];
+            return _result != null ? _result : $1;
+        });
+    };
+
+    $t.$escape = function (content, encodeURL) {
+        if (encodeURL != undefined) {
+            return encodeURIComponent(content);
+        } else {
+            var _map = {
+                r: /\<|\>|\&|\r|\n|\s|\'|\"/g,
+                '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
+                '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
+            };
+            return _encode(_map, content);
+        }
+    };
+
+    $t.$unescape = function (content, decodeURL) {
+        if (decodeURL != undefined) {
+            return decodeURIComponent(content);
+        } else {
+            var _map = {
+                r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
+                '&lt;': '<', '&gt;': '>', '&amp;': '&', '&nbsp;': ' ',
+                '&#39;': "'", '&quot;': '"', '<br/>': '\n'
+            };
+            return _encode(_map, content);
+        }
+    };
 
 
     _win.$t = $t;

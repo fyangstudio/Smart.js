@@ -14,13 +14,13 @@
     $t.$watchHash(function (_hash) {
         console.log(_hash);
     })
-    $t.$ajax({
-        url: 'http://fed.hz.netease.com/api/getblogs',
-        data:{t:1},
-        success: function (_json) {
-            console.log(_json)
-        }
-    })
+    //    $t.$ajax({
+    //        url: 'http://fed.hz.netease.com/api/getblogs',
+    //        success: function (_json) {
+    //            console.log(_json)
+    //        }
+    //    })
+    console.log($t.$escape('http://www.163.com/', true));
 </script>
 </body>
 </html>
