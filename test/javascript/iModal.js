@@ -153,10 +153,12 @@
             } else {
                 var json = [], arr = $t.$isArray(obj), stringify = arguments.callee;
                 for (var key in obj) {
-                    var v = obj[key];
-                    if ($t.$isString(v)) v = '"' + v + '"';
-                    else if (typeof (v) == "object" && v !== null) v = stringify(v);
-                    json.push((arr ? "" : '"' + key + '":') + String(v));
+                    if (obj.hasOwnProperty(key)) {
+                        var v = obj[key];
+                        if ($t.$isString(v)) v = '"' + v + '"';
+                        else if (typeof (v) == "object" && v !== null) v = stringify(v);
+                        json.push((arr ? "" : '"' + key + '":') + String(v));
+                    }
                 }
                 return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
             }
