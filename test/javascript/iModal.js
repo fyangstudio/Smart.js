@@ -324,10 +324,13 @@
 
     /* hash
      ---------------------------------------------------------------------- */
+    // Window hash
     var _hash = window.location.hash;
-    
+
+    // The $t.$hash()method property returns a DOMString not containing a '#' followed by the fragment identifier of the URL.
+    // The hash is not percent encoded.
     $t.$hash = function (value) {
-        if (value != undefined) window.location.hash = value;
+        if (value != undefined) window.location.hash = value.replace(/#/g, '');
         return window.location.hash.replace('#', '');
     };
 
@@ -346,12 +349,12 @@
                 setInterval(function () {
                     var _h = window.location.hash.replace('#', '');
                     if (_h != _hash) {
+                        _hash = this.$hash();
                         handles.forEach(function (_fn) {
                             _fn.call(this, _h);
                         })
-                        _hash = this.$hash();
                     }
-                }.bind(this), 150);
+                }.bind(this), 100);
             }
         }
     }

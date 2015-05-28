@@ -11,7 +11,10 @@
     $m.config({1: 1});
     var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
     var t2 = $t.$o2s(t);
-    alert(t2);
+    $t.$watchHash(function(_hash){
+        console.log(_hash);
+    })
+    console.log($t.$hash());
 </script>
 </body>
 </html>
