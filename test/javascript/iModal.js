@@ -432,16 +432,13 @@
     // in which certain characters have been replaced by a hexadecimal escape sequence.
     // Use entity transform or encodeURIComponent instead.
     $m.$escape = function (content, encodeURL) {
-        if (encodeURL != undefined) {
-            return encodeURIComponent(content);
-        } else {
-            var _map = {
-                r: /\<|\>|\&|\r|\n|\s|\'|\"/g,
-                '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
-                '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
-            };
-            return _encode(_map, content);
-        }
+        var _map = {
+            r: /\<|\>|\&|\r|\n|\s|\'|\"/g,
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
+            '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
+        };
+        var ret = _encode(_map, content)
+        return encodeURL != undefined ? encodeURIComponent(ret) : ret;
     };
 
     // The $m.$unescape() method computes a new string,
@@ -449,16 +446,13 @@
     // The escape sequences might be introduced by a function like escape.
     // Because unescape is deprecated, use entity transform or decodeURIComponent instead.
     $m.$unescape = function (content, decodeURL) {
-        if (decodeURL != undefined) {
-            return decodeURIComponent(content);
-        } else {
-            var _map = {
-                r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
-                '&lt;': '<', '&gt;': '>', '&amp;': '&', '&nbsp;': ' ',
-                '&#39;': "'", '&quot;': '"', '<br/>': '\n'
-            };
-            return _encode(_map, content);
-        }
+        var _map = {
+            r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
+            '&lt;': '<', '&gt;': '>', '&amp;': '&', '&nbsp;': ' ',
+            '&#39;': "'", '&quot;': '"', '<br/>': '\n'
+        };
+        var ret = _encode(_map, content);
+        return decodeURL != undefined ? decodeURIComponent(ret) : ret;
     };
 
     /* Selector
