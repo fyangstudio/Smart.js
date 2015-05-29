@@ -23,19 +23,19 @@
 
     var x = $m.$module.$extend({
         $init: function () {
-            console.log(1);
+            console.log('base class init');
         }
     })
 
     var t = x.$extend({
         $init: function () {
             this.$super();
-            console.log(2);
+            console.log('child class init');
             this.t2()
         },
         t2: function () {
             this.$super();
-            console.log(3);
+            console.log('do something');
         }
     })
     new t().$init();
