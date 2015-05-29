@@ -443,8 +443,7 @@
 
     // The $m.$unescape() method computes a new string,
     // in which hexadecimal escape sequences are replaced with the character that it represents.
-    // The escape sequences might be introduced by a function like escape.
-    // Because unescape is deprecated, use entity transform or decodeURIComponent instead.
+    // Use entity transform or decodeURIComponent instead.
     $m.$unescape = function (content, decodeURL) {
         var _map = {
             r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
