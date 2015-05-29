@@ -21,24 +21,44 @@
     //    })
     console.log($m.$escape('http://www.163.com/', true));
 
-    var x = $m.$module.$extend({
+    var base = $m.$module.$extend({
+        v: 1,
         $init: function () {
-            console.log('base class init');
+            console.log('Base class init');
+            console.log(this.v);
+            this.t1();
+        },
+        t1: function () {
+            console.log('Base: do something')
         }
     })
 
-    var t = x.$extend({
+    var parent = base.$extend({
+        v: 2,
         $init: function () {
             this.$super();
-            console.log('child class init');
+            console.log('Parent class init');
+            console.log(this.v);
+        },
+        t2: function () {
+            console.log('Parent: do something');
+        }
+    })
+
+    var child = parent.$extend({
+        v: 3,
+        $init: function () {
+            this.$super();
+            console.log('Child class init');
+            console.log(this.v);
             this.t2()
         },
         t2: function () {
             this.$super();
-            console.log('do something');
+            console.log('Child: do something');
         }
     })
-    new t().$init();
+    new child().$init();
 </script>
 </body>
 </html>

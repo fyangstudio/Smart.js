@@ -497,18 +497,19 @@
         // Copy the properties over onto the new prototype
         $m.$forIn(prop, function (value, name) {
             if (name != "$super") {
-                if ($m.$isFunction(prop[name])) {
-                    prototype[name] = (function (name, fn) {
+                prototype[name] = (function (name, fn) {
+                    if ($m.$isFunction(prop[name])) {
                         return function () {
                             var _superFn = _noop;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
 
                             // Add a new $super() method that is the same method on the super-class
-                            this.$super = _superFn;
-                            return fn.apply(this, arguments);
+                            prototype.$super = _superFn;
+                            return fn.apply(prototype, arguments);
                         };
-                    })(name, prop[name])
-                } else prototype[name] = prop[name];
+                    }
+                    return prop[name];
+                })(name, prop[name])
             }
         })
 
