@@ -490,10 +490,12 @@
 
     // Create a new Class that inherits from this class
     Class.$extend = function (prop) {
+        if (!$t.$isObject(prop)) return;
+
+        // Parent Class
         var _super = this.prototype;
 
-        // Instantiate a base class (but only create the instance,
-        // don't run the init constructor)
+        // Instantiate a base class
         var prototype = new this();
 
         // Copy the properties over onto the new prototype
