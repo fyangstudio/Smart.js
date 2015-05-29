@@ -8,19 +8,43 @@
 <div id="test1"></div>
 <script src="javascript/iModal.js"></script>
 <script>
-    $m.config({1: 1});
     var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
-    var t2 = $t.$o2s(t);
-    $t.$watchHash(function (_hash) {
+    var t2 = $m.$o2s(t);
+    $m.$watchHash(function (_hash) {
         console.log(_hash);
     })
-    //    $t.$ajax({
+    //    $m.$ajax({
     //        url: 'http://fed.hz.netease.com/api/getblogs',
     //        success: function (_json) {
     //            console.log(_json)
     //        }
     //    })
-    console.log($t.$escape('http://www.163.com/', true));
+    console.log($m.$escape('http://www.163.com/', true));
+
+    var x = $m.$module.$extend({
+        $init: function () {
+            console.log(1);
+        },
+        t1: function () {
+            this.$super();
+            console.log(2)
+        },
+        t2: function () {
+            console.log(3);
+        }
+    })
+
+    var t = x.$extend({
+        $init: function () {
+            this.$super();
+            console.log(4);
+            this.t2()
+        },
+        t2: function () {
+            this.$super();
+        }
+    })
+    new t().$init();
 </script>
 </body>
 </html>

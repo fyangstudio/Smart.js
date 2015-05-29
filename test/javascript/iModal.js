@@ -14,24 +14,24 @@
      * Base function
      *
      */
-    var $t = {};
+    var $m = {};
     var _noop = function () {
     };
 
     /* Event listener
      ---------------------------------------------------------------------- */
     if (_doc.addEventListener) {
-        $t.$addEvent = function (node, event, fn) {
+        $m.$addEvent = function (node, event, fn) {
             node.addEventListener(event, fn, false);
         }
-        $t.$removeEvent = function (node, event, fn) {
+        $m.$removeEvent = function (node, event, fn) {
             node.removeEventListener(event, fn, false)
         }
     } else {
-        $t.$addEvent = function (node, event, fn) {
+        $m.$addEvent = function (node, event, fn) {
             node.attachEvent('on' + event, fn);
         }
-        $t.$removeEvent = function (node, event, fn) {
+        $m.$removeEvent = function (node, event, fn) {
             node.detachEvent('on' + event, fn);
         }
     }
@@ -44,11 +44,11 @@
         }
     }
 
-    // The $t.$isXXX() method returns true if an object is an XXX, false if it is not.
-    $t.$isArray = Array.isArray || _isType('Array');
-    $t.$isObject = _isType('Object');
-    $t.$isString = _isType('String');
-    $t.$isFunction = _isType('Function');
+    // The $m.$isXXX() method returns true if an object is an XXX, false if it is not.
+    $m.$isArray = Array.isArray || _isType('Array');
+    $m.$isObject = _isType('Object');
+    $m.$isString = _isType('String');
+    $m.$isFunction = _isType('Function');
 
     /* Syntax fix
      ---------------------------------------------------------------------- */
@@ -65,7 +65,7 @@
     // with a given sequence of arguments preceding any provided when the new function is called.
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {
-            if (!$t.$isFunction(this)) return;
+            if (!$m.$isFunction(this)) return;
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
                 fBound = function () {
@@ -82,7 +82,7 @@
     if (!Array.prototype.forEach) {
         Array.prototype.forEach = function forEach(callback, thisArg) {
             var T, k = 0;
-            if (this == null || !$t.$isFunction(callback)) return;
+            if (this == null || !$m.$isFunction(callback)) return;
 
             var O = Object(this);
             var len = O.length >>> 0;
@@ -116,7 +116,7 @@
                 dontEnumsLength = dontEnums.length;
 
             return function (obj) {
-                if (typeof obj !== 'object' && !$t.$isFunction(obj) || obj === null) return;
+                if (typeof obj !== 'object' && !$m.$isFunction(obj) || obj === null) return;
 
                 var result = [];
                 for (var prop in obj) {
@@ -138,7 +138,7 @@
         // It can't be called or constructed, and aside from its two method properties it has no interesting functionality of its own.
         _json.parse = function (json) {
             if (json === null) return json;
-            if ($t.$isString(json)) {
+            if ($m.$isString(json)) {
                 json = json.trim();
                 if (json) return ( new Function('return ' + json) )();
             }
@@ -148,14 +148,14 @@
         // or optionally including only the specified properties if a replacer array is specified.
         _json.stringify = function (obj) {
             if (typeof (obj) != "object" || obj === null) {
-                if ($t.$isString(obj)) obj = '"' + obj + '"';
+                if ($m.$isString(obj)) obj = '"' + obj + '"';
                 return String(obj);
             } else {
-                var json = [], arr = $t.$isArray(obj), stringify = arguments.callee;
+                var json = [], arr = $m.$isArray(obj), stringify = arguments.callee;
                 for (var key in obj) {
                     if (obj.hasOwnProperty(key)) {
                         var v = obj[key];
-                        if ($t.$isString(v)) v = '"' + v + '"';
+                        if ($m.$isString(v)) v = '"' + v + '"';
                         else if (typeof (v) == "object" && v !== null) v = stringify(v);
                         json.push((arr ? "" : '"' + key + '":') + String(v));
                     }
@@ -178,7 +178,7 @@
     /* Custom event function
      ---------------------------------------------------------------------- */
     // Handles custom event
-    $t.$on = function (event, fn) {
+    $m.$on = function (event, fn) {
         if (typeof event === "object") {
             var _on = arguments.callee;
             for (var i in event) {
@@ -193,7 +193,7 @@
     }
 
     // Relieve custom event
-    $t.$off = function (event, fn) {
+    $m.$off = function (event, fn) {
         if (!this._handles) return;
         if (!event) this._handles = {};
         var _handles = this._handles, _calls;
@@ -215,8 +215,8 @@
 
     /* Parse
      ---------------------------------------------------------------------- */
-    // The $t.$parseHTML() method can change a string of html to a html node.
-    $t.$parseHTML = function (txt) {
+    // The $m.$parseHTML() method can change a string of html to a html node.
+    $m.$parseHTML = function (txt) {
         if (!txt) return;
         var _reg = /<(.*?)(?=\s|>)/i, // first tag name
             _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
@@ -230,8 +230,8 @@
 
     /* Transform
      ---------------------------------------------------------------------- */
-    // The $t.$forIn() statement iterates over the enumerable properties of an object, in arbitrary order.
-    $t.$forIn = function (obj, callback, thisArg) {
+    // The $m.$forIn() statement iterates over the enumerable properties of an object, in arbitrary order.
+    $m.$forIn = function (obj, callback, thisArg) {
         if (!obj || !callback) return null;
         var _keys = Object.keys(obj);
         for (var i = 0, l = _keys.length, _key, _ret; i < l; i++) {
@@ -246,7 +246,7 @@
     };
 
     // String to object
-    $t.$s2o = function (string, _split) {
+    $m.$s2o = function (string, _split) {
         var _obj = {};
         var _arr = (string || '').split(_split);
         _arr.forEach(function (_name) {
@@ -260,7 +260,7 @@
     };
 
     // Object to string
-    $t.$o2s = function (_object, _split, _encode) {
+    $m.$o2s = function (_object, _split, _encode) {
         if (typeof (_object) != "object" || _object === null) return JSON.stringify(_object);
 
         var _arr = [];
@@ -277,7 +277,7 @@
     /* Object operate
      ---------------------------------------------------------------------- */
     // Clone
-    $t.$clone = function (target, deep) {
+    $m.$clone = function (target, deep) {
         var cloned, _deep = !!deep, cloneObject = arguments.callee.bind(this);
         if (!!target.nodeType) return target.cloneNode(_deep);
         if (target === null || target === undefined || typeof(target) !== 'object') return target;
@@ -294,7 +294,7 @@
     };
 
     // Same
-    $t.$same = function (target1, target2, deep) {
+    $m.$same = function (target1, target2, deep) {
         var _deep = !!deep, check = arguments.callee;
         if (target1 === target2) return true;
         if (target1.constructor !== target2.constructor) return false;
@@ -327,16 +327,16 @@
     // Window hash
     var _hash = window.location.hash;
 
-    // The $t.$hash()method property returns a DOMString not containing a '#' followed by the fragment identifier of the URL.
+    // The $m.$hash()method property returns a DOMString not containing a '#' followed by the fragment identifier of the URL.
     // The hash is not percent encoded.
-    $t.$hash = function (value) {
+    $m.$hash = function (value) {
         if (value != undefined) window.location.hash = value.replace(/#/g, '');
         return window.location.hash.replace('#', '');
     };
 
-    // The $t.$watchHash() method can check the location.hash at a regular interval,
+    // The $m.$watchHash() method can check the location.hash at a regular interval,
     // if location.hash changed, the callback function is called.
-    $t.$watchHash = function (callback) {
+    $m.$watchHash = function (callback) {
         if (this.$isFunction(callback)) {
             if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
                 this.$addEvent(window, 'hashchange', function () {
@@ -374,7 +374,7 @@
                     _success = config.success || _noop,                         // request success callback
                     _error = config.error || _noop,                             // request fail callback
                     _xhr = this._createXhrObject();                             // XMLHttpRequest
-                if (_data != null && _method == 'get') _url += ('?' + $t.$o2s(_data));
+                if (_data != null && _method == 'get') _url += ('?' + $m.$o2s(_data));
                 // On xhr ready state change
                 _xhr.onreadystatechange = function () {
                     if (_xhr.readyState !== 4) return;
@@ -410,8 +410,8 @@
         }
     }
 
-    // The $t.$ajax() method perform an asynchronous HTTP request.
-    $t.$ajax = function (config) {
+    // The $m.$ajax() method perform an asynchronous HTTP request.
+    $m.$ajax = function (config) {
         if (this.$isObject(config)) return new _ajaxHandler()._request(config);
         else throw new Error('Ajax parameter error');
     }
@@ -426,10 +426,10 @@
             return _result != null ? _result : $1;
         });
     };
-    // The $t.$escape() method computes a new string,
+    // The $m.$escape() method computes a new string,
     // in which certain characters have been replaced by a hexadecimal escape sequence.
     // Use entity transform or encodeURIComponent instead.
-    $t.$escape = function (content, encodeURL) {
+    $m.$escape = function (content, encodeURL) {
         if (encodeURL != undefined) {
             return encodeURIComponent(content);
         } else {
@@ -442,11 +442,11 @@
         }
     };
 
-    // The $t.$unescape() method computes a new string,
+    // The $m.$unescape() method computes a new string,
     // in which hexadecimal escape sequences are replaced with the character that it represents.
     // The escape sequences might be introduced by a function like escape.
     // Because unescape is deprecated, use entity transform or decodeURIComponent instead.
-    $t.$unescape = function (content, decodeURL) {
+    $m.$unescape = function (content, decodeURL) {
         if (decodeURL != undefined) {
             return decodeURIComponent(content);
         } else {
@@ -459,9 +459,6 @@
         }
     };
 
-
-    _win.$t = $t;
-
     /*!
      * iModal Templates Component
      *
@@ -469,12 +466,12 @@
      * Living dom
      *
      */
-    var $tpl = function () {
+    var $mpl = function () {
 
     }
-    $tpl.prototype = {}
+    $mpl.prototype = {}
 
-    _win.$tpl = $tpl;
+    $m.$mpl = $mpl;
 
     /*!
      * iModal Modal Component
@@ -490,7 +487,7 @@
 
     // Create a new Class that inherits from this class
     Class.$extend = function (prop) {
-        if (!$t.$isObject(prop)) return;
+        if (!$m.$isObject(prop)) return;
 
         // Parent Class
         var _super = this.prototype;
@@ -499,13 +496,13 @@
         var prototype = new this();
 
         // Copy the properties over onto the new prototype
-        $t.$forIn(prop, function (value, name) {
+        $m.$forIn(prop, function (value, name) {
             if (name != "$super") {
-                if ($t.$isFunction(prop[name])) {
+                if ($m.$isFunction(prop[name])) {
                     prototype[name] = (function (name, fn) {
                         return function () {
                             var _superFn = _noop;
-                            if (!!_super[name] && $t.$isFunction(_super[name])) _superFn = _super[name];
+                            if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
 
                             // Add a new .$super() method that is the same method on the super-class
                             this.$super = _superFn;
@@ -521,7 +518,7 @@
         }
 
         // Copy the static method over onto the new prototype
-        $t.$forIn(this, function (value, key) {
+        $m.$forIn(this, function (value, key) {
             if (key != "$extend") _Class[key] = value;
         })
 
@@ -537,37 +534,8 @@
         return _Class;
     };
 
-    var x = Class.$extend({
-        $init: function () {
-            console.log(1);
-        },
-        t1: function () {
-            this.$super();
-            console.log(2)
-        },
-        t2: function () {
-            console.log(3);
-        }
-    })
+    $m.$module = Class;
 
-    var t = x.$extend({
-        $init: function () {
-            this.$super();
-            console.log(4);
-            this.t2()
-        },
-        t2: function () {
-            this.$super();
-        }
-    })
-    new t().$init();
-
-    var $m = {
-        config: function (options) {
-            // console.log(options);
-        }
-    }
-
-    _win.$m = $m;
+    _win.$M = _win.$m = $m;
 
 })(document, window)
