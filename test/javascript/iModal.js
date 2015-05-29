@@ -497,37 +497,31 @@
         var prototype = new this();
 
         // Copy the properties over onto the new prototype
-        for (var name in prop) {
+        $t.$forIn(prop, function (value, name) {
             if (name != "$super") {
-                // Check if we're overwriting an existing function
-                prototype[name] = ($t.$isFunction(prop[name]) && $t.$isFunction(_super[name]) ?
-                    (function (name, fn) {
+                if ($t.$isFunction(prop[name])) {
+                    prototype[name] = (function (name, fn) {
                         return function () {
-                            var tmp = this.$super;
+                            var _superFn = _noop;
+                            if (!!_super[name] && $t.$isFunction(_super[name])) _superFn = _super[name];
 
-                            // Add a new ._super() method that is the same method
-                            // but on the super-class
-                            this.$super = _super[name];
-
-                            // The method only need to be bound temporarily, so we
-                            // remove it when we're done executing
-                            var ret = fn.apply(this, arguments);
-                            this.$super = tmp;
-
-                            return ret;
+                            // Add a new .$super() method that is the same method on the super-class
+                            this.$super = _superFn;
+                            return fn.apply(this, arguments);
                         };
-                    })(name, prop[name]) : prop[name]);
+                    })(name, prop[name])
+                } else prototype[name] = prop[name];
             }
-        }
+        })
 
         // The dummy class constructor
         function _Class() {
         }
 
-        for (var key in this) {
-            if (this.hasOwnProperty(key) && key != "$extend")
-                _Class[key] = this[key];
-        }
+        // Copy the static method over onto the new prototype
+        $t.$forIn(this, function (value, key) {
+            if (key != "$extend") _Class[key] = value;
+        })
 
         // Populate our constructed prototype object
         _Class.prototype = prototype;
@@ -546,13 +540,19 @@
             console.log(1);
         },
         t1: function () {
+            this.$super();
+            console.log(2)
+        },
+        t2: function () {
+            console.log(3);
         }
     })
 
     var t = x.$extend({
         $init: function () {
             this.$super();
-            console.log(2);
+            console.log(4);
+            this.t2()
         },
         t2: function () {
             this.$super();
