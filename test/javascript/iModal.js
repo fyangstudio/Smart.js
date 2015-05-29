@@ -461,6 +461,27 @@
         }
     };
 
+    /* Selector
+     ---------------------------------------------------------------------- */
+    // Get the whole matched element
+    function _get(query, context) {
+
+        context = context || _doc;
+        // Browser querySelector
+        if (context.querySelectorAll) return context.querySelectorAll(query);
+        // Interpret query
+        else return _interpret(query, context);
+    }
+
+    function _interpret(query, context) {
+        var parts = query.replace(/\s+/, ' ').split(' ');
+        var part = parts.pop();
+        // var selector = Factory.create(part);
+        //var ret = selector.find(context);
+
+        //return (parts[0] && ret[0]) ? filter(parts, ret) : ret;
+    }
+
     /*!
      * iModal Module Component
      *
