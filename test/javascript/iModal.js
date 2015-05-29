@@ -293,7 +293,7 @@
         return cloned;
     };
 
-    // Same
+    // Comparison of same objects
     $m.$same = function (target1, target2, deep) {
         var _deep = !!deep, check = arguments.callee;
         if (target1 === target2) return true;
@@ -334,16 +334,17 @@
         return window.location.hash.replace('#', '');
     };
 
-    // The $m.$watchHash() method can check the location.hash at a regular interval,
-    // if location.hash changed, the callback function is called.
+    // Watch location.hash
     $m.$watchHash = function (callback) {
         if (this.$isFunction(callback)) {
+            // Browser support hash change event
             if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
                 this.$addEvent(window, 'hashchange', function () {
                     _hash = this.$hash();
                     callback(_hash);
                 }.bind(this))
             } else {
+                // Check the location.hash at a regular interval
                 var handles = this._hashFns || (this._hashFns = []);
                 handles.push(callback);
                 setInterval(function () {
@@ -386,6 +387,7 @@
             }
         },
         _createXhrObject: function () {
+            // Create Xhr Object
             var _methods = [
                 function () {
                     return new XMLHttpRequest();
@@ -460,39 +462,22 @@
     };
 
     /*!
-     * iModal Templates Component
-     *
-     * #include
-     * Living dom
-     *
-     */
-    var $mpl = function () {
-
-    }
-    $mpl.prototype = {}
-
-    $m.$mpl = $mpl;
-
-    /*!
-     * iModal Modal Component
+     * iModal Module Component
      *
      * #include
      * Base Class
      * Define (SAMD)
      *
      */
-    // The base Class implementation
     var Class = function () {
     };
 
-    // Create a new Class that inherits from this class
+    /* Extend
+     ---------------------------------------------------------------------- */
     Class.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
 
-        // Parent Class
         var _super = this.prototype;
-
-        // Instantiate a base class
         var prototype = new this();
 
         // Copy the properties over onto the new prototype
@@ -504,7 +489,7 @@
                             var _superFn = _noop;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
 
-                            // Add a new .$super() method that is the same method on the super-class
+                            // Add a new $super() method that is the same method on the super-class
                             this.$super = _superFn;
                             return fn.apply(this, arguments);
                         };
@@ -522,20 +507,29 @@
             if (key != "$extend") _Class[key] = value;
         })
 
-        // Populate our constructed prototype object
         _Class.prototype = prototype;
-
-        // Enforce the constructor to be what we expect
         _Class.prototype.constructor = _Class;
-
-        // And make this class extendable
         _Class.$extend = Class.$extend;
-
         return _Class;
     };
 
+    // iModal base module
     $m.$module = Class;
 
-    _win.$M = _win.$m = $m;
+    /*!
+     * iModal Templates Component
+     *
+     * #include
+     * Living dom
+     *
+     */
+    var $tpl = function () {
 
+    }
+    $tpl.prototype = {}
+
+    $m.$mpl = $tpl;
+
+    /* ---------------------------iModalJs end----------------------------- */
+    _win.$M = _win.$m = $m;
 })(document, window)

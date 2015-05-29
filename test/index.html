@@ -24,24 +24,18 @@
     var x = $m.$module.$extend({
         $init: function () {
             console.log(1);
-        },
-        t1: function () {
-            this.$super();
-            console.log(2)
-        },
-        t2: function () {
-            console.log(3);
         }
     })
 
     var t = x.$extend({
         $init: function () {
             this.$super();
-            console.log(4);
+            console.log(2);
             this.t2()
         },
         t2: function () {
             this.$super();
+            console.log(3);
         }
     })
     new t().$init();
