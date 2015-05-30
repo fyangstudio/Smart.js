@@ -475,6 +475,28 @@
         //return (parts[0] && ret[0]) ? filter(parts, ret) : ret;
     }
 
+    // Dom id selector
+    function IDSelector(id) {
+        this.id = id.substring(1);
+    }
+
+    IDSelector.test = function (selector) {
+        var regex = /^#([\w\-_]+)/;
+        return regex.test(selector);
+    };
+
+    IDSelector.prototype = {
+        find: function (context) {
+            var ret = [];
+            ret.push(context.getElementById(this.id));
+            return ret;
+        },
+        match: function (element) {
+            return element.id == this.id;
+        }
+    };
+
+
     /*!
      * iModal Module Component
      *
