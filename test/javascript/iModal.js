@@ -496,6 +496,25 @@
         }
     };
 
+    // Dom tagName selector
+    function TagSelector(tagName) {
+        this.tagName = tagName.toUpperCase();
+    }
+
+    TagSelector.test = function (selector) {
+        var regex = /^([\w\*\-_]+)/;
+        return regex.test(selector);
+    };
+
+    TagSelector.prototype = {
+        find: function (context) {
+            return context.getElementsByTagName(this.tagName);
+        },
+        match: function (element) {
+            return this.tagName == element.tagName.toUpperCase() || this.tagName === '*';
+        }
+    };
+
 
     /*!
      * iModal Module Component
