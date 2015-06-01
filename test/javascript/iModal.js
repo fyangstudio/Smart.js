@@ -515,6 +515,49 @@
         }
     };
 
+    // Dom className selector
+    function ClassSelector(className) {
+        var splits = className.split('.');
+
+        this.tagName = splits[0] || undefined;
+        this.className = splits[1];
+    }
+
+    ClassSelector.test = function (selector) {
+        var regex = /^([\w\-_]*)\.([\w\-_]+)/;
+        return regex.test(selector);
+    };
+
+    ClassSelector.prototype = {
+
+        find: function (context) {
+            var elements;
+            var ret = [];
+            var tagName = this.tagName;
+            var className = this.className;
+            var selector = new TagSelector((tagName || '*'));
+
+            if (context.getElementsByClassName) {
+                elements = context.getElementsByClassName(className);
+                if (!tagName) return elements;
+                for (var i = 0, n = elements.length; i < n; i++) {
+                    if (selector.match(elements[i])) ret.push(elements[i]);
+                }
+            } else {
+                elements = selector.find(context);
+                for (var i = 0, n = elements.length; i < n; i++) {
+                    if (this.match(elements[i])) ret.push(elements[i]);
+                }
+            }
+            return ret;
+        },
+
+        match: function (element) {
+            var className = this.className;
+            var regex = new RegExp('^|\\s' + className + '$|\\s');
+            return regex.test(element.className);
+        }
+    };
 
     /*!
      * iModal Module Component
