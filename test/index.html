@@ -39,7 +39,7 @@
             this.t1();
         },
         t1: function () {
-            console.log('Base: do something')
+            console.log('Base: do something');
         }
     })
 
@@ -57,11 +57,12 @@
 
     var child = parent.$extend({
         v: 3,
-        $init: function () {
+        $init: function (_option) {
             this.$super();
             console.log('Child class init');
             console.log(this.v);
-            this.t2()
+            console.log(_option['option']);
+            this.t2();
         },
         t2: function () {
             this.$super();
@@ -71,7 +72,7 @@
             console.log('OK!');
         }
     })
-    new child().t3();
+    new child({'option': 'I am option'}).t3();
 </script>
 </body>
 </html>
