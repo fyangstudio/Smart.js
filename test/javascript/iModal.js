@@ -624,7 +624,9 @@
      * Define (SAMD)
      *
      */
+    // Class state
     var initClass = false
+    // Base class and do nothing
     var Class = function () {
     };
 
