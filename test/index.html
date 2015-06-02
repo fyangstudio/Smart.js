@@ -23,7 +23,13 @@
 
     var stack = new $m.$stack();
     stack.push(1);
+    stack.push(2);
     console.log(stack.pop());
+
+    var queue = new $m.$queue();
+    queue.enqueue(1);
+    queue.enqueue(2);
+    console.log(queue.dequeue());
 
     var base = $m.$module.$extend({
         v: 1,
