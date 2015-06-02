@@ -62,6 +62,37 @@
     }
     $m.$stack = _stack;
 
+    /* Queue
+     ---------------------------------------------------------------------- */
+    var _queue = function () {
+        this.dataStore = [];
+    }
+    _queue.prototype = {
+        enqueue: function (element) {
+            this.dataStore.push(element);
+        },
+        dequeue: function () {
+            return this.dataStore.shift();
+        },
+        front: function () {
+            return this.dataStore[0]
+        },
+        back: function () {
+            return this.dataStore[this.dataStore.length - 1];
+        },
+        toString: function () {
+            var reStr = '';
+            for (var i = 0, l = this.dataStore.length; i < l; i++) {
+                reStr += this.dataStore[i] + '\n';
+            }
+            return reStr;
+        },
+        empty: function () {
+            return this.dataStore.length == 0 ? true : false;
+        }
+    }
+    $m.$queue = _queue;
+
     /* Type of
      ---------------------------------------------------------------------- */
     function _isType(type) {
