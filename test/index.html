@@ -21,6 +21,10 @@
     //    })
     console.log($m.$escape('http://www.163.com/', true));
 
+    var stack = new $m.$stack();
+    stack.push(1);
+    console.log(stack.pop());
+
     var base = $m.$module.$extend({
         v: 1,
         $init: function () {

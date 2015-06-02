@@ -38,11 +38,11 @@
 
     /* Stack
      ---------------------------------------------------------------------- */
-    var Stack = function () {
-        this.dataStore = [];
+    var _stack = function () {
         this.top = 0;
+        this.dataStore = [];
     }
-    Stack.prototype = {
+    _stack.prototype = {
         push: function (element) {
             this.dataStore[this.top++] = element;
         },
@@ -60,7 +60,7 @@
             return this.top;
         }
     }
-    $m.Stack = Stack;
+    $m.$stack = _stack;
 
     /* Type of
      ---------------------------------------------------------------------- */
