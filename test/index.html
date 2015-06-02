@@ -62,10 +62,11 @@
             console.log('Child class init');
             console.log(this.v);
             console.log(_option['option']);
-            this.t2();
+            this.t2(_option);
         },
-        t2: function () {
+        t2: function (_option) {
             this.$super();
+            console.log(_option['option']);
             console.log('Child: do something');
         },
         t3: function () {
