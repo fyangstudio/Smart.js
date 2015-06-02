@@ -66,9 +66,12 @@
         t2: function () {
             this.$super();
             console.log('Child: do something');
+        },
+        t3: function () {
+            console.log('OK!');
         }
     })
-    new child();
+    new child().t3();
 </script>
 </body>
 </html>
