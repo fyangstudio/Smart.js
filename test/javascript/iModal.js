@@ -624,6 +624,7 @@
      * Define (SAMD)
      *
      */
+    var initClass = false
     var Class = function () {
     };
 
@@ -633,7 +634,11 @@
         if (!$m.$isObject(prop)) return;
 
         var _super = this.prototype;
+
+        // Class state change
+        initClass = true;
         var prototype = new this();
+        initClass = false;
 
         // Copy the properties over onto the new prototype
         $m.$forIn(prop, function (value, name) {
@@ -656,6 +661,8 @@
 
         // The dummy class constructor
         function $mClass() {
+            var _fn = this.$init;
+            if (!initClass && $m.$isFunction(_fn)) _fn.apply(this, arguments);
         }
 
         // Copy the static method over onto the new prototype
