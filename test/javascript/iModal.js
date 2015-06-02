@@ -36,6 +36,32 @@
         }
     }
 
+    /* Stack
+     ---------------------------------------------------------------------- */
+    var Stack = function () {
+        this.dataStore = [];
+        this.top = 0;
+    }
+    Stack.prototype = {
+        push: function (element) {
+            this.dataStore[this.top++] = element;
+        },
+        peek: function () {
+            return this.dataStore[this.top - 1];
+        },
+        pop: function () {
+            return this.dataStore[--this.top];
+        },
+        clear: function () {
+            this.top = 0;
+            this.dataStore = [];
+        },
+        length: function () {
+            return this.top;
+        }
+    }
+    $m.Stack = Stack;
+
     /* Type of
      ---------------------------------------------------------------------- */
     function _isType(type) {
@@ -598,18 +624,18 @@
         })
 
         // The dummy class constructor
-        function _Class() {
+        function $mClass() {
         }
 
         // Copy the static method over onto the new prototype
         $m.$forIn(this, function (value, key) {
-            if (key != "$extend") _Class[key] = value;
+            if (key != "$extend") $mClass[key] = value;
         })
 
-        _Class.prototype = prototype;
-        _Class.prototype.constructor = _Class;
-        _Class.$extend = Class.$extend;
-        return _Class;
+        $mClass.prototype = prototype;
+        $mClass.prototype.constructor = $mClass;
+        $mClass.$extend = Class.$extend;
+        return $mClass;
     };
 
     // iModal base module
