@@ -514,7 +514,7 @@
     /* Selector
      ---------------------------------------------------------------------- */
     // Get the whole matched element
-    function _get(query, context) {
+    $m.get = function (query, context) {
 
         context = context || _doc;
         // Browser querySelector
@@ -526,10 +526,10 @@
     function _interpret(query, context) {
         var parts = query.replace(/\s+/, ' ').split(' ');
         var part = parts.pop();
-        // var selector = Factory.create(part);
-        //var ret = selector.find(context);
+        var selector = DomFactory.create(part);
+        var ret = selector.find(context);
 
-        //return (parts[0] && ret[0]) ? filter(parts, ret) : ret;
+        return (parts[0] && ret[0]) ? DomFilter(parts, ret) : ret;
     }
 
     // Dom id selector
@@ -613,6 +613,35 @@
             var className = this.className;
             var regex = new RegExp('^|\\s' + className + '$|\\s');
             return regex.test(element.className);
+        }
+    };
+
+    // If result has parent selector, filter result
+    function DomFilter(parts, nodeList) {
+        var part = parts.pop();
+        var selector = DomFactory.create(part);
+        var ret = [];
+        var parent;
+
+        for (var i = 0, n = nodeList.length; i < n; i++) {
+            parent = nodeList[i].parentNode;
+            while (parent && parent !== _doc) {
+                if (selector.match(parent)) {
+                    ret.push(nodeList[i]);
+                    break;
+                }
+                parent = parent.parentNode;
+            }
+        }
+        return (parts[0] && ret[0]) ? DomFilter(parts, ret) : ret;
+    }
+
+    // Create dom selector
+    var DomFactory = {
+        create: function (query) {
+            if (IDSelector.test(query)) return new IDSelector(query);
+            else if (ClassSelector.test(query)) return new ClassSelector(query);
+            else return new TagSelector(query);
         }
     };
 
