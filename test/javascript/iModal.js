@@ -611,7 +611,7 @@
 
         match: function (element) {
             var className = this.className;
-            var regex = new RegExp('^|\\s' + className + '$|\\s');
+            var regex = new RegExp('(\\s|^)' + className + '(\\s|$)');
             return regex.test(element.className);
         }
     };
