@@ -514,7 +514,7 @@
     /* Selector
      ---------------------------------------------------------------------- */
     // Get the whole matched element
-    $m.get = function (query, context) {
+    $m.$get = function (query, context) {
 
         context = context || _doc;
         // Browser querySelector
