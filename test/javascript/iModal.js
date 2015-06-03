@@ -14,9 +14,13 @@
      * Base function
      *
      */
+    // iModal object
     var $m = {};
+    // Empty function
     var _noop = function () {
     };
+    // Browser's userAgent
+    $m.$ua = navigator.userAgent.toLowerCase();
 
     /* Event listener
      ---------------------------------------------------------------------- */
@@ -724,6 +728,6 @@
 
     $m.$mpl = $tpl;
 
-    /* ---------------------------iModalJs end----------------------------- */
+    // Return iModal
     _win.$M = _win.$m = $m;
 })(document, window)
