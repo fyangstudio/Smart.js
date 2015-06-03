@@ -724,6 +724,13 @@
     // iModal base module
     $m.$module = Class;
 
+    /* Define
+     ---------------------------------------------------------------------- */
+    var _iList = [],  // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
+        _sCache = {}, // state cache   0-loading  1-waiting  2-defined
+        _rCache = {}, // result cache
+        _dList = [];  // for define stack
+
     /*!
      * iModal Templates Component
      *
