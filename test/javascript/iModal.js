@@ -737,12 +737,11 @@
      * Living dom
      *
      */
-    var $tpl = function () {
+    $m.$tpl = Class.$extend({
+        $init: function (options) {
 
-    }
-    $tpl.prototype = {}
-
-    $m.$mpl = $tpl;
+        }
+    });
 
     // Return iModal
     _win.$M = _win.$m = $m;
