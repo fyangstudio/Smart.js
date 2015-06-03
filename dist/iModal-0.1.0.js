@@ -6,6 +6,13 @@
  * Date: 2015-05-20
  */
 (function (_doc, _win, undefined) {
+
+    // iModal object
+    var $m = {};
+    // Empty function
+    var _noop = function () {
+    };
+    
     /*!
      * iModal Tools Component
      *
@@ -14,9 +21,16 @@
      * Base function
      *
      */
-    var $m = {};
-    var _noop = function () {
-    };
+    /* Browser information
+     ---------------------------------------------------------------------- */
+    var _sys = $m.$sys = {};
+    var _ua = $m.$ua = navigator.userAgent.toLowerCase();
+    // Parse userAgent
+    if (_ua.indexOf('chrome') > 0) _sys.chrome = _ua.match(/chrome\/([\d.]+)/)[1];
+    else if (window.ActiveXObject) _sys.ie = _ua.match(/msie ([\d.]+)/)[1];
+    else if (document.getBoxObjectFor) _sys.firefox = _ua.match(/firefox\/([\d.]+)/)[1];
+    else if (window.openDatabase) _sys.safari = _ua.match(/version\/([\d.]+)/)[1];
+    else if (window.opera) _sys.opera = _ua.match(/opera.([\d.]+)/)[1];
 
     /* Event listener
      ---------------------------------------------------------------------- */
@@ -35,6 +49,63 @@
             node.detachEvent('on' + event, fn);
         }
     }
+
+    /* Stack
+     ---------------------------------------------------------------------- */
+    var _stack = function () {
+        this.top = 0;
+        this.dataStore = [];
+    }
+    _stack.prototype = {
+        push: function (element) {
+            this.dataStore[this.top++] = element;
+        },
+        peek: function () {
+            return this.dataStore[this.top - 1];
+        },
+        pop: function () {
+            return this.dataStore[--this.top];
+        },
+        clear: function () {
+            this.top = 0;
+            this.dataStore = [];
+        },
+        length: function () {
+            return this.top;
+        }
+    }
+    $m.$stack = _stack;
+
+    /* Queue
+     ---------------------------------------------------------------------- */
+    var _queue = function () {
+        this.dataStore = [];
+    }
+    _queue.prototype = {
+        enqueue: function (element) {
+            this.dataStore.push(element);
+        },
+        dequeue: function () {
+            return this.dataStore.shift();
+        },
+        front: function () {
+            return this.dataStore[0]
+        },
+        back: function () {
+            return this.dataStore[this.dataStore.length - 1];
+        },
+        toString: function () {
+            var reStr = '';
+            for (var i = 0, l = this.dataStore.length; i < l; i++) {
+                reStr += this.dataStore[i] + '\n';
+            }
+            return reStr;
+        },
+        empty: function () {
+            return this.dataStore.length == 0 ? true : false;
+        }
+    }
+    $m.$queue = _queue;
 
     /* Type of
      ---------------------------------------------------------------------- */
@@ -432,32 +503,159 @@
     // in which certain characters have been replaced by a hexadecimal escape sequence.
     // Use entity transform or encodeURIComponent instead.
     $m.$escape = function (content, encodeURL) {
-        if (encodeURL != undefined) {
-            return encodeURIComponent(content);
-        } else {
-            var _map = {
-                r: /\<|\>|\&|\r|\n|\s|\'|\"/g,
-                '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
-                '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
-            };
-            return _encode(_map, content);
-        }
+        var _map = {
+            r: /\<|\>|\&|\r|\n|\s|\'|\"/g,
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
+            '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
+        };
+        var ret = _encode(_map, content)
+        return encodeURL != undefined ? encodeURIComponent(ret) : ret;
     };
 
     // The $m.$unescape() method computes a new string,
     // in which hexadecimal escape sequences are replaced with the character that it represents.
-    // The escape sequences might be introduced by a function like escape.
-    // Because unescape is deprecated, use entity transform or decodeURIComponent instead.
+    // Use entity transform or decodeURIComponent instead.
     $m.$unescape = function (content, decodeURL) {
-        if (decodeURL != undefined) {
-            return decodeURIComponent(content);
-        } else {
-            var _map = {
-                r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
-                '&lt;': '<', '&gt;': '>', '&amp;': '&', '&nbsp;': ' ',
-                '&#39;': "'", '&quot;': '"', '<br/>': '\n'
-            };
-            return _encode(_map, content);
+        var _map = {
+            r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
+            '&lt;': '<', '&gt;': '>', '&amp;': '&', '&nbsp;': ' ',
+            '&#39;': "'", '&quot;': '"', '<br/>': '\n'
+        };
+        var ret = _encode(_map, content);
+        return decodeURL != undefined ? decodeURIComponent(ret) : ret;
+    };
+
+    /* Selector
+     ---------------------------------------------------------------------- */
+    // Get the whole matched element
+    $m.$get = function (query, context) {
+
+        context = context || _doc;
+        // Browser querySelector
+        if (context.querySelectorAll) return context.querySelectorAll(query);
+        // Interpret query
+        else return _interpret(query, context);
+    }
+
+    function _interpret(query, context) {
+        var parts = query.replace(/\s+/, ' ').split(' ');
+        var part = parts.pop();
+        var selector = DomFactory.create(part);
+        var ret = selector.find(context);
+
+        return (parts[0] && ret[0]) ? DomFilter(parts, ret) : ret;
+    }
+
+    // Dom id selector
+    function IDSelector(id) {
+        this.id = id.substring(1);
+    }
+
+    IDSelector.test = function (selector) {
+        var regex = /^#([\w\-_]+)/;
+        return regex.test(selector);
+    };
+
+    IDSelector.prototype = {
+        find: function (context) {
+            var ret = [];
+            ret.push(context.getElementById(this.id));
+            return ret;
+        },
+        match: function (element) {
+            return element.id == this.id;
+        }
+    };
+
+    // Dom tagName selector
+    function TagSelector(tagName) {
+        this.tagName = tagName.toUpperCase();
+    }
+
+    TagSelector.test = function (selector) {
+        var regex = /^([\w\*\-_]+)/;
+        return regex.test(selector);
+    };
+
+    TagSelector.prototype = {
+        find: function (context) {
+            return context.getElementsByTagName(this.tagName);
+        },
+        match: function (element) {
+            return this.tagName == element.tagName.toUpperCase() || this.tagName === '*';
+        }
+    };
+
+    // Dom className selector
+    function ClassSelector(className) {
+        var splits = className.split('.');
+
+        this.tagName = splits[0] || undefined;
+        this.className = splits[1];
+    }
+
+    ClassSelector.test = function (selector) {
+        var regex = /^([\w\-_]*)\.([\w\-_]+)/;
+        return regex.test(selector);
+    };
+
+    ClassSelector.prototype = {
+
+        find: function (context) {
+            var elements;
+            var ret = [];
+            var tagName = this.tagName;
+            var className = this.className;
+            var selector = new TagSelector((tagName || '*'));
+
+            if (context.getElementsByClassName) {
+                elements = context.getElementsByClassName(className);
+                if (!tagName) return elements;
+                for (var i = 0, n = elements.length; i < n; i++) {
+                    if (selector.match(elements[i])) ret.push(elements[i]);
+                }
+            } else {
+                elements = selector.find(context);
+                for (var i = 0, n = elements.length; i < n; i++) {
+                    if (this.match(elements[i])) ret.push(elements[i]);
+                }
+            }
+            return ret;
+        },
+
+        match: function (element) {
+            var className = this.className;
+            var regex = new RegExp('(\\s|^)' + className + '(\\s|$)');
+            return regex.test(element.className);
+        }
+    };
+
+    // If result has parent selector, filter result
+    function DomFilter(parts, nodeList) {
+        var part = parts.pop();
+        var selector = DomFactory.create(part);
+        var ret = [];
+        var parent;
+
+        for (var i = 0, n = nodeList.length; i < n; i++) {
+            parent = nodeList[i].parentNode;
+            while (parent && parent !== _doc) {
+                if (selector.match(parent)) {
+                    ret.push(nodeList[i]);
+                    break;
+                }
+                parent = parent.parentNode;
+            }
+        }
+        return (parts[0] && ret[0]) ? DomFilter(parts, ret) : ret;
+    }
+
+    // Create dom selector
+    var DomFactory = {
+        create: function (query) {
+            if (IDSelector.test(query)) return new IDSelector(query);
+            else if (ClassSelector.test(query)) return new ClassSelector(query);
+            else return new TagSelector(query);
         }
     };
 
@@ -469,6 +667,9 @@
      * Define (SAMD)
      *
      */
+    // Class state
+    var _initClass = false;
+    // Base class and do nothing
     var Class = function () {
     };
 
@@ -478,39 +679,46 @@
         if (!$m.$isObject(prop)) return;
 
         var _super = this.prototype;
+
+        // Class state change
+        _initClass = true;
         var prototype = new this();
+        _initClass = false;
 
         // Copy the properties over onto the new prototype
         $m.$forIn(prop, function (value, name) {
             if (name != "$super") {
-                if ($m.$isFunction(prop[name])) {
-                    prototype[name] = (function (name, fn) {
+                prototype[name] = (function (name, fn) {
+                    if ($m.$isFunction(prop[name])) {
                         return function () {
                             var _superFn = _noop;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
 
                             // Add a new $super() method that is the same method on the super-class
-                            this.$super = _superFn;
-                            return fn.apply(this, arguments);
+                            prototype.$super = _superFn;
+                            return fn.apply(prototype, arguments);
                         };
-                    })(name, prop[name])
-                } else prototype[name] = prop[name];
+                    }
+                    return prop[name];
+                })(name, prop[name])
             }
         })
 
         // The dummy class constructor
-        function _Class() {
+        function $mClass() {
+            var _fn = this.$init;
+            if (!_initClass && $m.$isFunction(_fn)) _fn.apply(this, arguments);
         }
 
         // Copy the static method over onto the new prototype
         $m.$forIn(this, function (value, key) {
-            if (key != "$extend") _Class[key] = value;
+            if (key != "$extend") $mClass[key] = value;
         })
 
-        _Class.prototype = prototype;
-        _Class.prototype.constructor = _Class;
-        _Class.$extend = Class.$extend;
-        return _Class;
+        $mClass.prototype = prototype;
+        $mClass.prototype.constructor = $mClass;
+        $mClass.$extend = Class.$extend;
+        return $mClass;
     };
 
     // iModal base module
@@ -530,6 +738,6 @@
 
     $m.$mpl = $tpl;
 
-    /* ---------------------------iModalJs end----------------------------- */
+    // Return iModal
     _win.$M = _win.$m = $m;
 })(document, window)

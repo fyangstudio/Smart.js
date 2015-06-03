@@ -6,6 +6,13 @@
  * Date: 2015-05-20
  */
 (function (_doc, _win, undefined) {
+
+    // iModal object
+    var $m = {};
+    // Empty function
+    var _noop = function () {
+    };
+
     /*!
      * iModal Tools Component
      *
@@ -14,12 +21,6 @@
      * Base function
      *
      */
-    // iModal object
-    var $m = {};
-    // Empty function
-    var _noop = function () {
-    };
-
     /* Browser information
      ---------------------------------------------------------------------- */
     var _sys = $m.$sys = {};
