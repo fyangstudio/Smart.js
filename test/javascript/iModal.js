@@ -625,7 +625,7 @@
      *
      */
     // Class state
-    var initClass = false;
+    var _initClass = false;
     // Base class and do nothing
     var Class = function () {
     };
@@ -638,9 +638,9 @@
         var _super = this.prototype;
 
         // Class state change
-        initClass = true;
+        _initClass = true;
         var prototype = new this();
-        initClass = false;
+        _initClass = false;
 
         // Copy the properties over onto the new prototype
         $m.$forIn(prop, function (value, name) {
@@ -664,7 +664,7 @@
         // The dummy class constructor
         function $mClass() {
             var _fn = this.$init;
-            if (!initClass && $m.$isFunction(_fn)) _fn.apply(this, arguments);
+            if (!_initClass && $m.$isFunction(_fn)) _fn.apply(this, arguments);
         }
 
         // Copy the static method over onto the new prototype
