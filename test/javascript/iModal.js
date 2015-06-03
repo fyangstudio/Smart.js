@@ -52,11 +52,11 @@
 
     /* Stack
      ---------------------------------------------------------------------- */
-    var _stack = function () {
+    $m.$stack = function () {
         this.top = 0;
         this.dataStore = [];
     }
-    _stack.prototype = {
+    $m.$stack.prototype = {
         push: function (element) {
             this.dataStore[this.top++] = element;
         },
@@ -74,7 +74,6 @@
             return this.top;
         }
     }
-    $m.$stack = _stack;
 
     /* Queue
      ---------------------------------------------------------------------- */
@@ -540,23 +539,23 @@
     function _interpret(query, context) {
         var parts = query.replace(/\s+/, ' ').split(' ');
         var part = parts.pop();
-        var selector = DomFactory.create(part);
+        var selector = _selectorFactory.create(part);
         var ret = selector.find(context);
 
-        return (parts[0] && ret[0]) ? DomFilter(parts, ret) : ret;
+        return (parts[0] && ret[0]) ? _domFilter(parts, ret) : ret;
     }
 
     // Dom id selector
-    function IDSelector(id) {
+    function _IdSelector(id) {
         this.id = id.substring(1);
     }
 
-    IDSelector.test = function (selector) {
+    _IdSelector.test = function (selector) {
         var regex = /^#([\w\-_]+)/;
         return regex.test(selector);
     };
 
-    IDSelector.prototype = {
+    _IdSelector.prototype = {
         find: function (context) {
             var ret = [];
             ret.push(context.getElementById(this.id));
@@ -568,16 +567,16 @@
     };
 
     // Dom tagName selector
-    function TagSelector(tagName) {
+    function _TagSelector(tagName) {
         this.tagName = tagName.toUpperCase();
     }
 
-    TagSelector.test = function (selector) {
+    _TagSelector.test = function (selector) {
         var regex = /^([\w\*\-_]+)/;
         return regex.test(selector);
     };
 
-    TagSelector.prototype = {
+    _TagSelector.prototype = {
         find: function (context) {
             return context.getElementsByTagName(this.tagName);
         },
@@ -587,26 +586,26 @@
     };
 
     // Dom className selector
-    function ClassSelector(className) {
+    function _ClassSelector(className) {
         var splits = className.split('.');
 
         this.tagName = splits[0] || undefined;
         this.className = splits[1];
     }
 
-    ClassSelector.test = function (selector) {
+    _ClassSelector.test = function (selector) {
         var regex = /^([\w\-_]*)\.([\w\-_]+)/;
         return regex.test(selector);
     };
 
-    ClassSelector.prototype = {
+    _ClassSelector.prototype = {
 
         find: function (context) {
             var elements;
             var ret = [];
             var tagName = this.tagName;
             var className = this.className;
-            var selector = new TagSelector((tagName || '*'));
+            var selector = new _TagSelector((tagName || '*'));
 
             if (context.getElementsByClassName) {
                 elements = context.getElementsByClassName(className);
@@ -630,10 +629,10 @@
         }
     };
 
-    // If result has parent selector, filter result
-    function DomFilter(parts, nodeList) {
+    // If result has parent node, filter result
+    function _domFilter(parts, nodeList) {
         var part = parts.pop();
-        var selector = DomFactory.create(part);
+        var selector = _selectorFactory.create(part);
         var ret = [];
         var parent;
 
@@ -647,15 +646,15 @@
                 parent = parent.parentNode;
             }
         }
-        return (parts[0] && ret[0]) ? DomFilter(parts, ret) : ret;
+        return (parts[0] && ret[0]) ? _domFilter(parts, ret) : ret;
     }
 
     // Create dom selector
-    var DomFactory = {
+    var _selectorFactory = {
         create: function (query) {
-            if (IDSelector.test(query)) return new IDSelector(query);
-            else if (ClassSelector.test(query)) return new ClassSelector(query);
-            else return new TagSelector(query);
+            if (_IdSelector.test(query)) return new _IdSelector(query);
+            else if (_ClassSelector.test(query)) return new _ClassSelector(query);
+            else return new _TagSelector(query);
         }
     };
 
