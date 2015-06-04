@@ -767,8 +767,9 @@
                 _config[key] = value;
             }
         })
-        console.log(_config);
     }
+
+    define.samd = 'Selective Asynchronous Module Definition';
 
     if (!_win.define) {
         _win.define = define;
