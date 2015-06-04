@@ -739,11 +739,40 @@
 
     /* Define
      ---------------------------------------------------------------------- */
-    var _iList = [],                // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
-        _sCache = {},               // state cache   0-loading  1-waiting  2-defined
-        _rCache = {},               // result cache
-        _dStacl = new $m.$stack();  // for define stack
+    var
+    // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
+        _iList = [],
 
+    // state cache   0-loading  1-waiting  2-defined
+        _sCache = {},
+
+    // result cache
+        _rCache = {},
+
+    //  define method's config
+        _config = {sites: {}, paths: {}, charset: 'utf-8'},
+
+    // for define stack
+        _dStacl = new $m.$stack();
+
+    var define = function (uri, deps, callback) {
+
+    };
+    define.$config = function (config) {
+        if (!$m.$isObject(config)) return;
+        $m.$forIn(config, function (value, key) {
+            if (key == 'sites' || key == 'paths') {
+                if ($m.$isObject(value)) _config[key] = value;
+            } else {
+                _config[key] = value;
+            }
+        })
+        console.log(_config);
+    }
+
+    if (!_win.define) {
+        _win.define = define;
+    }
 
     /*!
      * iModal Templates Component
