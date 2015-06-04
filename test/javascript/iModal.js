@@ -32,8 +32,10 @@
     else if (window.openDatabase) _sys.safari = _ua.match(/version\/([\d.]+)/)[1];
     else if (window.opera) _sys.opera = _ua.match(/opera.([\d.]+)/)[1];
 
-    /* Event listener
+    /* Event
      ---------------------------------------------------------------------- */
+
+    // Event listener
     if (_doc.addEventListener) {
         $m.$addEvent = function (node, event, fn) {
             node.addEventListener(event, fn, false);
@@ -48,6 +50,18 @@
         $m.$removeEvent = function (node, event, fn) {
             node.detachEvent('on' + event, fn);
         }
+    }
+
+    // Cancels the event if it is cancelable, without stopping further propagation of the event.
+    $m.$stop = function (e) {
+        if (e == undefined) return;
+        if (e.preventDefault) e.preventDefault();
+        e.returnValue = false;
+    }
+
+    // Get event target.
+    $m.$getTarget = function (e) {
+        return !e ? null : (e.target || e.srcElement);
     }
 
     /* Stack
@@ -725,10 +739,11 @@
 
     /* Define
      ---------------------------------------------------------------------- */
-    var _iList = [],  // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
-        _sCache = {}, // state cache   0-loading  1-waiting  2-defined
-        _rCache = {}, // result cache
-        _dList = [];  // for define stack
+    var _iList = [],                // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
+        _sCache = {},               // state cache   0-loading  1-waiting  2-defined
+        _rCache = {},               // result cache
+        _dStacl = new $m.$stack();  // for define stack
+
 
     /*!
      * iModal Templates Component
