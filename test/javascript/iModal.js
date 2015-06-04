@@ -758,6 +758,8 @@
     var define = function (uri, deps, callback) {
 
     };
+
+    // The define.$config() method config preferences that define uses.
     define.$config = function (config) {
         if (!$m.$isObject(config)) return;
         $m.$forIn(config, function (value, key) {
@@ -769,7 +771,12 @@
         })
     }
 
+    // Declare define mode - samd.
     define.samd = 'Selective Asynchronous Module Definition';
+
+    var _init = function () {
+
+    }
 
     if (!_win.define) {
         _win.define = define;
