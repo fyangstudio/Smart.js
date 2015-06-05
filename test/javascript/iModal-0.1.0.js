@@ -80,7 +80,7 @@
             return this.dataStore[this.top - 1];
         },
         pop: function () {
-            return this.dataStore[--this.top];
+            return this.dataStore[this.top == 0 ? 0 : --this.top];
         },
         clear: function () {
             this.top = 0;
@@ -767,7 +767,7 @@
         _config = {sites: {}, paths: {}, charset: 'utf-8'},
 
     // for define stack
-        _dStacl = new $m.$stack();
+        _dStack = new $m.$stack();
 
     $m.$define = function (uri, deps, callback) {
 
@@ -795,13 +795,32 @@
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
             script = _list[i];
             uri = script.src;
-            if (!_reg.test(uri)) console.log(1);
+            if (!_reg.test(uri)) _jsLoaded(script);
         }
-
         // Return iModal
         if (!_win.define) _win.define = $m.$define;
         _win.$M = _win.$m = $m;
     }
+
+    function _jsLoaded(script) {
+        var _uri = script.src; //_doFormatURI(_script.src)
+        if (!_uri) return;
+        var _arr = _dStack.pop();
+
+        if (!!_arr) {
+            _arr.unshift(_uri);
+            // _doDefine.apply(_win, _arr);
+        }
+        // change state
+        if (!!_uri && _sCache[_uri] != 1) _sCache[_uri] = 2;
+
+        //_doCheckLoading();
+        if (!script || !script.parentNode) return;
+        script.onload = null;
+        script.onerror = null;
+        script.onreadystatechange = null;
+        script.parentNode.removeChild(script);
+    };
 
     // iModal start
     _init();
