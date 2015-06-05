@@ -8,9 +8,8 @@
 <div id="test1" class="test1">
     <p class="test1 test2">111</p>
 </div>
-
-<script src="javascript/page/index.js"></script>
 <script src="javascript/iModal-0.1.0.js"></script>
+<script src="javascript/page/index.js"></script>
 <script>
     var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
     var t2 = $m.$o2s(t);
@@ -81,10 +80,6 @@
     })
     new child({'option': 'I am option'}).t3();
 
-    define.$config({
-        "sites": {"pro": "javascript/pages/", "lib": "javascript/lib/"},
-        "charset": "gbk"
-    })
     console.log(define.samd)
 
 </script>
