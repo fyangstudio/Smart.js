@@ -322,7 +322,8 @@
             _reg1 = /([^:])\/+/g,                           // get request protocol
             _reg2 = /[^\/]*$/,                              // get file name
             _reg3 = /\.js$/i,                               // get javascript file
-            _anchor = _doc.createElement('a');              // _anchor which can get browser machined path
+            _anchor = _doc.createElement('a'),              // _anchor which can get browser machined path
+            _parseURI = arguments.callee;
 
         // The _absolute() method can tell if uri is a absolute path.
         function _absolute(uri) {
@@ -335,26 +336,34 @@
         }
 
         // Main function
-        function _parse(_uri, _type) {
+        function _parse(uri, type) {
             // append _anchor to document
             if (!_addA) {
                 _addA = true;
                 _anchor.style.display = 'none';
                 _doc.body.appendChild(_anchor);
             }
-            var _arr = _uri.split('!'),
+            // parse _config path
+            var _arr = uri.split('!'),
                 _site = '',
-                _path = _uri,
-                _sufx = (_type || _reg3.test(_uri)) ? '' : '.js';
+                _path = uri,
+                _type = (type || _reg3.test(uri)) ? '' : '.js';
             if (_arr.length > 1) {
-                _site = _config.sites[_arr.shift()];
-                _path = _arr.join('!');
+                if (!_arr[1]) {
+                    // parse _config paths path
+                    _type = '';
+                    _path = $m.$parseURI(_config.paths[_arr.shift()]);
+                } else {
+                    // parse _config sites path
+                    _site = _config.sites[_arr.shift()];
+                    _path = _arr.join('!');
+                }
             }
-
-            _uri = (_site + _path + _sufx).replace(_reg1, '$1/');
-            _anchor.href = _uri;
-            _uri = _anchor.href;
-            return _absolute(_uri) && _uri.indexOf('./') < 0 ? _uri : _anchor.getAttribute('href', 4); // ie6/7
+            // get path
+            uri = (_site + _path + _type).replace(_reg1, '$1/');
+            _anchor.href = uri;
+            uri = _anchor.href;
+            return _absolute(uri) && uri.indexOf('./') < 0 ? uri : _anchor.getAttribute('href', 4); // for ie6/7
         }
 
         return function (_uri, _base, _type) {
@@ -366,12 +375,9 @@
                 });
                 return _list;
             }
-            if (_absolute(_uri)) {
-                return _parse(_uri, _type);
-            }
-            if (_base && _uri.indexOf('.') == 0) {
-                _uri = _root(_base) + _uri;
-            }
+            if (_absolute(_uri)) return _parse(_uri, _type);
+            if (_base && _uri.indexOf('.') == 0) _uri = _root(_base) + _uri;
+
             return _parse(_uri, _type);
         };
     })();
