@@ -5,6 +5,7 @@
  *
  * Date: 2015-05-20
  */
+//<![CDATA[
 (function (_doc, _win, undefined) {
 
     // iModal object
@@ -750,7 +751,6 @@
      * Define (SAMD)
      *
      */
-
     /* Define
      ---------------------------------------------------------------------- */
     var
@@ -806,3 +806,4 @@
     // iModal start
     _init();
 })(document, window)
+//]]>
