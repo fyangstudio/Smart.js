@@ -14,6 +14,8 @@
     // Empty function
     var _noop = function () {
     };
+    // Define.samd config
+    var _config = {sites: {}, paths: {}, charset: 'utf-8'};
 
     /*!
      * iModal Tools Component
@@ -320,46 +322,48 @@
             _reg1 = /([^:])\/+/g,                           // get request protocol
             _reg2 = /[^\/]*$/,                              // get file name
             _reg3 = /\.js$/i,                               // get javascript file
-            _anchor = _doc.createElement('a');              // anchor which can get browser machined path
+            _anchor = _doc.createElement('a');              // _anchor which can get browser machined path
 
         // The _absolute() method can tell if uri is a absolute path.
         function _absolute(uri) {
             return uri.indexOf('://') > 0;
         }
 
-        // The _append() method can append _anchor to document.
-        function _append() {
-            if (_addA) return;
-            _addA = true;
-            _anchor.style.display = 'none';
-            _doc.body.appendChild(_anchor);
+        // The _root() method can return relative path's category.
+        function _root(_uri) {
+            return _uri.replace(_reg2, '');
         }
 
-        var _root = function (_uri) {
-            return _uri.replace(_reg2, '');
-        };
-        var _parse = function (_uri, _type) {
-            _append();
+        // Main function
+        function _parse(_uri, _type) {
+            // append _anchor to document
+            if (!_addA) {
+                _addA = true;
+                _anchor.style.display = 'none';
+                _doc.body.appendChild(_anchor);
+            }
             var _arr = _uri.split('!'),
                 _site = '',
                 _path = _uri,
-                _sufx = (_type || _reg3.test(_uri)  ) ? '' : '.js';
+                _sufx = (_type || _reg3.test(_uri)) ? '' : '.js';
             if (_arr.length > 1) {
                 _site = _config.sites[_arr.shift()];
                 _path = _arr.join('!');
             }
+
             _uri = (_site + _path + _sufx).replace(_reg1, '$1/');
             _anchor.href = _uri;
             _uri = _anchor.href;
             return _absolute(_uri) && _uri.indexOf('./') < 0 ? _uri : _anchor.getAttribute('href', 4); // ie6/7
-        };
+        }
+
         return function (_uri, _base, _type) {
             if (!_uri) return '';
             if ($m.$isArray(_uri)) {
                 var _list = [];
-                for (var i = 0; i < _uri.length; i++) {
-                    _list.push(arguments.callee(_uri[i], _base, _type));
-                }
+                _uri.forEach(function (value) {
+                    _list.push($m.$parseURI(value, _base, _type));
+                });
                 return _list;
             }
             if (_absolute(_uri)) {
@@ -821,9 +825,6 @@
     // result cache
         _rCache = {},
 
-    //  define method's config
-        _config = {sites: {}, paths: {}, charset: 'utf-8'},
-
     // for define stack
         _dStack = new $m.$stack();
 
@@ -850,7 +851,7 @@
         var _reg = new RegExp('iModal-' + $m.iModal + '.js$');
         var _list = _doc.getElementsByTagName('script');
         if (!_list || !_list.length) return;
-        console.log(_list.length)
+
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
             script = _list[i];
             uri = script.src;
