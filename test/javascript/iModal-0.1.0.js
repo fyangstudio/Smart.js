@@ -8,7 +8,8 @@
 (function (_doc, _win, undefined) {
 
     // iModal object
-    var $m = {};
+    var _version = "0.1.0";
+    var $m = {"iModal": _version};
     // Empty function
     var _noop = function () {
     };
@@ -768,12 +769,12 @@
     // for define stack
         _dStacl = new $m.$stack();
 
-    var define = function (uri, deps, callback) {
+    $m.$define = function (uri, deps, callback) {
 
     };
 
     // The define.$config() method config preferences that define uses.
-    define.$config = function (config) {
+    $m.$define.$config = function (config) {
         if (!$m.$isObject(config)) return;
         $m.$forIn(config, function (value, key) {
             if (key == 'sites' || key == 'paths') {
@@ -785,10 +786,10 @@
     }
 
     // Declare define mode - samd.
-    define.samd = 'Selective Asynchronous Module Definition';
+    $m.$define.samd = 'Selective Asynchronous Module Definition';
 
     var _init = function () {
-        var _reg = /iModal/;
+        var _reg = new RegExp('iModal-' + $m.iModal + '.js$');
         var _list = _doc.getElementsByTagName('script');
         if (!_list || !_list.length) return;
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
@@ -796,13 +797,12 @@
             uri = script.src;
             if (!_reg.test(uri)) console.log(1);
         }
+
+        // Return iModal
+        if (!_win.define) _win.define = $m.$define;
+        _win.$M = _win.$m = $m;
     }
 
-    if (!_win.define) {
-        _win.define = define;
-    }
-
-    // Return iModal
-    _win.$M = _win.$m = $m;
+    // iModal start
     _init();
 })(document, window)
