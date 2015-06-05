@@ -314,6 +314,59 @@
         return _list.length > 1 ? _cnt : _list[0];
     };
 
+    // The $m.$parseURI() method can change a URI to a URL.
+    $m.$parseURI = (function () {
+        var _addA = false,
+            _reg1 = /([^:])\/+/g,
+            _reg2 = /[^\/]*$/,
+            _reg3 = /\.js$/i,
+            _anchor = _doc.createElement('a');
+        var _absolute = function (_uri) {
+            return _uri.indexOf('://') > 0;
+        };
+        var _append = function () {
+            if (_addA) return;
+            _addA = true;
+            _anchor.style.display = 'none';
+            _doc.body.appendChild(_anchor);
+        };
+        var _root = function (_uri) {
+            return _uri.replace(_reg2, '');
+        };
+        var _format = function (_uri, _type) {
+            _append();
+            var _arr = _uri.split('!'),
+                _site = '',
+                _path = _uri,
+                _sufx = (_type || _reg3.test(_uri)  ) ? '' : '.js';
+            if (_arr.length > 1) {
+                _site = _config.sites[_arr.shift()];
+                _path = _arr.join('!');
+            }
+            _uri = (_site + _path + _sufx).replace(_reg1, '$1/');
+            _anchor.href = _uri;
+            _uri = _anchor.href;
+            return _absolute(_uri) && _uri.indexOf('./') < 0 ? _uri : _anchor.getAttribute('href', 4); // ie6/7
+        };
+        return function (_uri, _base, _type) {
+            if (!_uri) return '';
+            if ($m.$isArray(_uri)) {
+                var _list = [];
+                for (var i = 0; i < _uri.length; i++) {
+                    _list.push(arguments.callee(_uri[i], _base, _type));
+                }
+                return _list;
+            }
+            if (_absolute(_uri)) {
+                return _format(_uri, _type);
+            }
+            if (_base && _uri.indexOf('.') == 0) {
+                _uri = _root(_base) + _uri;
+            }
+            return _format(_uri, _type);
+        };
+    })();
+
     /* Transform
      ---------------------------------------------------------------------- */
     // The $m.$forIn() statement iterates over the enumerable properties of an object, in arbitrary order.
@@ -788,13 +841,15 @@
     // Declare define mode - samd.
     $m.$define.samd = 'Selective Asynchronous Module Definition';
 
-    var _init = function () {
+    function _init() {
         var _reg = new RegExp('iModal-' + $m.iModal + '.js$');
         var _list = _doc.getElementsByTagName('script');
         if (!_list || !_list.length) return;
+        console.log(_list.length)
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
             script = _list[i];
             uri = script.src;
+
             if (!_reg.test(uri)) _jsLoaded(script);
         }
         // Return iModal
