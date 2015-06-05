@@ -672,14 +672,6 @@
         }
     };
 
-    /*!
-     * iModal Module Component
-     *
-     * #include
-     * Base Class
-     * Define (SAMD)
-     *
-     */
     // Class state
     var _initClass = false;
     // Base class and do nothing
@@ -737,6 +729,27 @@
     // iModal base module
     $m.$module = Class;
 
+    /*!
+     * iModal Templates Component
+     *
+     * #include
+     * Living dom
+     *
+     */
+    $m.$tpl = Class.$extend({
+        $init: function (options) {
+
+        }
+    });
+
+    /*!
+     * iModal Module Component
+     *
+     * #include
+     * Define (SAMD)
+     *
+     */
+
     /* Define
      ---------------------------------------------------------------------- */
     var
@@ -775,26 +788,21 @@
     define.samd = 'Selective Asynchronous Module Definition';
 
     var _init = function () {
-
+        var _reg = /iModal/;
+        var _list = _doc.getElementsByTagName('script');
+        if (!_list || !_list.length) return;
+        for (var i = _list.length - 1, script, uri; i >= 0; i--) {
+            script = _list[i];
+            uri = script.src;
+            if (!_reg.test(uri)) console.log(1);
+        }
     }
 
     if (!_win.define) {
         _win.define = define;
     }
 
-    /*!
-     * iModal Templates Component
-     *
-     * #include
-     * Living dom
-     *
-     */
-    $m.$tpl = Class.$extend({
-        $init: function (options) {
-
-        }
-    });
-
     // Return iModal
     _win.$M = _win.$m = $m;
+    _init();
 })(document, window)
