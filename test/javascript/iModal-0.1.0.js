@@ -41,17 +41,17 @@
     if (_doc.addEventListener) {
         $m.$addEvent = function (node, event, fn) {
             node.addEventListener(event, fn, false);
-        }
+        };
         $m.$removeEvent = function (node, event, fn) {
             node.removeEventListener(event, fn, false)
-        }
+        };
     } else {
         $m.$addEvent = function (node, event, fn) {
             node.attachEvent('on' + event, fn);
-        }
+        };
         $m.$removeEvent = function (node, event, fn) {
             node.detachEvent('on' + event, fn);
-        }
+        };
     }
 
     // Cancels the event if it is cancelable, without stopping further propagation of the event.
@@ -59,19 +59,19 @@
         if (e == undefined) return;
         if (e.preventDefault) e.preventDefault();
         e.returnValue = false;
-    }
+    };
 
     // Get event target.
     $m.$getTarget = function (e) {
         return !e ? null : (e.target || e.srcElement);
-    }
+    };
 
     /* Stack
      ---------------------------------------------------------------------- */
     $m.$stack = function () {
         this.top = 0;
         this.dataStore = [];
-    }
+    };
     $m.$stack.prototype = {
         push: function (element) {
             this.dataStore[this.top++] = element;
@@ -89,7 +89,7 @@
         length: function () {
             return this.top;
         }
-    }
+    };
 
     /* Queue
      ---------------------------------------------------------------------- */
@@ -119,7 +119,7 @@
         empty: function () {
             return this.dataStore.length == 0 ? true : false;
         }
-    }
+    };
     $m.$queue = _queue;
 
     /* Type of
@@ -229,7 +229,7 @@
                 if (json) return ( new Function('return ' + json) )();
             }
             throw new Error('Invalid JSON: ' + json);
-        }
+        };
         // The JSON.stringify() method converts a JavaScript value to a JSON string, optionally replacing values if a replacer function is specified,
         // or optionally including only the specified properties if a replacer array is specified.
         _json.stringify = function (obj) {
@@ -276,7 +276,7 @@
             _calls.push(fn);
         }
         return this;
-    }
+    };
 
     // Relieve custom event
     $m.$off = function (event, fn) {
@@ -297,7 +297,7 @@
             }
         }
         return this;
-    }
+    };
 
     /* Parse
      ---------------------------------------------------------------------- */
@@ -314,26 +314,31 @@
         return _list.length > 1 ? _cnt : _list[0];
     };
 
-    // The $m.$parseURI() method can change a URI to a URL.
+    // The $m.$parseURI() method can change a samd uri string to a absolute path string.
     $m.$parseURI = (function () {
-        var _addA = false,
-            _reg1 = /([^:])\/+/g,
-            _reg2 = /[^\/]*$/,
-            _reg3 = /\.js$/i,
-            _anchor = _doc.createElement('a');
-        var _absolute = function (_uri) {
-            return _uri.indexOf('://') > 0;
-        };
-        var _append = function () {
+        var _addA = false,                                  // mark _anchor append to document
+            _reg1 = /([^:])\/+/g,                           // get request protocol
+            _reg2 = /[^\/]*$/,                              // get file name
+            _reg3 = /\.js$/i,                               // get javascript file
+            _anchor = _doc.createElement('a');              // anchor which can get browser machined path
+
+        // The _absolute() method can tell if uri is a absolute path.
+        function _absolute(uri) {
+            return uri.indexOf('://') > 0;
+        }
+
+        // The _append() method can append _anchor to document.
+        function _append() {
             if (_addA) return;
             _addA = true;
             _anchor.style.display = 'none';
             _doc.body.appendChild(_anchor);
-        };
+        }
+
         var _root = function (_uri) {
             return _uri.replace(_reg2, '');
         };
-        var _format = function (_uri, _type) {
+        var _parse = function (_uri, _type) {
             _append();
             var _arr = _uri.split('!'),
                 _site = '',
@@ -358,12 +363,12 @@
                 return _list;
             }
             if (_absolute(_uri)) {
-                return _format(_uri, _type);
+                return _parse(_uri, _type);
             }
             if (_base && _uri.indexOf('.') == 0) {
                 _uri = _root(_base) + _uri;
             }
-            return _format(_uri, _type);
+            return _parse(_uri, _type);
         };
     })();
 
@@ -497,12 +502,12 @@
                 }.bind(this), 100);
             }
         }
-    }
+    };
 
     /* request
      ---------------------------------------------------------------------- */
     var _ajaxHandler = function () {
-    }
+    };
     _ajaxHandler.prototype = {
         _request: function (config) {
             if (!!config.url) {
@@ -549,13 +554,13 @@
             }
             throw new Error('Could not create an XHR object');
         }
-    }
+    };
 
     // The $m.$ajax() method perform an asynchronous HTTP request.
     $m.$ajax = function (config) {
         if (this.$isObject(config)) return new _ajaxHandler()._request(config);
         else throw new Error('Ajax parameter error');
-    }
+    };
 
     /* Encode & Decode
      ---------------------------------------------------------------------- */
@@ -603,7 +608,7 @@
         if (context.querySelectorAll) return context.querySelectorAll(query);
         // Interpret query
         else return _interpret(query, context);
-    }
+    };
 
     function _interpret(query, context) {
         var parts = query.replace(/\s+/, ' ').split(' ');
@@ -762,7 +767,7 @@
                     return prop[name];
                 })(name, prop[name])
             }
-        })
+        });
 
         // The dummy class constructor
         function $mClass() {
@@ -773,7 +778,7 @@
         // Copy the static method over onto the new prototype
         $m.$forIn(this, function (value, key) {
             if (key != "$extend") $mClass[key] = value;
-        })
+        });
 
         $mClass.prototype = prototype;
         $mClass.prototype.constructor = $mClass;
@@ -836,7 +841,7 @@
                 _config[key] = value;
             }
         })
-    }
+    };
 
     // Declare define mode - samd.
     $m.$define.samd = 'Selective Asynchronous Module Definition';
