@@ -3,7 +3,7 @@ define.$config({
     paths: {notify: "com!notify/notify"},
     charset: "gbk"
 })
-alert($m.$parseURI(["wid!module", "javascript/components/notify/notify", "notify!"]))
+console.log($m.$parseURI(["wid!module", "javascript/components/notify/notify", "notify!"]))
 define([
     '../../widget/module'
 ], function (m) {

@@ -322,8 +322,7 @@
             _reg1 = /([^:])\/+/g,                           // get request protocol
             _reg2 = /[^\/]*$/,                              // get file name
             _reg3 = /\.js$/i,                               // get javascript file
-            _anchor = _doc.createElement('a'),              // _anchor which can get browser machined path
-            _parseURI = arguments.callee;
+            _anchor = _doc.createElement('a');              // _anchor which can get browser machined path
 
         // The _absolute() method can tell if uri is a absolute path.
         function _absolute(uri) {
@@ -366,19 +365,21 @@
             return _absolute(uri) && uri.indexOf('./') < 0 ? uri : _anchor.getAttribute('href', 4); // for ie6/7
         }
 
-        return function (_uri, _base, _type) {
-            if (!_uri) return '';
-            if ($m.$isArray(_uri)) {
+        // Return $m.$parseURI() method.
+        return function (uri, basePath, type) {
+            if (!uri) return '';
+            if ($m.$isArray(uri)) {
                 var _list = [];
-                _uri.forEach(function (value) {
-                    _list.push($m.$parseURI(value, _base, _type));
+                uri.forEach(function (value) {
+                    _list.push($m.$parseURI(value, basePath, type));
                 });
                 return _list;
             }
-            if (_absolute(_uri)) return _parse(_uri, _type);
-            if (_base && _uri.indexOf('.') == 0) _uri = _root(_base) + _uri;
-
-            return _parse(_uri, _type);
+            // parse absolute path
+            if (_absolute(uri)) return _parse(uri, type);
+            // parse relative path
+            if (basePath && uri.indexOf('.') == 0) uri = _root(basePath) + uri;
+            return _parse(uri, type);
         };
     })();
 
