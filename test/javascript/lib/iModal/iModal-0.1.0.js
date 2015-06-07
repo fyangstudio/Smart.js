@@ -854,6 +854,7 @@
     // Declare define mode - samd.
     $m.$define.samd = 'Selective Asynchronous Module Definition';
 
+    // Define and iModal init function
     function _init() {
         var _reg = new RegExp('iModal-' + $m.iModal + '.js$');
         var _list = _doc.getElementsByTagName('script');
@@ -870,8 +871,55 @@
         _win.$M = _win.$m = $m;
     }
 
+    // The _parsePlugin() method can determine whether a file is meet selective options.
+    var _parsePlugin = (function () {
+        // map of sustaining file type
+        var _fMap = {
+            $text: function (_uri) {
+                // _doLoadText(_uri);
+            },
+            $json: function (_uri) {
+                // todo
+            }
+        };
+        // parse browser version info
+        var _parseVersion = function (exp, sys) {
+            exp = (exp || '').replace(/\s/g, '').replace(sys, 'PT');
+            var _arr = exp.split('PT'),
+                _reg = /([<>=]=?)/,
+                _left = "'" + _arr[0].replace(_reg, "'$1'") + "[VERSION]'",
+                _right = "'[VERSION]" + _arr[1].replace(_reg, "'$1'") + "'";
+            return (function () {
+                var _res = ['true'], _v = $m.$sys[sys], _ver = parseInt(_v);
+                if (!!_left) _res.push(_left.replace('[VERSION]', _ver));
+                if (!!_right) _res.push(_right.replace('[VERSION]', _ver));
+                return eval(_res.join('&&'));
+            })();
+        };
+        return function (_uri) {
+            var _brr = [],
+                _type = null,
+                _arr = _uri.split('!'),
+                _target = _arr[0],
+                _reg = /\$[^><=!]+/,
+                _fun = _fMap[_target.toLowerCase()];
+            if (_arr.length > 1 && !_config.site[_target]) {
+                var _temp = _arr.shift(),
+                    _sys = _target.match(_reg)[0];
+                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = '';
+                else if (!_fun) _fun = _noop;
+                _type = _fun ? _temp : null;
+            }
+            _brr.push(_arr.join('!'));
+            // _brr.push(_fun || _loadScript);
+            _brr.push(_type);
+            return _brr;
+        };
+    })();
+
+    // The _jsLoaded() method can recover script when it's loaded.
     function _jsLoaded(script) {
-        var _uri = script.src; //_doFormatURI(_script.src)
+        var _uri = $m.$parseURI(script.src);
         if (!_uri) return;
         var _arr = _dStack.pop();
 
