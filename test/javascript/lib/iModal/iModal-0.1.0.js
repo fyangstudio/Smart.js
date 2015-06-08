@@ -875,10 +875,10 @@
     var _parsePlugin = (function () {
         // map of sustaining file type
         var _fMap = {
-            $text: function (_uri) {
-                // _doLoadText(_uri);
+            $text: function (url) {
+                _loadText(url);
             },
-            $json: function (_uri) {
+            $json: function (url) {
                 // todo
             }
         };
@@ -940,6 +940,18 @@
                 //script.src ? _scriptListener(_list[i]) : _doClearStack();
             }
         }
+    };
+
+    // The _loadText() method can load text by url, and put result in callback function.
+    var _loadText = function (url, callback) {
+        $m.$ajax({
+            url: url,
+            dataType: 'text',
+            success: function (data) {
+                // _doCheckLoading();
+                callback(data);
+            }
+        })
     };
 
     // The _loadScript() method can load script by url.
