@@ -339,6 +339,7 @@
             // append _anchor to document
             if (!_addA) {
                 _addA = true;
+                _anchor.id = 'iModal_anchor';
                 _anchor.style.display = 'none';
                 _doc.body.appendChild(_anchor);
             }
