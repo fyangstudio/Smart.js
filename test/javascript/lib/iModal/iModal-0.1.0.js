@@ -57,15 +57,15 @@
     }
 
     // Cancels the event if it is cancelable, without stopping further propagation of the event.
-    $m.$stop = function (e) {
-        if (e == undefined) return;
-        if (e.preventDefault) e.preventDefault();
-        e.returnValue = false;
+    $m.$stop = function (event) {
+        if (event == undefined) return;
+        if (event.preventDefault) event.preventDefault();
+        else event.returnValue = false;
     };
 
     // Get event target.
-    $m.$getTarget = function (e) {
-        return !e ? null : (e.target || e.srcElement);
+    $m.$getTarget = function (event) {
+        return !event ? null : (event.target || event.srcElement);
     };
 
     /* Stack
@@ -254,7 +254,7 @@
         _win.JSON = _json;
     }
 
-    // The console object provides access to the browser's debugging console
+    // Low version of the browser compatibility without console object.
     if (!_win.console) {
         _win.console = {
             log: _noop,
