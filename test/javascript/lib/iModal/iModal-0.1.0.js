@@ -862,6 +862,7 @@
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
             script = _list[i];
             uri = script.src;
+            script.iModal = !0;
 
             if (!/iModal/.test(uri)) _jsLoaded(script);
         }
@@ -927,6 +928,18 @@
             var _state = _element.readyState;
             if (_state === 'loaded' || _state === 'complete') _jsLoaded(_element, !0);
         };
+    };
+
+    // The _scriptListener() method can add listener to all script tags.
+    var _scriptAllListener = function () {
+        var _list = document.getElementsByTagName('script');
+        for (var i = _list.length - 1, script; i >= 0; i--) {
+            script = _list[i];
+            if (!script.iModal) {
+                script.iModal = !0;
+                //script.src ? _scriptListener(_list[i]) : _doClearStack();
+            }
+        }
     };
 
     // The _jsLoaded() method can recover script when it's loaded.
