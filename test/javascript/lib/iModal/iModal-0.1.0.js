@@ -890,29 +890,29 @@
                 _left = "'" + _arr[0].replace(_reg, "'$1'") + "[VERSION]'",
                 _right = "'[VERSION]" + _arr[1].replace(_reg, "'$1'") + "'";
             return (function () {
-                var _res = ['true'], _v = $m.$sys[sys], _ver = parseInt(_v);
+                var _res = ['true'], _ver = parseInt($m.$sys[sys]);
                 if (!!_left) _res.push(_left.replace('[VERSION]', _ver));
                 if (!!_right) _res.push(_right.replace('[VERSION]', _ver));
                 return eval(_res.join('&&'));
             })();
         };
         return function (_uri) {
-            var _brr = [],
-                _type = null,
-                _arr = _uri.split('!'),
-                _target = _arr[0],
-                _reg = /\$[^><=!]+/,
-                _fun = _fMap[_target.toLowerCase()];
+            var _brr = [],                                                  // return array
+                _sOption = null,                                            // samd selective option
+                _arr = _uri.split('!'),                                     // target array
+                _target = _arr[0],                                          // samd selective target
+                _reg = /\$[^><=!]+/,                                        // parse version regexp
+                _fun = _fMap[_target.toLowerCase()];                        // define module's callback function
             if (_arr.length > 1 && !_config.site[_target]) {
                 var _temp = _arr.shift(),
                     _sys = _target.match(_reg)[0];
                 if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = '';
                 else if (!_fun) _fun = _noop;
-                _type = _fun ? _temp : null;
+                _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
             // _brr.push(_fun || _loadScript);
-            _brr.push(_type);
+            _brr.push(_sOption);
             return _brr;
         };
     })();
