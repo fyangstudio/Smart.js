@@ -917,6 +917,19 @@
         };
     })();
 
+    // The _scriptListener() method can call _jsLoaded method when the target script loaded.
+    var _scriptListener = function (script) {
+        script.onload = function (event) {
+            _jsLoaded($m.$getTarget(event));
+        };
+        script.onreadystatechange = function (event) {
+            var _element = $m.$getTarget(event) || this;
+            if (!_element) return;
+            var _state = _element.readyState;
+            if (_state === 'loaded' || _state === 'complete') _jsLoaded(_element, !0);
+        };
+    };
+
     // The _jsLoaded() method can recover script when it's loaded.
     function _jsLoaded(script) {
         var _uri = $m.$parseURI(script.src);
