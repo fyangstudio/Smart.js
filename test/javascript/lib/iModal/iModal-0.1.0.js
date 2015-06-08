@@ -856,15 +856,13 @@
 
     // Define and iModal init function
     function _init() {
-        var _reg = new RegExp('iModal-' + $m.iModal + '.js$');
         var _list = _doc.getElementsByTagName('script');
-        if (!_list || !_list.length) return;
 
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
             script = _list[i];
             uri = script.src;
 
-            if (!_reg.test(uri)) _jsLoaded(script);
+            if (!/iModal/.test(uri)) _jsLoaded(script);
         }
         // Return iModal
         if (!_win.define) _win.define = $m.$define;
