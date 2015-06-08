@@ -95,10 +95,10 @@
 
     /* Queue
      ---------------------------------------------------------------------- */
-    var _queue = function () {
+    $m.$queue = function () {
         this.dataStore = [];
     }
-    _queue.prototype = {
+    $m.$queue.prototype = {
         enqueue: function (element) {
             this.dataStore.push(element);
         },
@@ -122,7 +122,6 @@
             return this.dataStore.length == 0 ? true : false;
         }
     };
-    $m.$queue = _queue;
 
     /* Type of
      ---------------------------------------------------------------------- */
@@ -824,14 +823,14 @@
     /* Define
      ---------------------------------------------------------------------- */
     var
-    // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
-        _iList = [],
-
     // state cache   0-loading  1-waiting  2-defined
         _sCache = {},
 
     // result cache
         _rCache = {},
+
+    // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
+        _iQueue = new $m.$queue(),
 
     // for define stack
         _dStack = new $m.$stack();
