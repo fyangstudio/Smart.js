@@ -942,6 +942,22 @@
         }
     };
 
+    // The _loadScript() method can load script by url.
+    var _loadScript = function (url) {
+        if (!url) return;
+        var _state = _sCache[url];
+        if (_state != null) return;
+        // load file
+        _sCache[url] = 0;
+        var _script = _doc.createElement('script');
+        _script.iModal = !0;
+        _script.type = 'text/javascript';
+        _script.charset = _config.charset;
+        _scriptListener(_script);
+        _script.src = url;
+        (_doc.getElementsByTagName('head')[0] || document.body).appendChild(_script);
+    };
+
     // The _jsLoaded() method can recover script when it's loaded.
     function _jsLoaded(script) {
         var _uri = $m.$parseURI(script.src);
