@@ -111,12 +111,8 @@
         back: function () {
             return this.dataStore[this.dataStore.length - 1];
         },
-        toString: function () {
-            var reStr = '';
-            for (var i = 0, l = this.dataStore.length; i < l; i++) {
-                reStr += this.dataStore[i] + '\n';
-            }
-            return reStr;
+        length: function () {
+            return this.dataStore.length;
         },
         empty: function () {
             return this.dataStore.length == 0 ? true : false;
@@ -830,7 +826,7 @@
         _rCache = {},
 
     // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
-        _iQueue = new $m.$queue(),
+        _iList = [],
 
     // for define stack
         _dStack = new $m.$stack();
@@ -968,6 +964,47 @@
         _script.src = url;
         (_doc.getElementsByTagName('head')[0] || document.body).appendChild(_script);
     };
+
+    // The _checkLoading() method can check files loading state.
+    var _checkLoading = (function () {
+        // check each item's state
+        function _isListLoaded(_list) {
+            if (!!_list && !!_list.length) {
+                for (var i = _list.length - 1; i >= 0; i--) {
+                    if (_sCache[_list[i]] !== 2) return !1;
+                }
+            }
+            return !0;
+        };
+        // check whether all files are loaded
+        function _isFinishLoaded() {
+            for (var x in _sCache)
+                if (_sCache[x] === 0) return !1;
+            return !0;
+        };
+        return function () {
+            if (!_iList.length) return;
+            for (var i = _iList.length - 1, _item; i >= 0;) {
+                _item = _iList[i];
+                if (_sCache[_item.n] !== 2 && !_isListLoaded(_item.d)) {
+                    i--;
+                    continue;
+                }
+                // for loaded
+                _iList.splice(i, 1);
+                if (_sCache[_item.n] !== 2) {
+                    //_doExecFunction(_item);
+                }
+                i = _iList.length - 1;
+            }
+            // check circular reference
+            if (_iList.length > 0 && _isFinishLoaded()) {
+                // var _item = _doFindCircularRef() || _iList.pop();
+                //_doExecFunction(_item);
+                _checkLoading();
+            }
+        };
+    })();
 
     // The _jsLoaded() method can recover script when it's loaded.
     function _jsLoaded(script) {
