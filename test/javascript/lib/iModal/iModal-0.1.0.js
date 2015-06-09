@@ -965,6 +965,74 @@
         (_doc.getElementsByTagName('head')[0] || document.body).appendChild(_script);
     };
 
+    var _circular = (function () {
+        var _result;
+        var _index = function (array, name) {
+            for (var i = array.length - 1; i >= 0; i--)
+                if (array[i].n == name) return i;
+            return -1;
+        };
+        var _loop = function (item) {
+            if (!item) return;
+            var i = _index(_result, item.n);
+            if (i >= 0) return item;
+            _result.push(item);
+            var _depends = item.d;
+            if (!_depends || !_depends.length) return;
+            for (var i = 0, l = _depends.length, _cItem; i < l; i++) {
+                _cItem = _loop(_iList[_index(_iList, _depends[i])]);
+                // blew ie9 check for depends resource loaded
+                if (!!_cItem) {
+                    var _cItemDeps = _cItem.d;
+                    if (!!_cItemDeps && !!_cItemDeps.length) {
+                        for (var j = _cItemDeps.length - 1; j >= 0; j--) {
+                            if (_sCache[_cItemDeps[i]] !== 2) return _cItemDeps[i];
+                        }
+                    }
+                    return _cItem;
+                }
+            }
+        };
+        var _exec = function (list, pMap) {
+            if (!pMap) return;
+            // find platform patch list
+            var _arr = [];
+            for (var i = 0, l = list.length, _it; i < l; i++) {
+                _it = list[i];
+                if (pMap[_it]) {
+                    _arr.push(_it);
+                }
+            }
+            // index queue by file name
+            var _map = {};
+            for (var i = 0, l = _iList.length, _it; i < l; i++) {
+                _it = _iList[i];
+                _map[_it.n] = _it;
+            }
+            // execute platform patch
+            for (var i = 0, l = _arr.length, _it, _item; i < l; i++) {
+                _it = _arr[i];
+                _item = _map[_it];
+                if (!!_item) {
+                    //_doExecFunction(_item);
+                }
+                // exec hack.patch.js
+                _item = _map[pMap[_it]];
+                if (!!_item) {
+                    // _doExecFunction(_item);
+                }
+            }
+        };
+        return function () {
+            _result = [];
+            // check from begin to end
+            var _item = _loop(_iList[0]);
+            // must do platform before execute
+            if (!!_item) _exec(_item.d, _item.p);
+            return _item;
+        };
+    })();
+
     // The _checkLoading() method can check files loading state.
     var _checkLoading = (function () {
         // check each item's state
