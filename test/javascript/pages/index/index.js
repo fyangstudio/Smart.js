@@ -1,6 +1,6 @@
 console.log($m.$parseURI(["wid!module", "javascript/components/notify/notify", "notify!"]))
 define([
-    'wid!module'
+    'notify!'
 ], function (m) {
-    console.log(m);
+    console.log(m.test);
 });

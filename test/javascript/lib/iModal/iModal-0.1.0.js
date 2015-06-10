@@ -916,7 +916,7 @@
                 _target = _arr[0],                                          // samd selective target
                 _reg = /\$[^><=!]+/,                                        // parse version regexp
                 _fun = _fMap[_target.toLowerCase()];                        // define module's callback function
-            if (_arr.length > 1 && !_config.site[_target]) {
+            if (_arr.length > 1 && !_config.sites[_target] && !_config.paths[_target]) {
                 var _temp = _arr.shift(),
                     _sys = _target.match(_reg)[0];
                 if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = '';
