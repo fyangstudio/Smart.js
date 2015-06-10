@@ -1,6 +1,7 @@
-console.log($m.$parseURI(["wid!module", "javascript/components/notify/notify", "notify!"]))
 define([
-    'notify!'
-], function (m) {
-    console.log(m.test);
+    'notify!',
+    'wid!frame/topbar'
+], function (notify, topbar) {
+    console.log(notify.notify);
+    new topbar({'option': 'I am option'}).t3();
 });

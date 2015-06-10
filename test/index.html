@@ -37,50 +37,6 @@
     queue.enqueue(2);
     console.log(queue.dequeue());
 
-    var base = $m.$module.$extend({
-        v: 1,
-        $init: function () {
-            console.log('Base class init');
-            console.log(this.v);
-            this.t1();
-        },
-        t1: function () {
-            console.log('Base: do something');
-        }
-    })
-
-    var parent = base.$extend({
-        v: 2,
-        $init: function () {
-            this.$super();
-            console.log('Parent class init');
-            console.log(this.v);
-        },
-        t2: function () {
-            console.log('Parent: do something');
-        }
-    })
-
-    var child = parent.$extend({
-        v: 3,
-        $init: function (_option) {
-            this.$super();
-            console.log('Child class init');
-            console.log(this.v);
-            console.log(_option['option']);
-            this.t2(_option);
-        },
-        t2: function (_option) {
-            this.$super();
-            console.log(_option['option']);
-            console.log('Child: do something');
-        },
-        t3: function () {
-            console.log('OK!');
-        }
-    })
-    new child({'option': 'I am option'}).t3();
-    new parent();
     console.log(define.samd)
 
 </script>

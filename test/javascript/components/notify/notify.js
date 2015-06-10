@@ -1,4 +1,3 @@
-define([], function () {
-    var t = {test: 111};
-    return t;
+define(function () {
+    return {notify: 520}
 });

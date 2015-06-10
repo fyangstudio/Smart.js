@@ -966,12 +966,16 @@
 
     // The _loadText() method can load text by url, and put result in callback function.
     var _loadText = function (url, callback) {
+        if (!url || _sCache[url] != null) return;
+        _sCache[url] = 0;
         $m.$ajax({
             url: url,
             dataType: 'text',
             success: function (data) {
+                _sCache[url] = 2;
+                _rCache[url] = data || '';
+                if (!!callback) callback(data);
                 _checkLoading();
-                callback(data);
             }
         })
     };
@@ -1222,9 +1226,7 @@
                 for (var k = 0, j = _list.length, _itt, _itm, _arr; k < j; k++) {
                     _itt = _list[k];
                     if (!_itt) return;
-                    // 0 - url
-                    // 1 - load function
-                    // 2 - resource type
+                    // 0-url 1-load function 2-resource type
                     _arr = _parsePlugin(_itt);
                     _itm = $m.$parseURI(_arr[0], _uri, _arr[2]);
                     _list[k] = _itm;
