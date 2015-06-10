@@ -965,6 +965,27 @@
         (_doc.getElementsByTagName('head')[0] || document.body).appendChild(_script);
     };
 
+    // The _jsLoaded() method can recover script when it's loaded.
+    function _jsLoaded(script) {
+        var _uri = $m.$parseURI(script.src);
+        if (!_uri) return;
+        var _arr = _dStack.pop();
+
+        if (!!_arr) {
+            _arr.unshift(_uri);
+            // _doDefine.apply(_win, _arr);
+        }
+        // change state
+        if (!!_uri && _sCache[_uri] != 1) _sCache[_uri] = 2;
+
+        //_doCheckLoading();
+        if (!script || !script.parentNode) return;
+        script.onload = null;
+        script.onerror = null;
+        script.onreadystatechange = null;
+        script.parentNode.removeChild(script);
+    };
+
     // The _circular() method can find the circular reference.
     var _circular = (function () {
         var _result;
@@ -1120,26 +1141,31 @@
         };
     })();
 
-    // The _jsLoaded() method can recover script when it's loaded.
-    function _jsLoaded(script) {
-        var _uri = $m.$parseURI(script.src);
-        if (!_uri) return;
-        var _arr = _dStack.pop();
-
-        if (!!_arr) {
-            _arr.unshift(_uri);
-            // _doDefine.apply(_win, _arr);
+    var _formatARG = function (_str, _arr, _fun) {
+        var _args = [null, null, null],
+            _kFun = [
+                function (_arg) {
+                    return $m.$isString(_arg);
+                },
+                function (_arg) {
+                    return $m.$isArray(_arg);
+                },
+                function (_arg) {
+                    return $m.$isFunction(_arg);
+                }
+            ];
+        for (var i = 0, l = arguments.length, _it; i < l; i++) {
+            _it = arguments[i];
+            for (var j = 0, k = _kFun.length; j < k; j++) {
+                if (_kFun[j](_it)) {
+                    _args[j] = _it;
+                    break;
+                }
+            }
         }
-        // change state
-        if (!!_uri && _sCache[_uri] != 1) _sCache[_uri] = 2;
-
-        //_doCheckLoading();
-        if (!script || !script.parentNode) return;
-        script.onload = null;
-        script.onerror = null;
-        script.onreadystatechange = null;
-        script.parentNode.removeChild(script);
+        return _args;
     };
+
 
     // iModal start
     _init();
