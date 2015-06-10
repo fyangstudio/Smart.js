@@ -996,7 +996,7 @@
                 }
             }
         };
-        // execute define method's callback function
+        // execute iModal callback function
         var _exec = function (list, pMap) {
             if (!pMap) return;
             // find platform patch list
@@ -1075,6 +1075,48 @@
                 //_doExecFunction(_item);
                 _checkLoading();
             }
+        };
+    })();
+
+    // The _execFn() method can execute define method's callback function.
+    var _execFn = (function () {
+        // merge inject param
+        var _mergeDI = function (_dep) {
+            var _arr = [];
+            // merge dependency list result
+            if (!!_dep)
+                for (var i = 0, l = _dep.length; i < l; i++) {
+                    _arr.push(_rCache[_dep[i]] || {});
+                }
+            return _arr;
+        };
+        // merge inject iModal result
+        var _mergeResult = function (_uri, _result) {
+            var _ret = _rCache[_uri],
+                _isO = $m.$isObject(_result);
+            if (!!_result) {
+                if (!_ret || !_isO) {
+                    // for other type of return
+                    _ret = _result;
+                } else {
+                    // for namespace return
+                    _ret = _ret || {};
+                    for (var x in _result) {
+                        _ret[x] = _result[x];
+                    }
+                }
+            }
+            _rCache[_uri] = _ret;
+        };
+        return function (_item) {
+            var _args = _mergeDI(_item.d);
+            if (!!_item.f) {
+                var _result = _item.f.apply(_win, _args) ||
+                    _args[_args.length - 4];
+                _mergeResult(_item.n, _result);
+            }
+            _sCache[_item.n] = 2;
+            console.log('iModal: ' + _item.n);
         };
     })();
 
