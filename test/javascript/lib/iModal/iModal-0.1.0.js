@@ -829,7 +829,7 @@
         _iList = [],
 
     // for define stack
-        _dStack = new $m.$stack();
+        _dStack = [];
 
     $m.$define = (function () {
         // The _runningScript() method can find running script. (for IE)
@@ -948,7 +948,7 @@
         var _clearStack = function () {
             var _args = _dStack.pop();
             while (!!_args) {
-                _define.apply(p, _args);
+                _define.apply(_win, _args);
                 _args = _dStack.pop();
             }
         };
@@ -970,7 +970,7 @@
             url: url,
             dataType: 'text',
             success: function (data) {
-                // _doCheckLoading();
+                _checkLoading();
                 callback(data);
             }
         })
@@ -1000,12 +1000,12 @@
 
         if (!!_arr) {
             _arr.unshift(_uri);
-            // _doDefine.apply(_win, _arr);
+            _define.apply(_win, _arr);
         }
         // change state
         if (!!_uri && _sCache[_uri] != 1) _sCache[_uri] = 2;
 
-        //_doCheckLoading();
+        _checkLoading();
         if (!script || !script.parentNode) return;
         script.onload = null;
         script.onerror = null;
