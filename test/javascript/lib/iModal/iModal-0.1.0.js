@@ -956,7 +956,7 @@
             var _list = document.getElementsByTagName('script');
             for (var i = _list.length - 1, script; i >= 0; i--) {
                 script = _list[i];
-                if (!script.iModal) {
+                if (script.src && !script.iModal) {
                     script.iModal = !0;
                     script.src ? _scriptListener(_list[i]) : _clearStack();
                 }
