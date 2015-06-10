@@ -965,13 +965,16 @@
         (_doc.getElementsByTagName('head')[0] || document.body).appendChild(_script);
     };
 
+    // The _circular() method can find the circular reference.
     var _circular = (function () {
         var _result;
+        // return reference's index
         var _index = function (array, name) {
             for (var i = array.length - 1; i >= 0; i--)
                 if (array[i].n == name) return i;
             return -1;
         };
+        // loading cycle test resources
         var _loop = function (item) {
             if (!item) return;
             var i = _index(_result, item.n);
@@ -993,6 +996,7 @@
                 }
             }
         };
+        // execute define method's callback function
         var _exec = function (list, pMap) {
             if (!pMap) return;
             // find platform patch list
