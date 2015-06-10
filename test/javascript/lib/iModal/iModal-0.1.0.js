@@ -825,7 +825,7 @@
     // result cache
         _rCache = {},
 
-    // item ex:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
+    // item ex:{n:'filename',d:[/* dependency list */],f:function}
         _iList = [],
 
     // for define stack
@@ -906,7 +906,7 @@
                 _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
-            // _brr.push(_fun || _loadScript);
+            _brr.push(_fun || _loadScript);
             _brr.push(_sOption);
             return _brr;
         };
@@ -1038,14 +1038,10 @@
             for (var i = 0, l = _arr.length, _it, _item; i < l; i++) {
                 _it = _arr[i];
                 _item = _map[_it];
-                if (!!_item) {
-                    //_doExecFunction(_item);
-                }
-                // exec hack.patch.js
+                if (!!_item) _execFn(_item);
+                // exec hack js
                 _item = _map[pMap[_it]];
-                if (!!_item) {
-                    // _doExecFunction(_item);
-                }
+                if (!!_item) _execFn(_item);
             }
         };
         return function () {
@@ -1086,14 +1082,14 @@
                 // for loaded
                 _iList.splice(i, 1);
                 if (_sCache[_item.n] !== 2) {
-                    //_doExecFunction(_item);
+                    _execFn(_item);
                 }
                 i = _iList.length - 1;
             }
             // check circular reference
             if (_iList.length > 0 && _isFinishLoaded()) {
-                // var _item = _doFindCircularRef() || _iList.pop();
-                //_doExecFunction(_item);
+                var _item = _circular() || _iList.pop();
+                _execFn(_item);
                 _checkLoading();
             }
         };
@@ -1141,30 +1137,78 @@
         };
     })();
 
-    var _formatARG = function (_str, _arr, _fun) {
-        var _args = [null, null, null],
-            _kFun = [
-                function (_arg) {
-                    return $m.$isString(_arg);
-                },
-                function (_arg) {
-                    return $m.$isArray(_arg);
-                },
-                function (_arg) {
-                    return $m.$isFunction(_arg);
-                }
-            ];
-        for (var i = 0, l = arguments.length, _it; i < l; i++) {
-            _it = arguments[i];
-            for (var j = 0, k = _kFun.length; j < k; j++) {
-                if (_kFun[j](_it)) {
-                    _args[j] = _it;
-                    break;
+    // The _define() method is $m.$define method's main function.
+    var _define = (function () {
+        var _seed = +new Date;
+        // format arguments
+        var _formatARG = function (_str, _arr, _fun) {
+            var _args = [null, null, null],
+                _fFun = [
+                    function (_arg) {
+                        return $m.$isString(_arg);
+                    },
+                    function (_arg) {
+                        return $m.$isArray(_arg);
+                    },
+                    function (_arg) {
+                        return $m.$isFunction(_arg);
+                    }
+                ];
+            // format the order of the arguments
+            for (var i = 0, l = arguments.length, _it; i < l; i++) {
+                _it = arguments[i];
+                for (var j = 0, k = _fFun.length; j < k; j++) {
+                    if (_fFun[j](_it)) {
+                        _args[j] = _it;
+                        break;
+                    }
                 }
             }
-        }
-        return _args;
-    };
+            return _args;
+        };
+        // parse all relative uri
+        var _parseAllURI = function (_list, _base) {
+            if (!_list || !_list.length) return;
+            for (var i = 0, l = _list.length, _it; i < l; i++) {
+                _it = _list[i] || '';
+                if (_it.indexOf('.') != 0) continue;
+                _list[i] = $m.$parseURI(_it, _base);
+            }
+        };
+        return function (_uri, _deps, _callback) {
+            // check input
+            var _args = _formatARG.apply(_win, arguments);
+            _uri = _args[0] || $m.$parseURI('./' + (_seed++) + '.js');
+            _deps = _args[1];
+            _callback = _args[2];
+            // check module defined in file
+            _uri = $m.$parseURI(_uri);
+            if (_sCache[_uri] === 2) return;
+            _parseAllURI(_deps, _uri);
+            _sCache[_uri] = 1;
+            // push to load queue
+            var _iMap = {n: _uri, d: _deps, f: _callback};
+            _iList.push(_iMap);
+            // load dependence
+            var _list = _iMap.d;
+            if (!!_list && !!_list.length) {
+                for (var k = 0, j = _list.length, _itt, _itm, _arr; k < j; k++) {
+                    _itt = _list[k];
+                    if (!_itt) return;
+                    // 0 - url
+                    // 1 - load function
+                    // 2 - resource type
+                    _arr = _parsePlugin(_itt);
+                    _itm = $m.$parseURI(_arr[0], _uri, _arr[2]);
+                    _list[k] = _itm;
+                    _arr[1](_itm);
+                }
+
+            }
+            // check state
+            _checkLoading();
+        };
+    })();
 
 
     // iModal start
