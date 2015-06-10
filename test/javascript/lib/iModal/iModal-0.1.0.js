@@ -831,9 +831,27 @@
     // for define stack
         _dStack = new $m.$stack();
 
-    $m.$define = function (uri, deps, callback) {
-
-    };
+    $m.$define = (function () {
+        // The _runningScript() method can find running script. (for IE)
+        var _runningScript = function () {
+            var _list = document.getElementsByTagName('script');
+            for (var i = _list.length - 1, _script; i >= 0; i--) {
+                _script = _list[i];
+                if (_script.readyState == 'interactive') return _script;
+            }
+        };
+        return function (uri, deps, callback) {
+            var _args = [].slice.call(arguments, 0), _script = _runningScript();
+            // for ie check running script
+            if (!!_script) {
+                var _src = _script.src;
+                if (!!_src) _args.unshift($m.$parseURI(_src));
+                return _define.apply(_win, _args);
+            }
+            _dStack.push(_args);
+            _scriptAllListener();
+        }
+    })();
 
     // The define.$config() method config preferences that define uses.
     $m.$define.$config = function (config) {
@@ -926,16 +944,25 @@
     };
 
     // The _scriptListener() method can add listener to all script tags.
-    var _scriptAllListener = function () {
-        var _list = document.getElementsByTagName('script');
-        for (var i = _list.length - 1, script; i >= 0; i--) {
-            script = _list[i];
-            if (!script.iModal) {
-                script.iModal = !0;
-                //script.src ? _scriptListener(_list[i]) : _doClearStack();
+    var _scriptAllListener = (function () {
+        var _clearStack = function () {
+            var _args = _dStack.pop();
+            while (!!_args) {
+                _define.apply(p, _args);
+                _args = _dStack.pop();
+            }
+        };
+        return function () {
+            var _list = document.getElementsByTagName('script');
+            for (var i = _list.length - 1, script; i >= 0; i--) {
+                script = _list[i];
+                if (!script.iModal) {
+                    script.iModal = !0;
+                    script.src ? _scriptListener(_list[i]) : _clearStack();
+                }
             }
         }
-    };
+    })();
 
     // The _loadText() method can load text by url, and put result in callback function.
     var _loadText = function (url, callback) {
@@ -1209,7 +1236,6 @@
             _checkLoading();
         };
     })();
-
 
     // iModal start
     _init();
