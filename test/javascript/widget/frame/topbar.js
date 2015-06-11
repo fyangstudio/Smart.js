@@ -1,5 +1,5 @@
 define([
-    'wid!module',
+    'widget!module',
     '$text!./topbar.html'
 ], function (m, tpl) {
     console.log(tpl);

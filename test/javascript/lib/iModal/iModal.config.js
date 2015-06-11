@@ -1,7 +1,7 @@
 if (typeof define === 'function' && !!define.$config) {
     define.$config({
-        sites: {pro: "javascript/pages/", wid: "javascript/widget/", com: "javascript/components/"},
-        paths: {notify: "com!notify/notify"},
+        sites: {pages: "javascript/pages/", widget: "javascript/widget/", components: "javascript/components/"},
+        paths: {notify: "components!notify/notify"},
         charset: "utf-8"
     })
 }

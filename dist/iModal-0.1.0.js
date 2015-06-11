@@ -30,11 +30,11 @@
     var _sys = $m.$sys = {};
     var _ua = $m.$ua = navigator.userAgent.toLowerCase();
     // Parse userAgent
-    if (_ua.indexOf('chrome') > 0) _sys.chrome = _ua.match(/chrome\/([\d.]+)/)[1];
-    else if (window.ActiveXObject) _sys.ie = _ua.match(/msie ([\d.]+)/)[1];
-    else if (document.getBoxObjectFor) _sys.firefox = _ua.match(/firefox\/([\d.]+)/)[1];
-    else if (window.openDatabase) _sys.safari = _ua.match(/version\/([\d.]+)/)[1];
-    else if (window.opera) _sys.opera = _ua.match(/opera.([\d.]+)/)[1];
+    if (_ua.indexOf('chrome') > 0) _sys.$chrome = _ua.match(/chrome\/([\d.]+)/)[1];
+    else if (window.ActiveXObject) _sys.$ie = _ua.match(/msie ([\d.]+)/)[1];
+    else if (document.getBoxObjectFor) _sys.$firefox = _ua.match(/firefox\/([\d.]+)/)[1];
+    else if (window.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
+    else if (window.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
 
     /* Event
      ---------------------------------------------------------------------- */
@@ -906,7 +906,7 @@
                 var _res = ['true'], _ver = parseInt($m.$sys[sys]);
                 if (!!_left) _res.push(_left.replace('[VERSION]', _ver));
                 if (!!_right) _res.push(_right.replace('[VERSION]', _ver));
-                return eval(_res.join('&&'));
+                return eval(_res.join('&&').replace(/'/g, ''));
             })();
         };
         return function (_uri) {
