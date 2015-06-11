@@ -75,19 +75,24 @@
         this.dataStore = [];
     };
     $m.$stack.prototype = {
+        // placing item on top
         push: function (element) {
             this.dataStore[this.top++] = element;
         },
+        // get the current item
         peek: function () {
             return this.dataStore[this.top - 1];
         },
+        // taking the top item off the stack
         pop: function () {
             return this.dataStore[this.top == 0 ? 0 : --this.top];
         },
+        // clear the stack
         clear: function () {
             this.top = 0;
             this.dataStore = [];
         },
+        // get stack length
         length: function () {
             return this.top;
         }
@@ -99,21 +104,27 @@
         this.dataStore = [];
     }
     $m.$queue.prototype = {
+        // add an item to the queue, generally at the "back" of the queue
         enqueue: function (element) {
             this.dataStore.push(element);
         },
+        // remove an item from the queue, generally from the "front" of the queue
         dequeue: function () {
             return this.dataStore.shift();
         },
+        // get the "front" of the queue
         front: function () {
             return this.dataStore[0]
         },
+        // get the "back" of the queue
         back: function () {
             return this.dataStore[this.dataStore.length - 1];
         },
+        // get queue length
         length: function () {
             return this.dataStore.length;
         },
+        // to determine whether empty queue
         empty: function () {
             return this.dataStore.length == 0 ? true : false;
         }
@@ -613,10 +624,11 @@
         context = context || _doc;
         // Browser querySelector
         if (context.querySelectorAll) return context.querySelectorAll(query);
-        // Interpret query
+        // Looking for the element
         else return _interpret(query, context);
     };
 
+    // Interpret query
     function _interpret(query, context) {
         var parts = query.replace(/\s+/, ' ').split(' ');
         var part = parts.pop();
@@ -631,17 +643,20 @@
         this.id = id.substring(1);
     }
 
+    // Check for Id Selector
     _IdSelector.test = function (selector) {
         var regex = /^#([\w\-_]+)/;
         return regex.test(selector);
     };
 
     _IdSelector.prototype = {
+        // find the element
         find: function (context) {
             var ret = [];
             ret.push(context.getElementById(this.id));
             return ret;
         },
+        // match the selector query
         match: function (element) {
             return element.id == this.id;
         }
@@ -652,15 +667,18 @@
         this.tagName = tagName.toUpperCase();
     }
 
+    // Check for Tag Selector
     _TagSelector.test = function (selector) {
         var regex = /^([\w\*\-_]+)/;
         return regex.test(selector);
     };
 
     _TagSelector.prototype = {
+        // find the element
         find: function (context) {
             return context.getElementsByTagName(this.tagName);
         },
+        // match the selector query
         match: function (element) {
             return this.tagName == element.tagName.toUpperCase() || this.tagName === '*';
         }
@@ -674,13 +692,14 @@
         this.className = splits[1];
     }
 
+    // Check for Class Selector
     _ClassSelector.test = function (selector) {
         var regex = /^([\w\-_]*)\.([\w\-_]+)/;
         return regex.test(selector);
     };
 
     _ClassSelector.prototype = {
-
+        // find the element
         find: function (context) {
             var elements;
             var ret = [];
@@ -702,7 +721,7 @@
             }
             return ret;
         },
-
+        // match the selector query
         match: function (element) {
             var className = this.className;
             var regex = new RegExp('(\\s|^)' + className + '(\\s|$)');
@@ -985,8 +1004,8 @@
         if (!url) return;
         var _state = _sCache[url];
         if (_state != null) return;
-        // load file
         _sCache[url] = 0;
+        // load file
         var _script = _doc.createElement('script');
         _script.iModal = !0;
         _script.type = 'text/javascript';
@@ -1070,7 +1089,6 @@
                 _it = _arr[i];
                 _item = _map[_it];
                 if (!!_item) _execFn(_item);
-                // exec hack js
                 _item = _map[pMap[_it]];
                 if (!!_item) _execFn(_item);
             }
@@ -1217,10 +1235,9 @@
             if (_sCache[_uri] === 2) return;
             _parseAllURI(_deps, _uri);
             _sCache[_uri] = 1;
-            // push to load queue
+            // load dependence
             var _iMap = {n: _uri, d: _deps, f: _callback};
             _iList.push(_iMap);
-            // load dependence
             var _list = _iMap.d;
             if (!!_list && !!_list.length) {
                 for (var k = 0, j = _list.length, _itt, _itm, _arr; k < j; k++) {
@@ -1234,7 +1251,6 @@
                 }
 
             }
-            // check state
             _checkLoading();
         };
     })();
