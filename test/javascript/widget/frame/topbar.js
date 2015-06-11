@@ -3,6 +3,11 @@ define([
     '$text!./topbar.html'
 ], function (m, tpl) {
     console.log(tpl);
+
+    var side = $m.$tpl.$extend({
+        tpl: tpl
+    })
+
     var parent = m.$extend({
         v: 2,
         $init: function () {
