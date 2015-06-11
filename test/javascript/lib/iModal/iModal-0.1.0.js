@@ -1036,7 +1036,7 @@
             if (!_depends || !_depends.length) return;
             for (var i = 0, l = _depends.length, _cItem; i < l; i++) {
                 _cItem = _loop(_iList[_index(_iList, _depends[i])]);
-                // blew ie9 check for depends resource loaded
+                // blew IE9 check for depends resource loaded
                 if (!!_cItem) {
                     var _cItemDeps = _cItem.d;
                     if (!!_cItemDeps && !!_cItemDeps.length) {
