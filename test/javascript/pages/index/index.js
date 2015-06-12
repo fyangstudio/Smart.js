@@ -6,10 +6,10 @@ define([
     '$pixel>1!./index.retina',
     'widget!frame/topbar'
 ], function (notify, chrome, IE, notIE, retina, topbar) {
-    console.log(notify.notify);
-    console.log(chrome);
-    console.log(IE);
-    console.log(notIE);
-    console.log(retina);
-    new topbar({'option': 'I am option'}).t3();
+    //console.log(notify.notify);
+    //console.log(chrome);
+    //console.log(IE);
+    //console.log(notIE);
+    //console.log(retina);
+    //new topbar({'option': 'I am option'}).t3();
 });

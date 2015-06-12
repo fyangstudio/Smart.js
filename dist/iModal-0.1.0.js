@@ -9,8 +9,8 @@
 (function (_doc, _win, undefined) {
 
     // iModal object
-    var _version = "0.1.0";
-    var $m = {"iModal": _version};
+    var _version = '0.1.0';
+    var $m = {iModal: _version};
     // Empty function
     var _noop = function () {
     };
@@ -243,7 +243,7 @@
         // The JSON.stringify() method converts a JavaScript value to a JSON string, optionally replacing values if a replacer function is specified,
         // or optionally including only the specified properties if a replacer array is specified.
         _json.stringify = function (obj) {
-            if (typeof (obj) != "object" || obj === null) {
+            if (typeof (obj) != 'object' || obj === null) {
                 if ($m.$isString(obj)) obj = '"' + obj + '"';
                 return String(obj);
             } else {
@@ -253,10 +253,10 @@
                         var v = obj[key];
                         if ($m.$isString(v)) v = '"' + v + '"';
                         else if (typeof (v) == "object" && v !== null) v = stringify(v);
-                        json.push((arr ? "" : '"' + key + '":') + String(v));
+                        json.push((arr ? '' : '"' + key + '":') + String(v));
                     }
                 }
-                return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+                return (arr ? '[' : '{') + String(json) + (arr ? ']' : '}');
             }
         };
         _win.JSON = _json;
@@ -275,7 +275,7 @@
      ---------------------------------------------------------------------- */
     // Handles custom event
     $m.$on = function (event, fn) {
-        if (typeof event === "object") {
+        if (typeof event === 'object') {
             var _on = arguments.callee;
             for (var i in event) {
                 _on(i, event[i]);
@@ -425,7 +425,7 @@
 
     // Object to string
     $m.$o2s = function (_object, _split, _encode) {
-        if (typeof (_object) != "object" || _object === null) return JSON.stringify(_object);
+        if (typeof (_object) != 'object' || _object === null) return JSON.stringify(_object);
 
         var _arr = [];
         this.$forIn(_object, function (_value, _key) {
@@ -780,7 +780,7 @@
 
         // Copy the properties over onto the new prototype
         $m.$forIn(prop, function (value, name) {
-            if (name != "$super") {
+            if (name != '$super') {
                 prototype[name] = (function (name, fn) {
                     if ($m.$isFunction(prop[name])) {
                         return function () {
@@ -805,7 +805,7 @@
 
         // Copy the static method over onto the new prototype
         $m.$forIn(this, function (value, key) {
-            if (key != "$extend") $mClass[key] = value;
+            if (key != '$extend') $mClass[key] = value;
         });
 
         $mClass.prototype = prototype;
@@ -824,11 +824,14 @@
      * Living dom
      *
      */
-    $m.$tpl = Class.$extend({
-        $init: function (options) {
+    var _tpl = function () {
 
-        }
-    });
+    }
+    _tpl.$extend = function () {
+
+    }
+
+    $m.$tpl = _tpl;
 
     /*!
      * iModal Module Component

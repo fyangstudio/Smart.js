@@ -824,11 +824,14 @@
      * Living dom
      *
      */
-    $m.$tpl = Class.$extend({
-        $init: function (options) {
+    var _tpl = function () {
 
-        }
-    });
+    }
+    _tpl.$extend = function () {
+
+    }
+
+    $m.$tpl = _tpl;
 
     /*!
      * iModal Module Component
