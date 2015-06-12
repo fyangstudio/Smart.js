@@ -87,7 +87,7 @@
         },
         // taking the top item off the stack
         pop: function () {
-            return this.dataStore[this.top == 0 ? 0 : --this.top];
+            return this.dataStore[--this.top];
         },
         // clear the stack
         clear: function () {
@@ -480,7 +480,7 @@
             }
         }
         for (p in target2) {
-            // allows target1["p"] to be set to undefined
+            // allows target1[p] to be set to undefined
             if (target2.hasOwnProperty(p) && !target1.hasOwnProperty(p)) return false;
         }
         return true;
@@ -850,7 +850,7 @@
         _iList = [],
 
     // for define stack
-        _dStack = [];
+        _dStack = new $m.$stack();
 
     $m.$define = (function () {
         // The _runningScript() method can find running script. (for IE)
