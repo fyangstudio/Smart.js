@@ -1,11 +1,13 @@
 define([
     'notify!',
+    '$chrome!./index.chrome',
     '6<=$ie<9!./index.IE',
     '^6<=$ie<9!./index.notIE',
     '$pixel>1!./index.retina',
     'widget!frame/topbar'
-], function (notify, IE, notIE, retina, topbar) {
+], function (notify, chrome, IE, notIE, retina, topbar) {
     console.log(notify.notify);
+    console.log(chrome);
     console.log(IE);
     console.log(notIE);
     console.log(retina);
