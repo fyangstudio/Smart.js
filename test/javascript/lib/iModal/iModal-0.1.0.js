@@ -29,6 +29,8 @@
      ---------------------------------------------------------------------- */
     var _sys = $m.$sys = {};
     var _ua = $m.$ua = navigator.userAgent.toLowerCase();
+    // Get pixel
+    _sys.$pixel = window.devicePixelRatio || 1;
     // Parse userAgent
     if (_ua.indexOf('chrome') > 0) _sys.$chrome = _ua.match(/chrome\/([\d.]+)/)[1];
     else if (window.ActiveXObject) _sys.$ie = _ua.match(/msie ([\d.]+)/)[1];
