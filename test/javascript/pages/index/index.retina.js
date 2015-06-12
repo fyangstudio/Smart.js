@@ -1,3 +1,3 @@
 define(function () {
-    console.log('Retina');
+    return 'Retina';
 })

@@ -1153,9 +1153,9 @@
             var _arr = [];
             // merge dependency list result
             if (!!_dep)
-                for (var i = 0, l = _dep.length; i < l; i++) {
-                    _arr.push(_rCache[_dep[i]] || {});
-                }
+                _dep.forEach(function (value) {
+                    _arr.push(_rCache[value] || false);
+                });
             return _arr;
         };
         // merge inject iModal result
