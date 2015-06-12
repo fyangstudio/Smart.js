@@ -29,6 +29,8 @@
      ---------------------------------------------------------------------- */
     var _sys = $m.$sys = {};
     var _ua = $m.$ua = navigator.userAgent.toLowerCase();
+    // Get pixel
+    _sys.$pixel = window.devicePixelRatio || 1;
     // Parse userAgent
     if (_ua.indexOf('chrome') > 0) _sys.$chrome = _ua.match(/chrome\/([\d.]+)/)[1];
     else if (window.ActiveXObject) _sys.$ie = _ua.match(/msie ([\d.]+)/)[1];
@@ -85,7 +87,7 @@
         },
         // taking the top item off the stack
         pop: function () {
-            return this.dataStore[this.top == 0 ? 0 : --this.top];
+            return this.dataStore[--this.top];
         },
         // clear the stack
         clear: function () {
@@ -478,7 +480,7 @@
             }
         }
         for (p in target2) {
-            // allows target1["p"] to be set to undefined
+            // allows target1[p] to be set to undefined
             if (target2.hasOwnProperty(p) && !target1.hasOwnProperty(p)) return false;
         }
         return true;
@@ -848,7 +850,7 @@
         _iList = [],
 
     // for define stack
-        _dStack = [];
+        _dStack = new $m.$stack();
 
     $m.$define = (function () {
         // The _runningScript() method can find running script. (for IE)
@@ -931,6 +933,7 @@
         return function (_uri) {
             var _brr = [],                                                  // return array
                 _sOption = null,                                            // samd selective option
+                _negation = false,                                          // negation selective flag
                 _arr = _uri.split('!'),                                     // target array
                 _target = _arr[0],                                          // samd selective target
                 _reg = /\$[^><=!]+/,                                        // parse version regexp
@@ -938,8 +941,14 @@
             if (_arr.length > 1 && !_config.sites[_target] && !_config.paths[_target]) {
                 var _temp = _arr.shift(),
                     _sys = _target.match(_reg)[0];
-                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = '';
-                else if (!_fun) _fun = _noop;
+                // determine whether is a negation selective.
+                if (_target.indexOf('^') == 0) {
+                    _negation = true;
+                    _target = _target.substring(1);
+                }
+                // load function to assignment
+                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _noop : '';
+                else if (!_fun) _fun = _negation ? '' : _noop;
                 _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
@@ -1151,9 +1160,9 @@
             var _arr = [];
             // merge dependency list result
             if (!!_dep)
-                for (var i = 0, l = _dep.length; i < l; i++) {
-                    _arr.push(_rCache[_dep[i]] || {});
-                }
+                _dep.forEach(function (value) {
+                    _arr.push(_rCache[value] || false);
+                });
             return _arr;
         };
         // merge inject iModal result

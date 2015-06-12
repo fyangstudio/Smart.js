@@ -933,6 +933,7 @@
         return function (_uri) {
             var _brr = [],                                                  // return array
                 _sOption = null,                                            // samd selective option
+                _negation = false,                                          // negation selective flag
                 _arr = _uri.split('!'),                                     // target array
                 _target = _arr[0],                                          // samd selective target
                 _reg = /\$[^><=!]+/,                                        // parse version regexp
@@ -940,8 +941,14 @@
             if (_arr.length > 1 && !_config.sites[_target] && !_config.paths[_target]) {
                 var _temp = _arr.shift(),
                     _sys = _target.match(_reg)[0];
-                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = '';
-                else if (!_fun) _fun = _noop;
+                // determine whether is a negation selective.
+                if (_target.indexOf('^') == 0) {
+                    _negation = true;
+                    _target = _target.substring(1);
+                }
+                // load function to assignment
+                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _noop : '';
+                else if (!_fun) _fun = _negation ? '' : _noop;
                 _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
