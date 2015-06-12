@@ -947,8 +947,8 @@
                     _target = _target.substring(1);
                 }
                 // load function to assignment
-                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _noop : '';
-                else if (!_fun) _fun = _negation ? '' : _noop;
+                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _noop : null;
+                else if (!_fun) _fun = _negation ? null : _noop;
                 _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
