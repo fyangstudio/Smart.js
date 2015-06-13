@@ -309,6 +309,22 @@
         return this;
     };
 
+    $m.$emit = function (event) {
+        var handles = this._handles, calls, args, type;
+        if (!event) return;
+        if (typeof event === "object") {
+            type = event.type;
+            args = event.data || [];
+        } else {
+            args = slice.call(arguments, 1);
+            type = event;
+        }
+        if (!handles || !(calls = handles[type])) return this;
+        for (var i = 0, len = calls.length; i < len; i++) {
+            calls[i].apply(this, args)
+        }
+        return this;
+    }
     /* Parse
      ---------------------------------------------------------------------- */
     // The $m.$parseHTML() method can change a string of html to a html node.
