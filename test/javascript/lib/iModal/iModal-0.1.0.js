@@ -273,58 +273,61 @@
 
     /* Custom event function
      ---------------------------------------------------------------------- */
-    // Handles custom event
-    $m.$on = function (event, fn) {
-        if (typeof event === 'object') {
-            var _on = arguments.callee;
-            for (var i in event) {
-                _on(i, event[i]);
+    $m.$bindEvent = function (context) {
+        if (!context) return;
+        // Handles custom event
+        context.$on = function (event, fn) {
+            if (typeof event === 'object') {
+                var _on = arguments.callee;
+                for (var i in event) {
+                    _on(i, event[i]);
+                }
+            } else {
+                var _handles = context._handles || (context._handles = {}),
+                    _calls = _handles[event] || (_handles[event] = []);
+                _calls.push(fn);
             }
-        } else {
-            var _handles = this._handles || (this._handles = {}),
-                _calls = _handles[event] || (_handles[event] = []);
-            _calls.push(fn);
+            return context;
         }
-        return this;
-    };
+        // Relieve custom event
+        context.$off = function (event, fn) {
+            if (!context._handles) return;
+            if (!event) context._handles = {};
+            var _handles = context._handles, _calls;
 
-    // Relieve custom event
-    $m.$off = function (event, fn) {
-        if (!this._handles) return;
-        if (!event) this._handles = {};
-        var _handles = this._handles, _calls;
-
-        if (_calls = _handles[event]) {
-            if (!fn) {
-                _handles[event] = [];
-                return this;
-            }
-            for (var i = 0, l = _calls.length; i < l; i++) {
-                if (fn === _calls[i]) {
-                    _calls.splice(i, 1);
-                    return this;
+            if (_calls = _handles[event]) {
+                if (!fn) {
+                    _handles[event] = [];
+                    return context;
+                }
+                for (var i = 0, l = _calls.length; i < l; i++) {
+                    if (fn === _calls[i]) {
+                        _calls.splice(i, 1);
+                        return context;
+                    }
                 }
             }
+            return context;
         }
-        return this;
-    };
+        // bubble event
+        context.$emit = function (event) {
+            var handles = context._handles, calls, args, type;
+            if (!event) return;
+            if (typeof event === "object") {
+                type = event.type;
+                args = event.data || [];
+            } else {
+                args = slice.call(arguments, 1);
+                type = event;
+            }
+            if (!handles || !(calls = handles[type])) return context;
+            for (var i = 0, len = calls.length; i < len; i++) {
+                calls[i].apply(context, args)
+            }
+            return context;
+        }
 
-    $m.$emit = function (event) {
-        var handles = this._handles, calls, args, type;
-        if (!event) return;
-        if (typeof event === "object") {
-            type = event.type;
-            args = event.data || [];
-        } else {
-            args = slice.call(arguments, 1);
-            type = event;
-        }
-        if (!handles || !(calls = handles[type])) return this;
-        for (var i = 0, len = calls.length; i < len; i++) {
-            calls[i].apply(this, args)
-        }
-        return this;
-    }
+    };
     /* Parse
      ---------------------------------------------------------------------- */
     // The $m.$parseHTML() method can change a string of html to a html node.
