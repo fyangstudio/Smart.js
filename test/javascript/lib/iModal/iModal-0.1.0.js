@@ -279,9 +279,9 @@
         context.$on = function (event, fn) {
             if (typeof event === 'object') {
                 var _on = arguments.callee;
-                for (var i in event) {
-                    _on(i, event[i]);
-                }
+                $m._$forEach(function (key, value) {
+                    _on(key, value);
+                });
             } else {
                 var _handles = context._handles || (context._handles = {}),
                     _calls = _handles[event] || (_handles[event] = []);
@@ -309,7 +309,7 @@
             }
             return context;
         }
-        // bubble event
+        // Trigger custom events
         context.$emit = function (event) {
             var handles = context._handles, calls, args, type;
             if (!event) return;
@@ -317,7 +317,7 @@
                 type = event.type;
                 args = event.data || [];
             } else {
-                args = slice.call(arguments, 1);
+                args = Array.prototype.slice.call(arguments);
                 type = event;
             }
             if (!handles || !(calls = handles[type])) return context;
@@ -326,7 +326,6 @@
             }
             return context;
         }
-
     };
     /* Parse
      ---------------------------------------------------------------------- */
