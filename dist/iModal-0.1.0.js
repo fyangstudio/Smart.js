@@ -273,42 +273,61 @@
 
     /* Custom event function
      ---------------------------------------------------------------------- */
-    // Handles custom event
-    $m.$on = function (event, fn) {
-        if (typeof event === 'object') {
-            var _on = arguments.callee;
-            for (var i in event) {
-                _on(i, event[i]);
+    // The $m.$bindEvent() method can create customEvent and add 3 methods to context, they are $on, $off and $emit.
+    $m.$bindEvent = function (context) {
+        if (!context) return;
+        // Handles custom event
+        context.$on = function (event, fn) {
+            if (typeof event === 'object') {
+                var _on = arguments.callee;
+                $m._$forEach(function (key, value) {
+                    _on(key, value);
+                });
+            } else {
+                var _handles = context._handles || (context._handles = {}),
+                    _calls = _handles[event] || (_handles[event] = []);
+                _calls.push(fn);
             }
-        } else {
-            var _handles = this._handles || (this._handles = {}),
-                _calls = _handles[event] || (_handles[event] = []);
-            _calls.push(fn);
+            return context;
         }
-        return this;
-    };
+        // Relieve custom event
+        context.$off = function (event, fn) {
+            if (!context._handles) return;
+            if (!event) context._handles = {};
+            var _handles = context._handles, _calls;
 
-    // Relieve custom event
-    $m.$off = function (event, fn) {
-        if (!this._handles) return;
-        if (!event) this._handles = {};
-        var _handles = this._handles, _calls;
-
-        if (_calls = _handles[event]) {
-            if (!fn) {
-                _handles[event] = [];
-                return this;
-            }
-            for (var i = 0, l = _calls.length; i < l; i++) {
-                if (fn === _calls[i]) {
-                    _calls.splice(i, 1);
-                    return this;
+            if (_calls = _handles[event]) {
+                if (!fn) {
+                    _handles[event] = [];
+                    return context;
+                }
+                for (var i = 0, l = _calls.length; i < l; i++) {
+                    if (fn === _calls[i]) {
+                        _calls.splice(i, 1);
+                        return context;
+                    }
                 }
             }
+            return context;
         }
-        return this;
+        // Trigger custom events
+        context.$emit = function (event) {
+            var handles = context._handles, calls, args, type;
+            if (!event) return;
+            if (typeof event === "object") {
+                type = event.type;
+                args = event.data || [];
+            } else {
+                args = Array.prototype.slice.call(arguments);
+                type = event;
+            }
+            if (!handles || !(calls = handles[type])) return context;
+            for (var i = 0, len = calls.length; i < len; i++) {
+                calls[i].apply(context, args)
+            }
+            return context;
+        }
     };
-
     /* Parse
      ---------------------------------------------------------------------- */
     // The $m.$parseHTML() method can change a string of html to a html node.
@@ -775,6 +794,7 @@
 
         // Class state change
         _initClass = true;
+        var eventInit = true;
         var prototype = new this();
         _initClass = false;
 
@@ -786,7 +806,9 @@
                         return function () {
                             var _superFn = _noop;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
-
+                            // Add custom event handles
+                            if (eventInit) $m.$bindEvent(prototype);
+                            eventInit = false;
                             // Add a new $super() method that is the same method on the super-class
                             prototype.$super = _superFn;
                             return fn.apply(prototype, arguments);
