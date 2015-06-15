@@ -13,4 +13,5 @@ define([
     //console.log(retina);
     //var t1 = new topbar({'option': 'I am option'});
     //t1.$emit('ok');
+    //t1.$emit('ok');
 });

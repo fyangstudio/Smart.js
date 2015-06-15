@@ -36,6 +36,7 @@ define([
     //    },
     //    t3: function () {
     //        console.log('OK!');
+    //        this.$off('ok');
     //    }
     //})
     //return child;
