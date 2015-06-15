@@ -273,6 +273,7 @@
 
     /* Custom event function
      ---------------------------------------------------------------------- */
+    // The $m.$bindEvent() method can create customEvent and add 3 methods to context, they are $on, $off and $emit.
     $m.$bindEvent = function (context) {
         if (!context) return;
         // Handles custom event
