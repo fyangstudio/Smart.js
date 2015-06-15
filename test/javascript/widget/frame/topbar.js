@@ -23,6 +23,7 @@ define([
     //    v: 3,
     //    $init: function (_option) {
     //        this.$super();
+    //        this.$on('ok', this.t3);
     //        console.log('Child class init');
     //        console.log(this.v);
     //        console.log(_option['option']);

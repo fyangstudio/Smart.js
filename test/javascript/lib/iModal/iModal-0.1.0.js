@@ -793,6 +793,7 @@
 
         // Class state change
         _initClass = true;
+        var eventInit = true;
         var prototype = new this();
         _initClass = false;
 
@@ -804,7 +805,9 @@
                         return function () {
                             var _superFn = _noop;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
-
+                            // Add custom event handles
+                            if (eventInit) $m.$bindEvent(prototype);
+                            eventInit = false;
                             // Add a new $super() method that is the same method on the super-class
                             prototype.$super = _superFn;
                             return fn.apply(prototype, arguments);
