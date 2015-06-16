@@ -30,13 +30,63 @@
     var _sys = $m.$sys = {};
     var _ua = $m.$ua = navigator.userAgent.toLowerCase();
     // Get pixel
-    _sys.$pixel = window.devicePixelRatio || 1;
+    _sys.$pixel = _win.devicePixelRatio || 1;
     // Parse userAgent
     if (_ua.indexOf('chrome') > 0) _sys.$chrome = _ua.match(/chrome\/([\d.]+)/)[1];
-    else if (window.ActiveXObject) _sys.$ie = _ua.match(/msie ([\d.]+)/)[1];
-    else if (document.getBoxObjectFor) _sys.$firefox = _ua.match(/firefox\/([\d.]+)/)[1];
-    else if (window.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
-    else if (window.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
+    else if (_win.ActiveXObject) _sys.$ie = _ua.match(/msie ([\d.]+)/)[1];
+    else if (_doc.getBoxObjectFor) _sys.$firefox = _ua.match(/firefox\/([\d.]+)/)[1];
+    else if (_win.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
+    else if (_win.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
+
+    /* size
+     ---------------------------------------------------------------------- */
+    // Width (in pixels) of the browser window viewport
+    var _winW = function () {
+        return _win.innerWidth || _doc.documentElement.clientWidth || _doc.body.clientWidth;
+    };
+    // Height (in pixels) of the browser window viewport
+    var _winH = function () {
+        return _win.innerHeight || _doc.documentElement.clientHeight || _doc.body.clientHeight;
+    };
+    // Get the width or height of an element in pixels.
+    // The inner sign can mark whether it includes padding.
+    var _wORh = function (name, elem, inner) {
+        var _val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
+        if (!inner) return _val;
+
+        var _value = this.$style(elem, name);
+        var _return = parseFloat(_value);
+        var _pdgMap = {
+            'width': ['padding-left', 'padding-right'],
+            'height': ['padding-top', 'padding-bottom']
+        };
+        // IE Fixes
+        if (isNaN(_return) || _value.indexOf('%') > 0) {
+            _return = _val
+            - parseFloat(this.$style(elem, _pdgMap[name][0]))
+            - parseFloat(this.$style(elem, _pdgMap[name][1]));
+        }
+        return _return;
+    };
+
+    // The $m.$style() method specifies the style sheet language for the given document fragment.
+    $m.$style = function (elem, name) {
+        if (elem.currentStyle) return elem.currentStyle[name];
+        return getComputedStyle(elem, null)[name];
+    };
+
+    // The $m.$width() method can get element's width in pixels.
+    $m.$width = function (elem, inner) {
+        return _wORh.call(this, 'width', elem, inner);
+    };
+
+    // The $m.$height() method can get element's height in pixels.
+    $m.$height = function (elem, inner) {
+        return _wORh.call(this, 'height', elem, inner);
+    };
+
+    // The $m.$winSize() object can show the information of window's viewport.
+    $m.$winSize = {w: _winW(), h: _winH()};
 
     /* Event
      ---------------------------------------------------------------------- */
@@ -165,7 +215,7 @@
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
                 fBound = function () {
-                    return fToBind.apply(this instanceof _noop && oThis ? this : oThis || window,
+                    return fToBind.apply(this instanceof _noop && oThis ? this : oThis || _win,
                         aArgs.concat(Array.prototype.slice.call(arguments)));
                 };
             _noop.prototype = this.prototype;
@@ -508,39 +558,75 @@
     /* hash
      ---------------------------------------------------------------------- */
     // Window hash
-    var _hash = window.location.hash;
+    var _hash = _win.location.hash;
 
     // The $m.$hash()method property returns a DOMString not containing a '#' followed by the fragment identifier of the URL.
     // The hash is not percent encoded.
     $m.$hash = function (value) {
-        if (value != undefined) window.location.hash = value.replace(/#/g, '');
-        return window.location.hash.replace('#', '');
+        if (value != undefined) _win.location.hash = value.replace(/#/g, '');
+        return _win.location.hash.replace('#', '');
     };
 
     // Watch location.hash
     $m.$watchHash = function (callback) {
-        if (this.$isFunction(callback)) {
-            // Browser support hash change event
-            if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
-                this.$addEvent(window, 'hashchange', function () {
+        if (!this.$isFunction(callback)) return;
+        // Browser support hash change event
+        if (('onhashchange' in _win) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
+            this.$addEvent(_win, 'hashchange', function () {
+                _hash = this.$hash();
+                callback(_hash);
+            }.bind(this))
+        } else {
+            // Check the location.hash at a regular interval
+            var handles = this._hashFns || (this._hashFns = []);
+            handles.push(callback);
+            setInterval(function () {
+                var _h = _win.location.hash.replace('#', '');
+                if (_h != _hash) {
                     _hash = this.$hash();
-                    callback(_hash);
-                }.bind(this))
-            } else {
-                // Check the location.hash at a regular interval
-                var handles = this._hashFns || (this._hashFns = []);
-                handles.push(callback);
-                setInterval(function () {
-                    var _h = window.location.hash.replace('#', '');
-                    if (_h != _hash) {
-                        _hash = this.$hash();
-                        handles.forEach(function (_fn) {
-                            _fn.call(this, _h);
-                        })
-                    }
-                }.bind(this), 100);
+                    handles.forEach(function (_fn) {
+                        _fn.call(this, _h);
+                    })
+                }
+            }.bind(this), 100);
+        }
+    };
+
+    /* scroll
+     ---------------------------------------------------------------------- */
+    // The $m.$scroll() method can scrolls to a particular set of coordinates in the document,
+    // and return the scroll's position.
+    $m.$scroll = function (position) {
+        var _flag = !!position && this.$isObject(position);
+        var _top = _flag ? position.top : undefined;
+        var _left = _flag ? position.left : undefined;
+        if (typeof pageYOffset != 'undefined') {
+            if (_flag) _win.scrollTo(_left || _win.pageXOffset, _top || _win.pageYOffset);
+            return {
+                top: _win.pageYOffset,
+                left: _win.pageXOffset
+            }
+        } else {
+            var _body = _doc.documentElement || _doc.body;
+            if (_flag) _win.scrollTo(_left || _body.scrollLeft, _top || _body.scrollTop);
+            return {
+                top: _body.scrollTop,
+                left: _body.scrollLeft
             }
         }
+    };
+
+    // Watch scroll event
+    $m.$watchScroll = function (callback) {
+        if (!this.$isFunction(callback)) return;
+        var handles = this._scrollFns || (this._scrollFns = []);
+        handles.push(callback);
+        var onScroll = function () {
+            handles.forEach(function (_fn) {
+                _fn.call(this, $m.$scroll());
+            })
+        }.bind(this);
+        $m.$addEvent(_win, 'scroll', onScroll);
     };
 
     /* request
@@ -880,7 +966,7 @@
     $m.$define = (function () {
         // The _runningScript() method can find running script. (for IE)
         var _runningScript = function () {
-            var _list = document.getElementsByTagName('script');
+            var _list = _doc.getElementsByTagName('script');
             for (var i = _list.length - 1, _script; i >= 0; i--) {
                 _script = _list[i];
                 if (_script.readyState == 'interactive') return _script;
@@ -1006,7 +1092,7 @@
             }
         };
         return function () {
-            var _list = document.getElementsByTagName('script');
+            var _list = _doc.getElementsByTagName('script');
             for (var i = _list.length - 1, script; i >= 0; i--) {
                 script = _list[i];
                 if (script.src && !script.iModal) {
@@ -1046,7 +1132,7 @@
         _script.charset = _config.charset;
         _scriptListener(_script);
         _script.src = url;
-        (_doc.getElementsByTagName('head')[0] || document.body).appendChild(_script);
+        (_doc.getElementsByTagName('head')[0] || _doc.body).appendChild(_script);
     };
 
     // The _jsLoaded() method can recover script when it's loaded.
@@ -1291,5 +1377,6 @@
 
     // iModal start
     _init();
-})(document, window)
+})
+(document, window)
 //]]>
