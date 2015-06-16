@@ -594,7 +594,8 @@
 
     /* scroll
      ---------------------------------------------------------------------- */
-
+    // The $m.$scroll() method can scrolls to a particular set of coordinates in the document,
+    // and return the scroll's position.
     $m.$scroll = function (position) {
         var _flag = !!position && this.$isObject(position);
         var _top = _flag ? position.top : undefined;
@@ -615,14 +616,18 @@
         }
     };
 
+    //
     $m.$watchScroll = function (callback) {
         if (!this.$isFunction(callback)) return;
+        var handles = this._scrollFns || (this._scrollFns = []);
+        handles.push(callback);
         var onScroll = function () {
-            console.log($m.$scroll());
+            handles.forEach(function (_fn) {
+                _fn.call(this, $m.$scroll());
+            })
         }.bind(this);
         $m.$addEvent(_win, 'scroll', onScroll);
     };
-
 
     /* request
      ---------------------------------------------------------------------- */
