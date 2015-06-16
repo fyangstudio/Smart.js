@@ -519,30 +519,54 @@
 
     // Watch location.hash
     $m.$watchHash = function (callback) {
-        if (this.$isFunction(callback)) {
-            // Browser support hash change event
-            if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
-                this.$addEvent(window, 'hashchange', function () {
+        if (!this.$isFunction(callback)) return;
+        // Browser support hash change event
+        if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
+            this.$addEvent(window, 'hashchange', function () {
+                _hash = this.$hash();
+                callback(_hash);
+            }.bind(this))
+        } else {
+            // Check the location.hash at a regular interval
+            var handles = this._hashFns || (this._hashFns = []);
+            handles.push(callback);
+            setInterval(function () {
+                var _h = window.location.hash.replace('#', '');
+                if (_h != _hash) {
                     _hash = this.$hash();
-                    callback(_hash);
-                }.bind(this))
-            } else {
-                // Check the location.hash at a regular interval
-                var handles = this._hashFns || (this._hashFns = []);
-                handles.push(callback);
-                setInterval(function () {
-                    var _h = window.location.hash.replace('#', '');
-                    if (_h != _hash) {
-                        _hash = this.$hash();
-                        handles.forEach(function (_fn) {
-                            _fn.call(this, _h);
-                        })
-                    }
-                }.bind(this), 100);
+                    handles.forEach(function (_fn) {
+                        _fn.call(this, _h);
+                    })
+                }
+            }.bind(this), 100);
+        }
+    };
+
+    /* scroll
+     ---------------------------------------------------------------------- */
+
+    $m.$scroll = function () {
+        return {
+            win: {
+                x: window.innerWidth || document.documentElement.clientWidth,
+                y: window.innerHeight || document.documentElement.clientHeight
+            },
+            size: {},
+            position: {
+                x: document.documentElement.scrollLeft || window.pageXOffset || document.body.scrollLeft,
+                y: document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop
             }
         }
     };
 
+    $m.$watchScroll = function (callback) {
+        if (!this.$isFunction(callback)) return;
+        var onScroll = function () {
+            console.log($m.$scroll());
+        }.bind(this);
+        $m.$addEvent(_win, 'scroll', onScroll);
+    };
+    console.log($m.$scroll().win.y)
     /* request
      ---------------------------------------------------------------------- */
     var _ajaxHandler = function () {
