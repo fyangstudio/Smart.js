@@ -616,7 +616,7 @@
         }
     };
 
-    //
+    // Watch scroll event
     $m.$watchScroll = function (callback) {
         if (!this.$isFunction(callback)) return;
         var handles = this._scrollFns || (this._scrollFns = []);
