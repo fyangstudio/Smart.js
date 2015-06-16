@@ -40,12 +40,16 @@
 
     /* size
      ---------------------------------------------------------------------- */
+    // Width (in pixels) of the browser window viewport
     var _winW = function () {
         return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     };
+    // Height (in pixels) of the browser window viewport
     var _winH = function () {
         return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
     };
+    // Get the width or height of an element in pixels.
+    // The inner sign can mark whether it includes padding.
     var _wORh = function (name, elem, inner) {
         var _val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
         if (!inner) return _val;
@@ -65,21 +69,24 @@
         return _return;
     };
 
+    // The $m.$style() method specifies the style sheet language for the given document fragment.
     $m.$style = function (elem, name) {
         if (elem.currentStyle) return elem.currentStyle[name];
         return getComputedStyle(elem, null)[name];
     };
 
+    // The $m.$width() method can get element's width in pixels.
     $m.$width = function (elem, inner) {
         return _wORh.call(this, 'width', elem, inner);
     };
 
+    // The $m.$height() method can get element's height in pixels.
     $m.$height = function (elem, inner) {
         return _wORh.call(this, 'height', elem, inner);
     };
 
+    // The $m.$winSize() object can show the information of window's viewport.
     $m.$winSize = {w: _winW(), h: _winH()};
-    $m.$width(document.body, true);
 
     /* Event
      ---------------------------------------------------------------------- */
