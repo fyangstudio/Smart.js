@@ -38,6 +38,49 @@
     else if (window.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
     else if (window.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
 
+    /* size
+     ---------------------------------------------------------------------- */
+    var _winW = function () {
+        return window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    };
+    var _winH = function () {
+        return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    };
+    var _wORh = function (name, elem, inner) {
+        var _val = name === "width" ? elem.offsetWidth : elem.offsetHeight;
+        if (!inner) return _val;
+
+        var _value = this.$style(elem, name);
+        var _return = parseFloat(_value);
+        var _pdgMap = {
+            'width': ['padding-left', 'padding-right'],
+            'height': ['padding-top', 'padding-bottom']
+        };
+        // IE Fixes
+        if (isNaN(_return) || _value.indexOf('%') > 0) {
+            _return = _val
+            - parseFloat(this.$style(elem, _pdgMap[name][0]))
+            - parseFloat(this.$style(elem, _pdgMap[name][1]));
+        }
+        return _return;
+    };
+
+    $m.$style = function (elem, name) {
+        if (elem.currentStyle) return elem.currentStyle[name];
+        return getComputedStyle(elem, null)[name];
+    };
+
+    $m.$width = function (elem, inner) {
+        return _wORh.call(this, 'width', elem, inner);
+    };
+
+    $m.$height = function (elem, inner) {
+        return _wORh.call(this, 'height', elem, inner);
+    };
+
+    $m.$winSize = {w: _winW(), h: _winH()};
+    $m.$width(document.body, true);
+
     /* Event
      ---------------------------------------------------------------------- */
 
@@ -547,15 +590,8 @@
 
     $m.$scroll = function () {
         return {
-            win: {
-                x: window.innerWidth || document.documentElement.clientWidth,
-                y: window.innerHeight || document.documentElement.clientHeight
-            },
-            size: {},
-            position: {
-                x: document.documentElement.scrollLeft || window.pageXOffset || document.body.scrollLeft,
-                y: document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop
-            }
+            x: document.documentElement.scrollLeft || window.pageXOffset || document.body.scrollLeft,
+            y: document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop
         }
     };
 
@@ -566,7 +602,7 @@
         }.bind(this);
         $m.$addEvent(_win, 'scroll', onScroll);
     };
-    console.log($m.$scroll().win.y)
+
     /* request
      ---------------------------------------------------------------------- */
     var _ajaxHandler = function () {
@@ -1315,5 +1351,6 @@
 
     // iModal start
     _init();
-})(document, window)
+})
+(document, window)
 //]]>
