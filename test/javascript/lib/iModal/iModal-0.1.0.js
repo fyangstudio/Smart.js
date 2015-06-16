@@ -596,12 +596,22 @@
      ---------------------------------------------------------------------- */
 
     $m.$scroll = function (position) {
-        if (position != undefined && this.$isObject(position)) {
-            _win.scrollTo(position.top || 0, 500);
-        }
-        return {
-            top: _doc.documentElement.scrollTop || _win.pageYOffset || _doc.body.scrollTop,
-            left: _doc.documentElement.scrollLeft || _win.pageXOffset || _doc.body.scrollLeft
+        var _flag = !!position && this.$isObject(position);
+        var _top = _flag ? position.top : undefined;
+        var _left = _flag ? position.left : undefined;
+        if (typeof pageYOffset != 'undefined') {
+            if (_flag) _win.scrollTo(_left || _win.pageXOffset, _top || _win.pageYOffset);
+            return {
+                top: _win.pageYOffset,
+                left: _win.pageXOffset
+            }
+        } else {
+            var _body = _doc.documentElement || _doc.body;
+            if (_flag) _win.scrollTo(_left || _body.scrollLeft, _top || _body.scrollTop);
+            return {
+                top: _body.scrollTop,
+                left: _body.scrollLeft
+            }
         }
     };
 
@@ -612,6 +622,7 @@
         }.bind(this);
         $m.$addEvent(_win, 'scroll', onScroll);
     };
+
 
     /* request
      ---------------------------------------------------------------------- */
