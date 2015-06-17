@@ -555,6 +555,21 @@
         return true;
     };
 
+    /* throttle
+     ---------------------------------------------------------------------- */
+    // Since resize events can fire at a high rate, the $m.$throttle() method can throttle the event using.
+    $m.$throttle = function (fn, delay) {
+        var _timer = null;
+        return function () {
+            var args = arguments;
+            clearTimeout(_timer);
+            // set _timer
+            _timer = setTimeout(function () {
+                fn.apply(this, args);
+            }.bind(this), delay);
+        };
+    };
+
     /* hash
      ---------------------------------------------------------------------- */
     // Window hash
@@ -934,6 +949,7 @@
      * Living dom
      *
      */
+
     var _tpl = function () {
 
     };
@@ -1387,5 +1403,5 @@
     // iModal start
     _init();
 })
-(document, window)
+(document, window);
 //]]>
