@@ -479,9 +479,9 @@
     };
 
     // String to object
-    $m.$s2o = function (string, _split) {
+    $m.$s2o = function (string, split) {
         var _obj = {};
-        var _arr = (string || '').split(_split);
+        var _arr = (string || '').split(split);
         _arr.forEach(function (_name) {
             var _brr = _name.split('=');
             if (!_brr || !_brr.length) return;
@@ -493,18 +493,18 @@
     };
 
     // Object to string
-    $m.$o2s = function (_object, _split, _encode) {
-        if (typeof (_object) != 'object' || _object === null) return JSON.stringify(_object);
+    $m.$o2s = function (object, split, encode) {
+        if (typeof (object) != 'object' || object === null) return JSON.stringify(object);
 
         var _arr = [];
-        this.$forIn(_object, function (_value, _key) {
-            if (this.$isFunction(_value)) return;
-            _value = JSON.stringify(_value);
+        this.$forIn(object, function (value, key) {
+            if (this.$isFunction(value)) return;
+            value = JSON.stringify(value);
 
-            if (!!_encode) _value = encodeURIComponent(_value);
-            _arr.push(encodeURIComponent(_key) + '=' + _value);
+            if (!!encode) value = encodeURIComponent(value);
+            _arr.push(encodeURIComponent(key) + '=' + value);
         }.bind(this));
-        return _arr.join(_split || ',');
+        return _arr.join(split || ',');
     };
 
     /* Object operate
@@ -652,6 +652,7 @@
         _request: function (config) {
             if (!!config.url) {
                 var
+                    _headers = config.headers || {},                            // set request header
                     _method = (config.method || 'GET').toLowerCase(),           // method
                     _url = config.url,                                          // url
                     _data = config.data || null,                                // send data
@@ -659,7 +660,10 @@
                     _success = config.success || _noop,                         // request success callback
                     _error = config.error || _noop,                             // request fail callback
                     _xhr = this._createXhrObject();                             // XMLHttpRequest
-                if (_data != null && _method == 'get') _url += ('?' + $m.$o2s(_data));
+                if (_data != null && _method == 'get') {
+                    _url += ('?' + $m.$o2s(_data, '&'));
+                    _data = null;
+                }
                 // On xhr ready state change
                 _xhr.onreadystatechange = function () {
                     if (_xhr.readyState !== 4) return;
@@ -667,6 +671,15 @@
                     (_xhr.status === 200) ? _success(_responseData) : _error(_xhr.status);
                 };
                 _xhr.open(_method, _url, true);
+                // Set request header
+                try {
+                    $m.$forIn(_headers, function (value, header) {
+                        if (_method == 'post' && _data != null && /form/i.test(value)) _data = $m.$o2s(_data, '&');
+                        _xhr.setRequestHeader(header, value);
+                    })
+                } catch (err) {
+                    // ignore
+                }
                 _xhr.send(_data);
             }
         },
