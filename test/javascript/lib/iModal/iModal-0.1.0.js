@@ -936,10 +936,17 @@
      */
     var _tpl = function () {
 
-    }
-    _tpl.$extend = function () {
+    };
+    _tpl.$extend = function (prop) {
+        if (!$m.$isObject(prop)) return;
 
-    }
+        var _super = this.prototype;
+
+        $m.$forIn(prop, function (value, key) {
+            if (_super[key] == undefined) _super[key] = value;
+        });
+
+    };
 
     $m.$tpl = _tpl;
 

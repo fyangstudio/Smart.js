@@ -4,7 +4,8 @@ define([
 ], function (m, tpl) {
 
     var side = $m.$tpl.$extend({
-        tpl: tpl
+        template: tpl,
+        responsive: true
     });
 
     //var parent = m.$extend({
