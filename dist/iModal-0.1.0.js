@@ -1057,11 +1057,14 @@
     var _parsePlugin = (function () {
         // map of sustaining file type
         var _fMap = {
+            $tpl: function (url) {
+                _loadText(url, 'text');
+            },
             $text: function (url) {
-                _loadText(url);
+                _loadText(url, 'text');
             },
             $json: function (url) {
-                // todo
+                _loadText(url, 'json');
             }
         };
         // parse browser version info
@@ -1141,12 +1144,12 @@
     })();
 
     // The _loadText() method can load text by url, and put result in callback function.
-    var _loadText = function (url, callback) {
+    var _loadText = function (url, type, callback) {
         if (!url || _sCache[url] != null) return;
         _sCache[url] = 0;
         $m.$ajax({
             url: url,
-            dataType: 'text',
+            dataType: type,
             success: function (data) {
                 _sCache[url] = 2;
                 _rCache[url] = data || '';
