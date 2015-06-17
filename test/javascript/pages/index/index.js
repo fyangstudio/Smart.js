@@ -14,10 +14,10 @@ define([
     //var t1 = new topbar({'option': 'I am option'});
     //t1.$emit('ok');
     //t1.$emit('ok');
-    var resizeFn = $m.$throttle(function (x) {
-        console.log(x);
-    }, 100);
-    $m.$addEvent(window, 'resize', function () {
-        resizeFn(100);
-    });
+    //var resizeFn = $m.$throttle(function (x) {
+    //    console.log(x);
+    //}, 100);
+    //$m.$addEvent(window, 'resize', function () {
+    //    resizeFn(100);
+    //});
 });

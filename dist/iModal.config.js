@@ -2,6 +2,7 @@ if (typeof define === 'function' && !!define.$config) {
     define.$config({
         sites: {/* lib: "javascript/lib/" */},
         paths: {/* config: "lib!iModal.config" */},
-        charset: "utf-8"
+        charset: "utf-8",
+        delay: 500
     });
 }

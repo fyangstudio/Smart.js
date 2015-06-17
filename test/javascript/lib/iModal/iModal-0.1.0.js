@@ -15,7 +15,7 @@
     var _noop = function () {
     };
     // Define.samd config
-    var _config = {sites: {}, paths: {}, charset: 'utf-8'};
+    var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
     /*!
      * iModal Tools Component
@@ -953,6 +953,7 @@
     var _tpl = function () {
 
     };
+
     _tpl.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
 
@@ -962,6 +963,17 @@
             if (_super[key] == undefined) _super[key] = value;
         });
 
+        if (!!_super['responsive']) _addResponsive.call(_super);
+
+    };
+
+    var _addResponsive = function () {
+        var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+        var _resizeFn = $m.$throttle(function () {
+            // this.$update();
+            console.log(this);
+        }.bind(this), _config.delay);
+        $m.$addEvent(window, _resizeEvt, _resizeFn);
     };
 
     $m.$tpl = _tpl;
