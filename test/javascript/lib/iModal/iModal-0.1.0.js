@@ -482,8 +482,8 @@
     $m.$s2o = function (string, split) {
         var _obj = {};
         var _arr = (string || '').split(split);
-        _arr.forEach(function (_name) {
-            var _brr = _name.split('=');
+        _arr.forEach(function (name) {
+            var _brr = name.split('=');
             if (!_brr || !_brr.length) return;
             var _key = _brr.shift();
             if (!_key) return;
@@ -1051,7 +1051,7 @@
     $m.$define.samd = 'Selective Asynchronous Module Definition';
 
     // Define and iModal init function
-    function _init() {
+    var _init = function () {
         var _list = _doc.getElementsByTagName('script');
 
         for (var i = _list.length - 1, script, uri; i >= 0; i--) {
@@ -1189,7 +1189,7 @@
     };
 
     // The _jsLoaded() method can recover script when it's loaded.
-    function _jsLoaded(script) {
+    var _jsLoaded = function (script) {
         var _uri = $m.$parseURI(script.src);
         if (!_uri) return;
         var _arr = _dStack.pop();
