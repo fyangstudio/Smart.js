@@ -15,7 +15,7 @@
     var _noop = function () {
     };
     // Define.samd config
-    var _config = {sites: {}, paths: {}, charset: 'utf-8'};
+    var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
     /*!
      * iModal Tools Component
@@ -555,6 +555,21 @@
         return true;
     };
 
+    /* throttle
+     ---------------------------------------------------------------------- */
+    // Since resize events can fire at a high rate, the $m.$throttle() method can throttle the event using.
+    $m.$throttle = function (fn, delay) {
+        var _timer = null;
+        return function () {
+            var args = arguments;
+            clearTimeout(_timer);
+            // set _timer
+            _timer = setTimeout(function () {
+                fn.apply(this, args);
+            }.bind(this), delay);
+        };
+    };
+
     /* hash
      ---------------------------------------------------------------------- */
     // Window hash
@@ -934,12 +949,32 @@
      * Living dom
      *
      */
+
     var _tpl = function () {
 
-    }
-    _tpl.$extend = function () {
+    };
 
-    }
+    _tpl.$extend = function (prop) {
+        if (!$m.$isObject(prop)) return;
+
+        var _super = this.prototype;
+
+        $m.$forIn(prop, function (value, key) {
+            if (_super[key] == undefined) _super[key] = value;
+        });
+
+        if (!!_super['responsive']) _addResponsive.call(_super);
+
+    };
+
+    var _addResponsive = function () {
+        var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+        var _resizeFn = $m.$throttle(function () {
+            // this.$update();
+            console.log(this);
+        }.bind(this), _config.delay);
+        $m.$addEvent(window, _resizeEvt, _resizeFn);
+    };
 
     $m.$tpl = _tpl;
 
@@ -1380,5 +1415,5 @@
     // iModal start
     _init();
 })
-(document, window)
+(document, window);
 //]]>
