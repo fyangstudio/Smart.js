@@ -893,8 +893,10 @@
                             var _superFn = _noop;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
                             // Add custom event handles
-                            if (eventInit) $m.$bindEvent(prototype);
-                            eventInit = false;
+                            if (eventInit) {
+                                eventInit = false;
+                                $m.$bindEvent(prototype);
+                            }
                             // Add a new $super() method that is the same method on the super-class
                             prototype.$super = _superFn;
                             return fn.apply(prototype, arguments);
