@@ -5,19 +5,19 @@ define([
 
     var side = $m.$tpl.$extend({
         tpl: tpl
-    })
+    });
 
     //var parent = m.$extend({
     //    v: 2,
     //    $init: function () {
-    //        this.$super();
+    //        this.$super(this);
     //        console.log('Parent class init');
     //        console.log(this.v);
     //    },
     //    t2: function () {
     //        console.log('Parent: do something');
     //    }
-    //})
+    //});
     //
     //var child = parent.$extend({
     //    v: 3,
@@ -38,6 +38,6 @@ define([
     //        console.log('OK!');
     //        this.$off('ok');
     //    }
-    //})
+    //});
     //return child;
 });
