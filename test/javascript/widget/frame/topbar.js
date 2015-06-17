@@ -1,13 +1,15 @@
 define([
     'widget!module',
+    '$json!mock/test.json',
     '$text!./topbar.html'
-], function (m, tpl) {
+], function (m, json, tpl) {
 
     var side = $m.$tpl.$extend({
         template: tpl,
         responsive: true
     });
 
+    //console.log(json);
     //var parent = m.$extend({
     //    v: 2,
     //    $init: function () {
