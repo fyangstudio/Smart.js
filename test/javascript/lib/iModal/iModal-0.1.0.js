@@ -674,7 +674,7 @@
                 // Set request header
                 try {
                     $m.$forIn(_headers, function (value, header) {
-                        if (/form/i.test(value)) _data = $m.$o2s(_data, '&');
+                        if (_method == 'post' && _data != null && /form/i.test(value)) _data = $m.$o2s(_data, '&');
                         _xhr.setRequestHeader(header, value);
                     })
                 } catch (err) {
