@@ -985,30 +985,30 @@
     };
 
     var _tpl = function () {
-
+        this._node = _doc.createElement('a');
     };
 
     _tpl.prototype = {
         $inject: function (refer, position) {
-            position = position || 'bottom';
 
-            var _inject = {
-                'bottom': function () {
-
-                },
-                'top': function () {
-
-                },
-                'after': function () {
-
-                },
-                'before': function () {
-
-                }
-            };
-
+            var _first, _next, _target = $m.$get(refer)[0], _position = position || 'bottom';
+            switch (position) {
+                case 'bottom':
+                    _target.appendChild(this._node);
+                    break;
+                case 'top':
+                    if (_first = _target.firstChild) _target.insertBefore(this._node, _first);
+                    else _target.appendChild(this._node);
+                    break;
+                case 'after':
+                    if (_next = _target.nextSibling) _next.parentNode.insertBefore(this._node, _next);
+                    else _target.parentNode.appendChild(this._node);
+                    break;
+                case 'before':
+                    _target.parentNode.insertBefore(this._node, _target);
+            }
         }
-    }
+    };
 
     _tpl.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
