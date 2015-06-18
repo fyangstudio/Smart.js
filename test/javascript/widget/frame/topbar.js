@@ -6,7 +6,10 @@ define([
 
     var side = $m.$tpl.$extend({
         template: tpl,
-        responsive: true
+        responsive: true,
+        test: function () {
+            console.log(this);
+        }
     });
 
     new side().$inject('#test1');
