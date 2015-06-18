@@ -660,8 +660,12 @@
                     _success = config.success || _noop,                         // request success callback
                     _error = config.error || _noop,                             // request fail callback
                     _xhr = this._createXhrObject();                             // XMLHttpRequest
+                // data to string
+                var _d2s = function (data) {
+                    return $m.$o2s(data, '&').replace(/^"|"$/g, '');
+                };
                 if (_data != null && _method == 'get') {
-                    _url += ('?' + $m.$o2s(_data, '&'));
+                    _url += ('?' + _d2s(_data));
                     _data = null;
                 }
                 // On xhr ready state change
@@ -674,12 +678,13 @@
                 // Set request header
                 try {
                     $m.$forIn(_headers, function (value, header) {
-                        if (_method == 'post' && _data != null && /form/i.test(value)) _data = $m.$o2s(_data, '&');
+                        if (_method == 'post' && _data != null && /form/i.test(value)) _data = _d2s(_data);
                         _xhr.setRequestHeader(header, value);
                     })
                 } catch (err) {
                     // ignore
                 }
+                console.log(_data)
                 _xhr.send(_data);
             }
         },
@@ -963,6 +968,14 @@
      *
      */
 
+    var _macro = {
+        'BEGIN': '{{',
+        'END': '}}',
+        'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
+        'IDENT': /[\$_A-Za-z][_0-9A-Za-z\$]*/,
+        'SPACE': /[\r\n\f ]/
+    };
+
     var _tpl = function () {
 
     };
@@ -976,6 +989,7 @@
             if (_super[key] == undefined) _super[key] = value;
         });
 
+
         if (!!_super['responsive']) _addResponsive.call(_super);
 
     };
@@ -988,6 +1002,7 @@
         }.bind(this), _config.delay);
         $m.$addEvent(window, _resizeEvt, _resizeFn);
     };
+
 
     $m.$tpl = _tpl;
 
