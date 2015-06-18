@@ -986,13 +986,14 @@
 
     var _tpl = function () {
         this._node = _doc.createElement('a');
+        this._node.href = '/';
     };
 
     _tpl.prototype = {
         $inject: function (refer, position) {
 
             var _first, _next, _target = $m.$get(refer)[0], _position = position || 'bottom';
-            switch (position) {
+            switch (_position) {
                 case 'bottom':
                     _target.appendChild(this._node);
                     break;
