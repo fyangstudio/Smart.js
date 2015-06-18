@@ -988,6 +988,28 @@
 
     };
 
+    _tpl.prototype = {
+        $inject: function (refer, position) {
+            position = position || 'bottom';
+
+            var _inject = {
+                'bottom': function () {
+
+                },
+                'top': function () {
+
+                },
+                'after': function () {
+
+                },
+                'before': function () {
+
+                }
+            };
+
+        }
+    }
+
     _tpl.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
 
@@ -1000,6 +1022,7 @@
 
         if (!!_super['responsive']) _addResponsive.call(_super);
 
+        return this;
     };
 
     var _addResponsive = function () {
@@ -1024,16 +1047,16 @@
     /* Define
      ---------------------------------------------------------------------- */
     var
-    // state cache   0-loading  1-waiting  2-defined
+// state cache   0-loading  1-waiting  2-defined
         _sCache = {},
 
-    // result cache
+// result cache
         _rCache = {},
 
-    // item ex:{n:'filename',d:[/* dependency list */],f:function}
+// item ex:{n:'filename',d:[/* dependency list */],f:function}
         _iList = [],
 
-    // for define stack
+// for define stack
         _dStack = new $m.$stack();
 
     $m.$define = (function () {
@@ -1058,7 +1081,7 @@
         }
     })();
 
-    // The define.$config() method config preferences that define uses.
+// The define.$config() method config preferences that define uses.
     $m.$define.$config = function (config) {
         if (!$m.$isObject(config)) return;
         $m.$forIn(config, function (value, key) {
@@ -1070,10 +1093,10 @@
         })
     };
 
-    // Declare define mode - samd.
+// Declare define mode - samd.
     $m.$define.samd = 'Selective Asynchronous Module Definition';
 
-    // Define and iModal init function
+// Define and iModal init function
     var _init = function () {
         var _list = _doc.getElementsByTagName('script');
 
@@ -1089,7 +1112,7 @@
         _win.$M = _win.$m = $m;
     }
 
-    // The _parsePlugin() method can determine whether a file is meet selective options.
+// The _parsePlugin() method can determine whether a file is meet selective options.
     var _parsePlugin = (function () {
         // map of sustaining file type
         var _fMap = {
@@ -1145,7 +1168,7 @@
         };
     })();
 
-    // The _scriptListener() method can call _jsLoaded method when the target script loaded.
+// The _scriptListener() method can call _jsLoaded method when the target script loaded.
     var _scriptListener = function (script) {
         script.onload = function (event) {
             _jsLoaded($m.$getTarget(event));
@@ -1158,7 +1181,7 @@
         };
     };
 
-    // The _scriptListener() method can add listener to all script tags.
+// The _scriptListener() method can add listener to all script tags.
     var _scriptAllListener = (function () {
         var _clearStack = function () {
             var _args = _dStack.pop();
@@ -1179,7 +1202,7 @@
         }
     })();
 
-    // The _loadText() method can load text by url, and put result in callback function.
+// The _loadText() method can load text by url, and put result in callback function.
     var _loadText = function (url, type, callback) {
         if (!url || _sCache[url] != null) return;
         _sCache[url] = 0;
@@ -1195,7 +1218,7 @@
         })
     };
 
-    // The _loadScript() method can load script by url.
+// The _loadScript() method can load script by url.
     var _loadScript = function (url) {
         if (!url) return;
         var _state = _sCache[url];
@@ -1211,7 +1234,7 @@
         (_doc.getElementsByTagName('head')[0] || _doc.body).appendChild(_script);
     };
 
-    // The _jsLoaded() method can recover script when it's loaded.
+// The _jsLoaded() method can recover script when it's loaded.
     var _jsLoaded = function (script) {
         var _uri = $m.$parseURI(script.src);
         if (!_uri) return;
@@ -1232,7 +1255,7 @@
         script.parentNode.removeChild(script);
     };
 
-    // The _circular() method can find the circular reference.
+// The _circular() method can find the circular reference.
     var _circular = (function () {
         var _result;
         // return reference's index
@@ -1299,7 +1322,7 @@
         };
     })();
 
-    // The _checkLoading() method can check files loading state.
+// The _checkLoading() method can check files loading state.
     var _checkLoading = (function () {
         // check each item's state
         function _isListLoaded(_list) {
@@ -1340,7 +1363,7 @@
         };
     })();
 
-    // The _execFn() method can execute define method's callback function.
+// The _execFn() method can execute define method's callback function.
     var _execFn = (function () {
         // merge inject param
         var _mergeDI = function (_dep) {
@@ -1382,7 +1405,7 @@
         };
     })();
 
-    // The _define() method is $m.$define method's main function.
+// The _define() method is $m.$define method's main function.
     var _define = (function () {
         var _seed = +new Date;
         // format arguments
@@ -1451,7 +1474,7 @@
         };
     })();
 
-    // iModal start
+// iModal start
     _init();
 })
 (document, window);

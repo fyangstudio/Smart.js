@@ -9,6 +9,8 @@ define([
         responsive: true
     });
 
+    new side().$inject('#test1');
+
     //console.log(json);
     //var parent = m.$extend({
     //    v: 2,
