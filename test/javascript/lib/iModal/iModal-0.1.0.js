@@ -684,7 +684,6 @@
                 } catch (err) {
                     // ignore
                 }
-                console.log(_data)
                 _xhr.send(_data);
             }
         },
