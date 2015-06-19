@@ -7,8 +7,12 @@ define([
     var side = $m.$tpl.$extend({
         template: tpl,
         responsive: true,
-        test: function () {
+        $init: function (data) {
             console.log(this);
+            this.$super();
+        },
+        test: function () {
+            console.log(this.template);
         }
     });
 
