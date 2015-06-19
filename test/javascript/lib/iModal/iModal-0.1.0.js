@@ -1020,7 +1020,7 @@
             if (_super[key] == undefined) _super[key] = value;
         });
 
-        _super.test.call(this);
+        _super.test.call(_super);
 
         if (!!_super['responsive']) _addResponsive.call(_super);
         return this;
