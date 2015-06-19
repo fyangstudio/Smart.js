@@ -11,6 +11,7 @@ define([
             this.$on('ok1', this.test1);
         },
         test1: function () {
+            this.$update();
             console.log(1);
         }
     });
@@ -29,7 +30,7 @@ define([
     //    }
     //});
 
-    new base().$inject('#test1');
+    var s = new base().$inject('#test1');
 
     //console.log(json);
     //var parent = m.$extend({

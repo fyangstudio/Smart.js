@@ -987,14 +987,14 @@
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
-            // this.$update();
-            console.log(this);
+             this.$update();
         }.bind(this), _config.delay);
         $m.$addEvent(window, _resizeEvt, _resizeFn);
     };
 
     $m.$tpl = $m.$module.$extend({
-        $init: function (context) {
+        $init: function (data) {
+
             var _fn = this.init;
             this._node = _doc.createElement('a');
             this._node.href = '/';
@@ -1002,6 +1002,12 @@
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
+
+            this.$update();
+        },
+
+        $update: function () {
+            console.log('update');
         },
 
         $inject: function (refer, position) {
