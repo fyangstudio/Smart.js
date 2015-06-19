@@ -897,14 +897,14 @@
         }
     };
 
+    /* Extend
+     ---------------------------------------------------------------------- */
     // Class state
     var _initClass = false;
     // Base class and do nothing
     var Class = function () {
     };
-
-    /* Extend
-     ---------------------------------------------------------------------- */
+    // Extend
     Class.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
 
@@ -930,8 +930,8 @@
                                 $m.$bindEvent(prototype);
                             }
                             // Add a new $super() method that is the same method on the super-class
-                            prototype.$super = _superFn;
-                            return fn.apply(prototype, arguments);
+                            this.$super = _superFn;
+                            return fn.apply(this, arguments);
                         };
                     }
                     return prop[name];
@@ -975,22 +975,13 @@
         'SPACE': /[\r\n\f ]/
     };
 
-    var _tpl = function () {
-
-    };
-
-    _tpl.$extend = function (prop) {
-        if (!$m.$isObject(prop)) return;
-
-        var _super = this.prototype;
-
-        $m.$forIn(prop, function (value, key) {
-            if (_super[key] == undefined) _super[key] = value;
-        });
-
-
-        if (!!_super['responsive']) _addResponsive.call(_super);
-
+    var rules = {
+        TAG_OPEN: [/<({NAME})\s*/, function (all, one) {
+            return {type: 'TAG_OPEN', value: one}
+        }, 'TAG'],
+        TAG_CLOSE: [/<\/({NAME})[\r\n\f ]*>/, function (all, one) {
+            return {type: 'TAG_CLOSE', value: one}
+        }, 'TAG']
     };
 
     var _addResponsive = function () {
@@ -1002,8 +993,37 @@
         $m.$addEvent(window, _resizeEvt, _resizeFn);
     };
 
+    $m.$tpl = $m.$module.$extend({
+        $init: function (context) {
+            var _fn = this.init;
+            this._node = _doc.createElement('a');
+            this._node.href = '/';
 
-    $m.$tpl = _tpl;
+
+            if (!!this['responsive']) _addResponsive.call(this);
+            if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
+        },
+
+        $inject: function (refer, position) {
+
+            var _first, _next, _target = $m.$get(refer)[0], _position = position || 'bottom';
+            switch (_position) {
+                case 'bottom':
+                    _target.appendChild(this._node);
+                    break;
+                case 'top':
+                    if (_first = _target.firstChild) _target.insertBefore(this._node, _first);
+                    else _target.appendChild(this._node);
+                    break;
+                case 'after':
+                    if (_next = _target.nextSibling) _next.parentNode.insertBefore(this._node, _next);
+                    else _target.parentNode.appendChild(this._node);
+                    break;
+                case 'before':
+                    _target.parentNode.insertBefore(this._node, _target);
+            }
+        }
+    });
 
     /*!
      * iModal Module Component
@@ -1027,6 +1047,10 @@
     // for define stack
         _dStack = new $m.$stack();
 
+    // If the module has dependencies, the first argument should be an array of dependency names,
+    // and the second argument should be a definition function.
+    // The function will be called to define the module once all dependencies have loaded.
+    // The function should return an object that defines the module.
     $m.$define = (function () {
         // The _runningScript() method can find running script. (for IE)
         var _runningScript = function () {
