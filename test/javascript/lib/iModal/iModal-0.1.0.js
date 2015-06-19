@@ -975,7 +975,7 @@
         'SPACE': /[\r\n\f ]/
     };
 
-    var rules = {
+    var _rules = {
         TAG_OPEN: [/<({NAME})\s*/, function (all, one) {
             return {type: 'TAG_OPEN', value: one}
         }, 'TAG'],
@@ -984,10 +984,18 @@
         }, 'TAG']
     };
 
+    var _parseTpl = function (tpl) {
+        var _convert = '\
+        "use strict";\
+        try {\
+            INNER_FUNCTION";\
+        } catch(e) {throw new Error("iModal-tpl: "+e.message);}';
+    };
+
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
-             this.$update();
+            this.$update();
         }.bind(this), _config.delay);
         $m.$addEvent(window, _resizeEvt, _resizeFn);
     };
@@ -998,7 +1006,7 @@
             var _fn = this.init;
             this._node = _doc.createElement('a');
             this._node.href = '/';
-
+            console.log(this.template);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
@@ -1028,6 +1036,7 @@
                 case 'before':
                     _target.parentNode.insertBefore(this._node, _target);
             }
+            return this;
         }
     });
 
