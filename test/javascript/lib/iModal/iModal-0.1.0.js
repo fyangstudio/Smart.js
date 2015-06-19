@@ -897,14 +897,14 @@
         }
     };
 
+    /* Extend
+     ---------------------------------------------------------------------- */
     // Class state
     var _initClass = false;
     // Base class and do nothing
     var Class = function () {
     };
-
-    /* Extend
-     ---------------------------------------------------------------------- */
+    // Extend
     Class.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
 
