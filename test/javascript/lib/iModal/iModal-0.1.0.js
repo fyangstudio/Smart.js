@@ -950,7 +950,6 @@
             if (key != '$extend') $mClass[key] = value;
         });
 
-        _super.$child = prototype;
         $mClass.prototype = prototype;
         $mClass.prototype.constructor = $mClass;
         $mClass.$extend = Class.$extend;
@@ -996,13 +995,13 @@
 
     $m.$tpl = $m.$module.$extend({
         $init: function (context) {
-            var _self = this;
-            _self.test.call(_self);
-            
+            var _fn = this.init;
             this._node = _doc.createElement('a');
             this._node.href = '/';
 
-            if (!!_self['responsive']) _addResponsive.call(_self);
+
+            if (!!this['responsive']) _addResponsive.call(this);
+            if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
         },
 
         $inject: function (refer, position) {

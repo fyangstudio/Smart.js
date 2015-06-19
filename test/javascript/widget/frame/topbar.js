@@ -7,42 +7,36 @@ define([
     var base = $m.$tpl.$extend({
         template: tpl,
         responsive: true,
-        $init: function (data) {
-            this.$super();
-            console.log('!' + this.v);
+        init: function () {
+            this.$on('ok1', this.test1);
         },
-        v: 3,
-        test: function () {
-            console.log(this);
+        test1: function () {
+            console.log(1);
         }
     });
 
-    var side = base.$extend({
-        $init: function (data) {
-            this.$on('ok', function () {
-                console.log(1);
-            });
-            this.$super();
-            console.log(this);
-        },
-        v: 2,
-        test: function () {
+    //var side = base.$extend({
+    //    init: function () {
+    //        this.$super();
+    //        this.$on('ok2', this.test1);
+    //        this.test2()
+    //    },
+    //    v: 2,
+    //    test2: function () {
+    //        this.$emit('ok1');
+    //        this.$emit('ok2');
+    //        console.log('!!' + this.v);
+    //    }
+    //});
 
-            this.$emit('ok');
-            console.log('!!' + this.v);
-        }
-    });
-
-    new side().$inject('#test1');
+    new base().$inject('#test1');
 
     //console.log(json);
     //var parent = m.$extend({
-    //    v: 2,
     //    $init: function () {
     //        this.$super(this);
-    //        console.log(this.$child)
     //        console.log('Parent class init');
-    //        console.log(this.v);
+    //        this.t2();
     //    },
     //    t2: function () {
     //        console.log('Parent: do something');
@@ -50,21 +44,14 @@ define([
     //});
     //
     //var child = parent.$extend({
-    //    v: 3,
     //    $init: function (_option) {
     //        this.$super();
     //        this.$on('ok', this.t3);
     //        console.log('Child class init');
-    //        console.log(this.v);
     //        console.log(_option['option']);
-    //        this.t2(_option);
-    //    },
-    //    t2: function (_option) {
-    //        this.$super();
-    //        console.log(_option['option']);
-    //        console.log('Child: do something');
     //    },
     //    t3: function () {
+    //        console.log(this);
     //        console.log('OK!');
     //        this.$off('ok');
     //    }
