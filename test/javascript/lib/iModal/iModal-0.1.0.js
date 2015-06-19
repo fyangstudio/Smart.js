@@ -930,8 +930,8 @@
                                 $m.$bindEvent(prototype);
                             }
                             // Add a new $super() method that is the same method on the super-class
-                            prototype.$super = _superFn;
-                            return fn.apply(prototype, arguments);
+                            this.$super = _superFn;
+                            return fn.apply(this, arguments);
                         };
                     }
                     return prop[name];
@@ -995,14 +995,14 @@
     };
 
     $m.$tpl = $m.$module.$extend({
-        $init: function (data) {
-            var _control = this.$child;
-            _control.test.call(this);
-
+        $init: function (context) {
+            var _self = this;
+            _self.test.call(_self);
+            
             this._node = _doc.createElement('a');
             this._node.href = '/';
 
-            if (!!_control['responsive']) _addResponsive.call(_control);
+            if (!!_self['responsive']) _addResponsive.call(_self);
         },
 
         $inject: function (refer, position) {

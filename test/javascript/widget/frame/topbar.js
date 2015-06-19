@@ -4,15 +4,32 @@ define([
     '$text!./topbar.html'
 ], function (m, json, tpl) {
 
-    var side = $m.$tpl.$extend({
+    var base = $m.$tpl.$extend({
         template: tpl,
         responsive: true,
         $init: function (data) {
-            console.log(this);
             this.$super();
+            console.log('!' + this.v);
         },
+        v: 3,
         test: function () {
-            console.log(this.template);
+            console.log(this);
+        }
+    });
+
+    var side = base.$extend({
+        $init: function (data) {
+            this.$on('ok', function () {
+                console.log(1);
+            });
+            this.$super();
+            console.log(this);
+        },
+        v: 2,
+        test: function () {
+
+            this.$emit('ok');
+            console.log('!!' + this.v);
         }
     });
 
