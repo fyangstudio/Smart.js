@@ -19,6 +19,7 @@ define([
     //    v: 2,
     //    $init: function () {
     //        this.$super(this);
+    //        console.log(this.$child)
     //        console.log('Parent class init');
     //        console.log(this.v);
     //    },

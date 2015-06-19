@@ -909,6 +909,7 @@
         if (!$m.$isObject(prop)) return;
 
         var _super = this.prototype;
+        _super.$child = prop;
 
         // Class state change
         _initClass = true;
