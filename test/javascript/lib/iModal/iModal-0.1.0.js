@@ -990,6 +990,8 @@
         try {\
             INNER_FUNCTION";\
         } catch(e) {throw new Error("iModal-tpl: "+e.message);}';
+        console.log(tpl);
+        return _convert;
     };
 
     var _addResponsive = function () {
@@ -1006,7 +1008,8 @@
             var _fn = this.init;
             this._node = _doc.createElement('a');
             this._node.href = '/';
-            console.log(this.template);
+            this._render = _parseTpl(this.template);
+            console.log(this._render);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
