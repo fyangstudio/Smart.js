@@ -990,7 +990,7 @@
         try {\
             INNER_FUNCTION";\
         } catch(e) {throw new Error("iModal-tpl: "+e.message);}';
-        console.log(tpl);
+        console.log(tpl.length);
         return _convert;
     };
 
