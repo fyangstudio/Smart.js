@@ -994,6 +994,23 @@
         return _convert;
     };
 
+    var _watch = function (obj) {
+        var _observe = Object.observe;
+        if (_observe) {
+            var t = {s: 1, t: 2};
+            _observe(t, function (changes) {
+                console.log(changes[changes.length - 1]);
+            });
+            t.s = 2;
+            t.s = 4;
+        }
+    };
+    _watch();
+
+    var _render = function () {
+
+    };
+
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
