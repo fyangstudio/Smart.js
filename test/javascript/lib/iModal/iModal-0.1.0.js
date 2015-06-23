@@ -991,7 +991,7 @@
         var _convert = '\
         "use strict";\
         try {\
-            INNER_FUNCTION";\
+            INNER_FUNCTION\
         } catch(e) {throw new Error("iModal-tpl: "+e.message);}';
         return _convert;
     };
@@ -1047,24 +1047,9 @@
             console.log('update');
         },
 
-        $inject: function (refer, position) {
-
-            var _first, _next, _target = $m.$get(refer)[0], _position = position || 'bottom';
-            switch (_position) {
-                case 'bottom':
-                    _target.appendChild(this._node);
-                    break;
-                case 'top':
-                    if (_first = _target.firstChild) _target.insertBefore(this._node, _first);
-                    else _target.appendChild(this._node);
-                    break;
-                case 'after':
-                    if (_next = _target.nextSibling) _next.parentNode.insertBefore(this._node, _next);
-                    else _target.parentNode.appendChild(this._node);
-                    break;
-                case 'before':
-                    _target.parentNode.insertBefore(this._node, _target);
-            }
+        $inject: function (parentNode) {
+            if (!parentNode) return;
+            (parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0]).appendChild(this._node);
             return this;
         }
     });

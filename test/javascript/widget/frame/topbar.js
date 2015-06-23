@@ -30,7 +30,7 @@ define([
     //    }
     //});
 
-    new base().$inject('#test1');
+    new base().$inject(document.getElementById('test1'));
 
     //console.log(json);
     //var parent = m.$extend({
