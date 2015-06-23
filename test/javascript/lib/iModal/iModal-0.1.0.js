@@ -15,10 +15,10 @@
     // iModalJs object
     var $m = {iModal: _version};
     // Empty function
-    var _noop = function () {
+    var _NOOP = function () {
     };
     // Error function
-    var _error = function (msg) {
+    var _ERROR = function (msg) {
         throw new Error(msg);
     };
     // Define.samd config
@@ -222,11 +222,11 @@
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
                 fBound = function () {
-                    return fToBind.apply(this instanceof _noop && oThis ? this : oThis || _win,
+                    return fToBind.apply(this instanceof _NOOP && oThis ? this : oThis || _win,
                         aArgs.concat(Array.prototype.slice.call(arguments)));
                 };
-            _noop.prototype = this.prototype;
-            fBound.prototype = new _noop();
+            _NOOP.prototype = this.prototype;
+            fBound.prototype = new _NOOP();
             return fBound;
         };
     }
@@ -295,7 +295,7 @@
                 json = json.trim();
                 if (json) return ( new Function('return ' + json) )();
             }
-            throw new Error('Invalid JSON: ' + json);
+            _ERROR('Invalid JSON: ' + json);
         };
         // The JSON.stringify() method converts a JavaScript value to a JSON string, optionally replacing values if a replacer function is specified,
         // or optionally including only the specified properties if a replacer array is specified.
@@ -322,9 +322,9 @@
     // Low version of the browser compatibility without console object.
     if (!_win.console) {
         _win.console = {
-            log: _noop,
-            warn: _noop,
-            error: _noop
+            log: _NOOP,
+            warn: _NOOP,
+            error: _NOOP
         };
     }
 
@@ -664,8 +664,8 @@
                     _url = config.url,                                          // url
                     _data = config.data || null,                                // send data
                     _dataType = (config.dataType || 'JSON').toLowerCase(),      // request data type
-                    _success = config.success || _noop,                         // request success callback
-                    _error = config.error || _noop,                             // request fail callback
+                    _success = config.success || _NOOP,                         // request success callback
+                    _error = config.error || _NOOP,                             // request fail callback
                     _xhr = this._createXhrObject();                             // XMLHttpRequest
                 // data to string
                 var _d2s = function (data) {
@@ -679,7 +679,7 @@
                 _xhr.onreadystatechange = function () {
                     if (_xhr.readyState !== 4) return;
                     var _responseData = _dataType == 'json' ? JSON.parse(_xhr.responseText) : _xhr.responseText;
-                    (_xhr.status === 200) ? _success(_responseData) : _error(_xhr.status);
+                    (_xhr.status === 200) ? _success(_responseData) : _error(_xhr);
                 };
                 _xhr.open(_method, _url, true);
                 // Set request header
@@ -716,14 +716,14 @@
                 this._createXhrObject = _methods[i];
                 return _methods[i]();
             }
-            throw new Error('Could not create an XHR object');
+            _ERROR('$ajax: Could not create an XHR object');
         }
     };
 
     // The $m.$ajax() method perform an asynchronous HTTP request.
     $m.$ajax = function (config) {
         if (this.$isObject(config)) return new _ajaxHandler()._request(config);
-        else throw new Error('Ajax parameter error');
+        else _ERROR('$ajax: Parameter error');
     };
 
     /* Encode & Decode
@@ -929,7 +929,7 @@
                 prototype[name] = (function (name, fn) {
                     if ($m.$isFunction(prop[name])) {
                         return function () {
-                            var _superFn = _noop;
+                            var _superFn = _NOOP;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
                             // Add custom event handles
                             if (eventInit) {
@@ -1054,7 +1054,7 @@
         $inject: function (parentNode) {
             var _target = undefined;
             if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
-            if (!_target) _error('$inject: Node is not found');
+            if (!_target) _ERROR('$inject: Node is not found');
             _target.appendChild(this._node);
             return this;
         }
@@ -1184,8 +1184,8 @@
                     _target = _target.substring(1);
                 }
                 // load function to assignment
-                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _noop : null;
-                else if (!_fun) _fun = _negation ? null : _noop;
+                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _NOOP : null;
+                else if (!_fun) _fun = _negation ? null : _NOOP;
                 _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
