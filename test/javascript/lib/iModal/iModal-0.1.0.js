@@ -17,6 +17,10 @@
     // Empty function
     var _noop = function () {
     };
+    // Error function
+    var _error = function (msg) {
+        throw new Error(msg);
+    };
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
@@ -1048,8 +1052,9 @@
         },
 
         $inject: function (parentNode) {
+            if (!parentNode) _error('$inject: Node is not found');
             var _target = parentNode && parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
-            if (!_target) throw new Error('No such node - ' + parentNode);
+            if (!_target) _error('$inject: No such node - ' + parentNode);
             _target.appendChild(this._node);
             return this;
         }
