@@ -1052,9 +1052,9 @@
         },
 
         $inject: function (parentNode) {
-            if (!parentNode) _error('$inject: Node is not found');
-            var _target = parentNode && parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
-            if (!_target) _error('$inject: No such node - ' + parentNode);
+            var _target = undefined;
+            if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
+            if (!_target) _error('$inject: Node is not found');
             _target.appendChild(this._node);
             return this;
         }
