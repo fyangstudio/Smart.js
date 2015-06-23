@@ -1048,8 +1048,9 @@
         },
 
         $inject: function (parentNode) {
-            if (!parentNode) return;
-            (parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0]).appendChild(this._node);
+            var _target = parentNode && parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
+            if (!_target) throw new Error('No such node - ' + parentNode);
+            _target.appendChild(this._node);
             return this;
         }
     });
