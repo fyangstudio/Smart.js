@@ -10,6 +10,9 @@
 
     // iModal object
     var _version = '0.1.0';
+    // Object.observe
+    var _observe = Object.observe || undefined;
+    // iModalJs object
     var $m = {iModal: _version};
     // Empty function
     var _noop = function () {
@@ -995,11 +998,10 @@
     };
 
     var _watch = function (obj) {
-        var _observe = Object.observe;
         if (_observe) {
             var t = {s: 1, t: 2};
             _observe(t, function (changes) {
-                console.log(changes[changes.length - 1]);
+                console.log(t);
             });
             t.s = 2;
             t.s = 4;
