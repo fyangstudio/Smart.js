@@ -993,11 +993,10 @@
         try {\
             INNER_FUNCTION";\
         } catch(e) {throw new Error("iModal-tpl: "+e.message);}';
-        console.log(tpl.length);
         return _convert;
     };
 
-    var _watch = function (obj) {
+    var _watch = function (obj, callback) {
         if (_observe) {
             var t = {s: 1, t: 2};
             _observe(t, function (changes) {
@@ -1009,9 +1008,17 @@
     };
     _watch();
 
-    var _render = function () {
-
+    var _render = function (tpl) {
+        this._pos = 0;
+        console.log(tpl.length);
     };
+
+    var _rp = _render.prototype;
+
+    _rp.next = function (scale) {
+        this._pos += (scale || 1);
+    };
+
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
@@ -1027,7 +1034,7 @@
             var _fn = this.init;
             this._node = _doc.createElement('a');
             this._node.href = '/';
-            this._render = _parseTpl(this.template);
+            this._render = new _render(this.template);
             console.log(this._render);
 
             if (!!this['responsive']) _addResponsive.call(this);
