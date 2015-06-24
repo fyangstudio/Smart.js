@@ -161,7 +161,7 @@
      ---------------------------------------------------------------------- */
     $m.$queue = function () {
         this.dataStore = [];
-    }
+    };
     $m.$queue.prototype = {
         // add an item to the queue, generally at the "back" of the queue
         enqueue: function (element) {
@@ -182,10 +182,6 @@
         // get queue length
         length: function () {
             return this.dataStore.length;
-        },
-        // to determine whether empty queue
-        empty: function () {
-            return this.dataStore.length == 0 ? true : false;
         }
     };
 
@@ -346,7 +342,7 @@
                 _calls.push(fn);
             }
             return context;
-        }
+        };
         // Relieve custom event
         context.$off = function (event, fn) {
             if (!context._handles) return;
@@ -366,7 +362,7 @@
                 }
             }
             return context;
-        }
+        };
         // Trigger custom events
         context.$emit = function (event) {
             var handles = context._handles, calls, args, type;
@@ -745,7 +741,7 @@
             '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
             '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
         };
-        var ret = _encode(_map, content)
+        var ret = _encode(_map, content);
         return encodeURL != undefined ? encodeURIComponent(ret) : ret;
     };
 
@@ -778,7 +774,7 @@
     function _interpret(query, context) {
         var parts = query.replace(/\s+/, ' ').split(' ');
         var part = parts.pop();
-        var selector = _selectorFactory.create(part);
+        var selector = _selectorFactory.createSelector(part);
         var ret = selector.find(context);
 
         return (parts[0] && ret[0]) ? _domFilter(parts, ret) : ret;
@@ -878,7 +874,7 @@
     // If result has parent node, filter result
     function _domFilter(parts, nodeList) {
         var part = parts.pop();
-        var selector = _selectorFactory.create(part);
+        var selector = _selectorFactory.createSelector(part);
         var ret = [];
         var parent;
 
@@ -897,7 +893,7 @@
 
     // Create dom selector
     var _selectorFactory = {
-        create: function (query) {
+        createSelector: function (query) {
             if (_IdSelector.test(query)) return new _IdSelector(query);
             else if (_ClassSelector.test(query)) return new _ClassSelector(query);
             else return new _TagSelector(query);
@@ -1013,7 +1009,11 @@
     _watch();
 
     var _render = function (tpl) {
+        if (!tpl) _ERROR('$tpl: Template not found!');
+        tpl = tpl.trim();
         this._pos = 0;
+
+
         console.log(tpl.length);
     };
 
@@ -1044,7 +1044,7 @@
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
 
-            this.$update();
+            this.$on('update', this.$update);
         },
 
         $update: function () {
@@ -1052,6 +1052,7 @@
         },
 
         $inject: function (parentNode) {
+            this.$emit('update');
             var _target = undefined;
             if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$inject: Node is not found');
@@ -1137,7 +1138,7 @@
         // Return iModal
         if (!_win.define) _win.define = $m.$define;
         _win.$M = _win.$m = $m;
-    }
+    };
 
     // The _parsePlugin() method can determine whether a file is meet selective options.
     var _parsePlugin = (function () {
@@ -1359,13 +1360,14 @@
                 }
             }
             return !0;
-        };
+        }
+
         // check whether all files are loaded
         function _isFinishLoaded() {
-            for (var x in _sCache)
-                if (_sCache[x] === 0) return !1;
+            for (var x in _sCache) if (_sCache.hasOwnProperty(x) && _sCache[x] === 0) return !1;
             return !0;
-        };
+        }
+
         return function () {
             if (!_iList.length) return;
             for (var i = _iList.length - 1, _item; i >= 0;) {
@@ -1383,8 +1385,8 @@
             }
             // check circular reference
             if (_iList.length > 0 && _isFinishLoaded()) {
-                var _item = _circular() || _iList.pop();
-                _execFn(_item);
+                var _itemFn = _circular() || _iList.pop();
+                _execFn(_itemFn);
                 _checkLoading();
             }
         };
@@ -1413,9 +1415,9 @@
                 } else {
                     // for namespace return
                     _ret = _ret || {};
-                    for (var x in _result) {
-                        _ret[x] = _result[x];
-                    }
+                    $m.$forIn(_result, function (value, key) {
+                        _ret[key] = value;
+                    });
                 }
             }
             _rCache[_uri] = _ret;

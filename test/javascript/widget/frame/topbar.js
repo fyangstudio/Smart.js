@@ -5,6 +5,7 @@ define([
 ], function (m, json, tpl) {
 
     var base = $m.$tpl.$extend({
+        name: 'bar',
         template: tpl,
         responsive: true,
         init: function () {
