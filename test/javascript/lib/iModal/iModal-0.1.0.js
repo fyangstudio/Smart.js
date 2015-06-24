@@ -194,6 +194,7 @@
 
     // The $m.$isXXX() method returns true if an object is an XXX, false if it is not.
     $m.$isArray = Array.isArray || _isType('Array');
+    $m.$isDate = _isType('Date');
     $m.$isObject = _isType('Object');
     $m.$isString = _isType('String');
     $m.$isFunction = _isType('Function');
@@ -466,8 +467,12 @@
     /* Format
      ---------------------------------------------------------------------- */
     $m.$formatTime = function (time, format) {
+        if (this.$isString(time)) time = new Date(Date.parse(time));
+        if (!this.$isDate(time)) time = new Date(time);
         var _map = {i: !0, r: /\byyyy|yy|MM|M|dd|d|HH|H|mm|ms|ss|m|s|w|ct|et\b/g};
+        console.log(time);
     };
+    $m.$formatTime(1435116292173);
 
     /* Transform
      ---------------------------------------------------------------------- */
