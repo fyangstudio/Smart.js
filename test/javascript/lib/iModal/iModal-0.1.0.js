@@ -469,10 +469,17 @@
     $m.$formatTime = function (time, format) {
         if (this.$isString(time)) time = new Date(Date.parse(time));
         if (!this.$isDate(time)) time = new Date(time);
-        var _map = {i: !0, r: /\byyyy|yy|MM|M|dd|d|HH|H|mm|ms|ss|m|s|w|ct|et\b/g};
-        console.log(time);
+        var _map = [
+            [/(y+)/, function (year) {
+                return (time.getFullYear() + "").substr(4 - year.length);
+            }]
+        ];
+        _map.forEach(function (value) {
+            format = format.replace(value[0], value[1]);
+        });
+        console.log(format);
     };
-    $m.$formatTime(1435116292173);
+    $m.$formatTime(1435116292173, 'yyyy-MM');
 
     /* Transform
      ---------------------------------------------------------------------- */
