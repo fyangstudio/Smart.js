@@ -97,7 +97,6 @@
 
     /* Event
      ---------------------------------------------------------------------- */
-
     // Event listener
     if (_doc.addEventListener) {
         $m.$addEvent = function (node, event, fn) {
@@ -201,7 +200,6 @@
 
     /* Syntax fix
      ---------------------------------------------------------------------- */
-
     // The trim() method removes whitespace from both ends of a string.
     if (!String.prototype.trim) {
         String.prototype.trim = function () {
@@ -381,6 +379,7 @@
             return context;
         }
     };
+
     /* Parse
      ---------------------------------------------------------------------- */
     // The $m.$parseHTML() method can change a string of html to a html node.
@@ -463,6 +462,12 @@
             return _parse(uri, type);
         };
     })();
+
+    /* Format
+     ---------------------------------------------------------------------- */
+    $m.$formatTime = function (time, format) {
+        var _map = {i: !0, r: /\byyyy|yy|MM|M|dd|d|HH|H|mm|ms|ss|m|s|w|ct|et\b/g};
+    };
 
     /* Transform
      ---------------------------------------------------------------------- */
