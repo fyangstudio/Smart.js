@@ -1074,7 +1074,7 @@
                 reg = rule[0];
                 handler = rule[1];
 
-                if (typeof handler === 'string') {
+                if ($m.$isString(handler)) {
                     handler = wrapHander(handler);
                 }
                 if ($m.$isRegExp(reg)) reg = reg.toString().slice(1, -1);
