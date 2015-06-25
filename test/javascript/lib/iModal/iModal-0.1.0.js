@@ -466,6 +466,7 @@
 
     /* Format
      ---------------------------------------------------------------------- */
+    // Transforms a "yyyy-MM-dd hh:mm:ss" timestamp into the specified date/time format.
     $m.$formatTime = function (time, format) {
         if (this.$isString(time)) time = new Date(Date.parse(time));
         if (!this.$isDate(time)) time = new Date(time);
@@ -473,14 +474,33 @@
             return RegExp.$1.length == 1 ? value : ('00' + value).substr(('' + value).length);
         };
         var _map = [
+            // Format Year
             [/(y+)/, function () {
                 return (time.getFullYear() + '').substr(4 - RegExp.$1.length);
             }],
+            // Format Month
             [/(M+)/, function () {
                 return _format(time.getMonth() + 1);
             }],
+            // Format Date
             [/(d+)/, function () {
                 return _format(time.getDate());
+            }],
+            // Format Hour
+            [/(h+)/, function () {
+                return _format(time.getHours());
+            }],
+            // Format Minutes
+            [/(m+)/, function () {
+                return _format(time.getMinutes());
+            }],
+            // Format Seconds
+            [/(s+)/, function () {
+                return _format(time.getSeconds());
+            }],
+            // Format Milliseconds
+            [/(ms)/, function () {
+                return _format(time.getMilliseconds());
             }]
         ];
         _map.forEach(function (value) {
@@ -488,7 +508,6 @@
         });
         return format;
     };
-    console.log($m.$formatTime(1435116292173, 'yyyy-MM-dd'));
 
     /* Transform
      ---------------------------------------------------------------------- */
