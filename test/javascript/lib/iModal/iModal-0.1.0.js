@@ -195,6 +195,7 @@
     // The $m.$isXXX() method returns true if an object is an XXX, false if it is not.
     $m.$isArray = Array.isArray || _isType('Array');
     $m.$isDate = _isType('Date');
+    $m.$isRegExp = _isType('RegExp');
     $m.$isObject = _isType('Object');
     $m.$isString = _isType('String');
     $m.$isFunction = _isType('Function');
@@ -777,6 +778,12 @@
             return _result != null ? _result : $1;
         });
     };
+    // Escapes all reserved characters for regular expressions by preceding them with a backslash.
+    $m.escapeRegExp = function (str) {
+        return str.replace(/[-[\]{}()*+?.\\^$|,#\s]/g, function (match) {
+            return '\\' + match;
+        });
+    };
     // The $m.$escape() method computes a new string,
     // in which certain characters have been replaced by a hexadecimal escape sequence.
     // Use entity transform or encodeURIComponent instead.
@@ -1032,14 +1039,62 @@
         }, 'TAG']
     };
 
-    var _parseTpl = function (tpl) {
-        var _convert = '\
-        "use strict";\
-        try {\
-            INNER_FUNCTION\
-        } catch(e) {throw new Error("iModal-tpl: "+e.message);}';
-        return _convert;
-    };
+    function wrapHander(handler) {
+        return function (all) {
+            return {type: handler, value: all}
+        }
+    }
+
+    function genMap(rules) {
+        var rule, map = {}, sign;
+        for (var i = 0, len = rules.length; i < len; i++) {
+            rule = rules[i];
+            sign = rule[2] || 'INIT';
+            ( map[sign] || (map[sign] = {rules: [], links: []}) ).rules.push(rule);
+        }
+        return setup(map);
+    }
+
+    function setup(map) {
+        var split, rules, trunks, handler, reg, retain, rule;
+
+        function replaceFn(all, one) {
+            return typeof _macro[one] === 'string' ? $m.escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
+        }
+
+        for (var i in map) {
+
+            split = map[i];
+            split.curIndex = 1;
+            rules = split.rules;
+            trunks = [];
+
+            for (var j = 0, len = rules.length; j < len; j++) {
+                rule = rules[j];
+                reg = rule[0];
+                handler = rule[1];
+
+                if (typeof handler === 'string') {
+                    handler = wrapHander(handler);
+                }
+                if ($m.$isRegExp(reg)) reg = reg.toString().slice(1, -1);
+
+                reg = reg.replace(/\{(\w+)\}/g, replaceFn);
+                trunks.push(reg);
+            }
+            split.TRUNK = new RegExp("^(?:(" + trunks.join(")|(") + "))")
+        }
+        return map;
+    }
+
+    var map1 = genMap([
+
+        //TAG
+        _rules.TAG_OPEN,
+        _rules.TAG_CLOSE
+
+    ]);
+    console.log(map1);
 
     var _watch = function (obj, callback) {
         if (_observe) {
@@ -1057,7 +1112,7 @@
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         this._pos = 0;
-
+        console.log(tpl.charAt(this._pos));
 
         console.log(tpl.length);
     };
