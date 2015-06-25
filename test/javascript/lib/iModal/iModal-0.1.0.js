@@ -469,17 +469,26 @@
     $m.$formatTime = function (time, format) {
         if (this.$isString(time)) time = new Date(Date.parse(time));
         if (!this.$isDate(time)) time = new Date(time);
+        var _format = function (value) {
+            return RegExp.$1.length == 1 ? value : ('00' + value).substr(('' + value).length);
+        };
         var _map = [
-            [/(y+)/, function (year) {
-                return (time.getFullYear() + "").substr(4 - year.length);
+            [/(y+)/, function () {
+                return (time.getFullYear() + '').substr(4 - RegExp.$1.length);
+            }],
+            [/(M+)/, function () {
+                return _format(time.getMonth() + 1);
+            }],
+            [/(d+)/, function () {
+                return _format(time.getDate());
             }]
         ];
         _map.forEach(function (value) {
             format = format.replace(value[0], value[1]);
         });
-        console.log(format);
+        return format;
     };
-    $m.$formatTime(1435116292173, 'yyyy-MM');
+    console.log($m.$formatTime(1435116292173, 'yyyy-MM-dd'));
 
     /* Transform
      ---------------------------------------------------------------------- */
