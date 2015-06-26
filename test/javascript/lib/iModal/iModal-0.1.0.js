@@ -1050,29 +1050,26 @@
     };
 
     function setup(map) {
-        var split, rules, _matchs, reg, rule;
+        var split, rules, _matchs, reg;
 
         var _replaceFn = function ($, one) {
             return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
         };
 
-        for (var i in map) {
-
-            split = map[i];
-            split.curIndex = 1;
+        $m.$forIn(map, function (value) {
+            split = value;
             rules = split.rules;
             _matchs = [];
 
-            for (var j = 0, len = rules.length; j < len; j++) {
-                rule = rules[j];
+            rules.forEach(function (rule) {
                 reg = rule[0];
                 if ($m.$isRegExp(reg)) reg = reg.toString().slice(1, -1);
 
                 reg = reg.replace(/%(\w+)%/g, _replaceFn);
                 _matchs.push(reg);
-            }
-            split.MATCH = new RegExp("^(?:(" + _matchs.join(")|(") + "))")
-        }
+            });
+            split.MATCH = new RegExp("^(?:(" + _matchs.join(")|(") + "))");
+        });
         return map;
     }
 
