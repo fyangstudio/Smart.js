@@ -1040,38 +1040,30 @@
     };
 
     var _processRules = function (rules) {
-        var rule, map = {}, sign;
-        rules.forEach(function (value) {
-            rule = value;
-            sign = rule[2] || 'INIT';
-            (map[sign] || (map[sign] = {rules: [], links: []})).rules.push(rule);
-        });
-        return setup(map);
-    };
-
-    function setup(map) {
-        var split, rules, _matchs, reg;
+        var map = {}, sign, _rules, _matchs, reg;
 
         var _replaceFn = function ($, one) {
             return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
         };
-
-        $m.$forIn(map, function (value) {
-            split = value;
-            rules = split.rules;
+        // add map[sign]
+        rules.forEach(function (rule) {
+            sign = rule[2] || 'INIT';
+            (map[sign] || (map[sign] = {rules: [], links: []})).rules.push(rule);
+        });
+        // add map[sign]'s MATCH
+        $m.$forIn(map, function (split) {
+            _rules = split.rules;
             _matchs = [];
-
-            rules.forEach(function (rule) {
+            _rules.forEach(function (rule) {
                 reg = rule[0];
                 if ($m.$isRegExp(reg)) reg = reg.toString().slice(1, -1);
-
                 reg = reg.replace(/%(\w+)%/g, _replaceFn);
                 _matchs.push(reg);
             });
             split.MATCH = new RegExp("^(?:(" + _matchs.join(")|(") + "))");
         });
         return map;
-    }
+    };
 
     var map1 = _processRules([
         //TAG
