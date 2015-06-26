@@ -1040,7 +1040,7 @@
     };
 
     var _processRules = function (rules) {
-        var map = {}, sign, _rules, _matchs, reg;
+        var map = {}, sign, _rules, _matchs, _reg;
 
         var _replaceFn = function ($, one) {
             return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
@@ -1055,10 +1055,10 @@
             _rules = split.rules;
             _matchs = [];
             _rules.forEach(function (rule) {
-                reg = rule[0];
-                if ($m.$isRegExp(reg)) reg = reg.toString().slice(1, -1);
-                reg = reg.replace(/%(\w+)%/g, _replaceFn);
-                _matchs.push(reg);
+                _reg = rule[0];
+                if ($m.$isRegExp(reg)) _reg = _reg.toString().slice(1, -1);
+                _reg = _reg.replace(/%(\w+)%/g, _replaceFn);
+                _matchs.push(_reg);
             });
             split.MATCH = new RegExp("^(?:(" + _matchs.join(")|(") + "))");
         });
