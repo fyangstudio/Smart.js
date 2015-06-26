@@ -779,7 +779,7 @@
         });
     };
     // Escapes all reserved characters for regular expressions by preceding them with a backslash.
-    $m.escapeRegExp = function (str) {
+    $m.$escapeRegExp = function (str) {
         return str.replace(/[-[\]{}()*+?.\\^$|,#\s]/g, function (match) {
             return '\\' + match;
         });
@@ -1031,10 +1031,10 @@
     };
 
     var _rules = {
-        TAG_OPEN: [/<({NAME})\s*/, function (all, one) {
+        TAG_OPEN: [/<(%NAME%)\s*/, function (all, one) {
             return {type: 'TAG_OPEN', value: one}
         }, 'TAG'],
-        TAG_CLOSE: [/<\/({NAME})[\r\n\f ]*>/, function (all, one) {
+        TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function (all, one) {
             return {type: 'TAG_CLOSE', value: one}
         }, 'TAG']
     };
@@ -1045,22 +1045,22 @@
         }
     }
 
-    function genMap(rules) {
+    var _processRules = function (rules) {
         var rule, map = {}, sign;
         for (var i = 0, len = rules.length; i < len; i++) {
             rule = rules[i];
             sign = rule[2] || 'INIT';
-            ( map[sign] || (map[sign] = {rules: [], links: []}) ).rules.push(rule);
+            (map[sign] || (map[sign] = {rules: [], links: []})).rules.push(rule);
         }
         return setup(map);
-    }
+    };
 
     function setup(map) {
         var split, rules, trunks, handler, reg, retain, rule;
 
-        function replaceFn(all, one) {
-            return typeof _macro[one] === 'string' ? $m.escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
-        }
+        var _replaceFn = function ($, one) {
+            return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
+        };
 
         for (var i in map) {
 
@@ -1079,7 +1079,7 @@
                 }
                 if ($m.$isRegExp(reg)) reg = reg.toString().slice(1, -1);
 
-                reg = reg.replace(/\{(\w+)\}/g, replaceFn);
+                reg = reg.replace(/%(\w+)%/g, _replaceFn);
                 trunks.push(reg);
             }
             split.TRUNK = new RegExp("^(?:(" + trunks.join(")|(") + "))")
@@ -1087,7 +1087,7 @@
         return map;
     }
 
-    var map1 = genMap([
+    var map1 = _processRules([
 
         //TAG
         _rules.TAG_OPEN,
