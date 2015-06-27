@@ -1056,7 +1056,7 @@
             _matchs = [];
             _rules.forEach(function (rule) {
                 _reg = rule[0];
-                if ($m.$isRegExp(reg)) _reg = _reg.toString().slice(1, -1);
+                if ($m.$isRegExp(_reg)) _reg = _reg.toString().slice(1, -1);
                 _reg = _reg.replace(/%(\w+)%/g, _replaceFn);
                 _matchs.push(_reg);
             });
@@ -1088,10 +1088,19 @@
     var _render = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
+        var tokens = [], split, test, mlen, token, state, i = 0;
         this._pos = 0;
-        console.log(tpl.charAt(this._pos));
+        while (tpl) {
+            i++;
+            split = map1['TAG'];
+            test = split.MATCH.exec(tpl);
 
-        console.log(tpl.length);
+            mlen = test ? test[0].length : 1;
+            tpl = tpl.slice(mlen);
+            console.log(tpl);
+            this._pos += mlen;
+
+        }
     };
 
     var _rp = _render.prototype;
