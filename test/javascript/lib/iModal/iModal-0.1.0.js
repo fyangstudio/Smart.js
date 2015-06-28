@@ -779,6 +779,7 @@
         });
     };
     // Escapes all reserved characters for regular expressions by preceding them with a backslash.
+    // Credit: XRegExp 0.6.1 (c) 2007-2008 Steven Levithan <http://stevenlevithan.com/regex/xregexp/> MIT License
     $m.$escapeRegExp = function (str) {
         return str.replace(/[-[\]{}()*+?.\\^$|,#\s]/g, function (match) {
             return '\\' + match;
@@ -1094,10 +1095,10 @@
             i++;
             split = map1['TAG'];
             test = split.MATCH.exec(tpl);
-
+            console.log(test);
             mlen = test ? test[0].length : 1;
             tpl = tpl.slice(mlen);
-            console.log(tpl);
+
             this._pos += mlen;
 
         }
