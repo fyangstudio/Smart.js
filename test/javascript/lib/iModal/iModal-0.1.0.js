@@ -1094,7 +1094,7 @@
     };
     _watch();
 
-    var _render = function (tpl) {
+    var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state, i = 0;
@@ -1114,10 +1114,14 @@
         this._imgHandles.push(1);
     };
 
-    var _rp = _render.prototype;
+    var _lp = _Lexer.prototype;
 
-    _rp.next = function (scale) {
+    _lp.next = function (scale) {
         this._pos += (scale || 1);
+    };
+
+    _lp.parse = function () {
+
     };
 
 
@@ -1135,8 +1139,8 @@
             var _fn = this.init;
             this._node = _doc.createElement('a');
             this._node.href = '/';
-            this._render = new _render(this.template);
-            console.log(this._render);
+            this._structure = new _Lexer(this.template);
+            console.log(this._structure);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
