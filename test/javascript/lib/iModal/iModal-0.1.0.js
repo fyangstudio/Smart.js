@@ -1040,6 +1040,14 @@
         }, 'TAG']
     };
 
+    var _create = function (type, namespace) {
+        return !namespace ? document.createElement(type) : document.createElementNS(namespace, type);
+    };
+
+    var _fragment = function () {
+        return document.createDocumentFragment();
+    };
+
     var _processRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg;
 
