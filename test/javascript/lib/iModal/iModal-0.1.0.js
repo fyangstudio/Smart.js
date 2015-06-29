@@ -45,8 +45,18 @@
     else if (_win.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
     else if (_win.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
 
-    /* size
+    /* Document information
      ---------------------------------------------------------------------- */
+    // Create the specified HTML element
+    var _create = function (type, namespace) {
+        return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
+    };
+
+    // Create an empty DocumentFragment object.
+    var _fragment = function () {
+        return _doc.createDocumentFragment();
+    };
+
     // Width (in pixels) of the browser window viewport
     var _winW = function () {
         return _win.innerWidth || _doc.documentElement.clientWidth || _doc.body.clientWidth;
@@ -391,7 +401,7 @@
             _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
         var _tag;
         if (_reg.test(txt)) _tag = _parentNodeMap[(RegExp.$1 || '').toLowerCase()] || '';
-        var _cnt = _doc.createElement(_tag || 'div');
+        var _cnt = _create(_tag || 'div');
         _cnt.innerHTML = txt;
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
@@ -403,7 +413,7 @@
             _reg1 = /([^:])\/+/g,                           // get request protocol
             _reg2 = /[^\/]*$/,                              // get file name
             _reg3 = /\.js$/i,                               // get javascript file
-            _anchor = _doc.createElement('a');              // _anchor which can get browser machined path
+            _anchor = _create('a');                         // _anchor which can get browser machined path
 
         // The _absolute() method can tell if uri is a absolute path.
         function _absolute(uri) {
@@ -1032,14 +1042,14 @@
     };
 
     var _rules = {
-        TAG_OPEN_START: [/<(%NAME%)\s*/, function (all, one) {
+        TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
-        TAG_OPEN_END: [/[\>\/=&]/, function (all) {
-            if (all === '>') this.leave();
-            return {type: 'TAG_OPEN_END', value: all}
+        TAG_OPEN_END: [/[\>\/=&]/, function ($) {
+            if ($ === '>') this.leave();
+            return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
-        TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function (all, one) {
+        TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
             this.leave();
             return {type: 'TAG_CLOSE', value: one}
         }, 'TAG']
@@ -1147,14 +1157,6 @@
     };
     _watch();
 
-    var _create = function (type, namespace) {
-        return !namespace ? document.createElement(type) : document.createElementNS(namespace, type);
-    };
-
-    var _fragment = function () {
-        return document.createDocumentFragment();
-    };
-
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
@@ -1167,7 +1169,7 @@
         $init: function (data) {
 
             var _fn = this.init;
-            this._node = _doc.createElement('a');
+            this._node = _create('a');
             this._node.href = '/';
             this._structure = new _Lexer(this.template);
 
@@ -1383,7 +1385,7 @@
         if (_state != null) return;
         _sCache[url] = 0;
         // load file
-        var _script = _doc.createElement('script');
+        var _script = _create('script');
         _script.iModal = !0;
         _script.type = 'text/javascript';
         _script.charset = _config.charset;
@@ -1627,7 +1629,6 @@
                     _list[k] = _itm;
                     _arr[1](_itm);
                 }
-
             }
             _checkLoading();
         };
