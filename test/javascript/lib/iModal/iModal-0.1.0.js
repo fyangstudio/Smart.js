@@ -1082,18 +1082,6 @@
     ]);
     console.log(map1);
 
-    var _watch = function (obj, callback) {
-        if (_observe) {
-            var t = {s: 1, t: 2};
-            _observe(t, function (changes) {
-                console.log(t);
-            });
-            t.s = 2;
-            t.s = 4;
-        }
-    };
-    _watch();
-
     var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
@@ -1124,7 +1112,18 @@
 
     };
 
-
+    var _watch = function (obj, callback) {
+        if (_observe) {
+            var t = {s: 1, t: 2};
+            _observe(t, function (changes) {
+                console.log(t);
+            });
+            t.s = 2;
+            t.s = 4;
+        }
+    };
+    _watch();
+    
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
