@@ -1046,11 +1046,22 @@
     };
 
     var _processRules = function (rules) {
-        var map = {}, sign, _rules, _matchs, _reg, _retain;
+        var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
 
         var _replaceFn = function ($, one) {
             return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
         };
+
+        var _getRetain = function (regStr) {
+            var brackets = 0, len = regStr.length, ignored = regStr.match(_ignoredReg);
+            ignored = ignored ? ignored.length : 0;
+            for (; len--;) {
+                var letter = regStr.charAt(len);
+                if ((len === 0 || regStr.charAt(len - 1) !== "\\") && letter === "(") brackets++;
+            }
+            return brackets - ignored;
+        };
+
         // add map[sign]
         rules.forEach(function (rule) {
             sign = rule[2] || 'INIT';
@@ -1065,7 +1076,7 @@
                 _reg = rule[0];
                 if ($m.$isRegExp(_reg)) _reg = _reg.toString().slice(1, -1);
                 _reg = _reg.replace(/%(\w+)%/g, _replaceFn);
-                _retain = _.findSubCapture(reg) + 1;
+                _retain = _getRetain(_reg) + 1;
                 split.links.push([split.curIndex, _retain, rule[1]]);
                 split.curIndex += _retain;
                 _matchs.push(_reg);
@@ -1094,21 +1105,41 @@
             i++;
             split = map1['TAG'];
             test = split.MATCH.exec(tpl);
-            console.log(test);
             mlen = test ? test[0].length : 1;
             tpl = tpl.slice(mlen);
-
+            token = this.process.call(this, test, split, tpl);
+            if (token) tokens.push(token);
             this._pos += mlen;
 
         }
         // end of file
         tokens.push({type: 'EOF'});
+        console.log(tokens);
         return tokens;
     };
 
     _Lexer.prototype = {
         next: function (scale) {
             this._pos += (scale || 1);
+        },
+        process: function (args, split, str) {
+
+            var links = split.links, marched = false, token;
+
+            for (var len = links.length, i = 0; i < len; i++) {
+                var link = links[i],
+                    handler = link[2],
+                    index = link[0];
+                if (args[index] !== undefined) {
+                    marched = true;
+                    if (handler) {
+                        token = handler.apply(this, args.slice(index, index + link[1]));
+                        if (token)  token.pos = this._pos;
+                    }
+                    break;
+                }
+            }
+            return token;
         },
         leave: function (state) {
             var states = this._states;
@@ -1151,7 +1182,6 @@
             this._node = _doc.createElement('a');
             this._node.href = '/';
             this._structure = new _Lexer(this.template);
-            console.log(this._structure);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
