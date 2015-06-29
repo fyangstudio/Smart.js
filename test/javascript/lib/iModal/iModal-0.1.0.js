@@ -1093,9 +1093,7 @@
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state, i = 0;
         this._pos = 0;
-        this.states = ["INIT"];
-        this._imgHandles = new $m.$stack();
-        this._imgHandles.push(1);
+        this._states = ["INIT"];
         while (tpl) {
             i++;
             split = map1['TAG'];
@@ -1117,8 +1115,8 @@
             this._pos += (scale || 1);
         },
         leave: function (state) {
-            var states = this.states;
-            if (!state || states[states.length - 1] === state) states.pop()
+            var states = this._states;
+            if (!state || states[states.length - 1] === state) states.pop();
         }
     };
 
