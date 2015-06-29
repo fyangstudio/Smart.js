@@ -1032,10 +1032,15 @@
     };
 
     var _rules = {
-        TAG_OPEN: [/<(%NAME%)\s*/, function (all, one) {
-            return {type: 'TAG_OPEN', value: one}
+        TAG_OPEN_START: [/<(%NAME%)\s*/, function (all, one) {
+            return {type: 'TAG_OPEN_START', value: one}
+        }, 'TAG'],
+        TAG_OPEN_END: [/[\>\/=&]/, function (all) {
+            if (all === '>') this.leave();
+            return {type: all, value: all}
         }, 'TAG'],
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function (all, one) {
+            this.leave();
             return {type: 'TAG_CLOSE', value: one}
         }, 'TAG']
     };
@@ -1076,7 +1081,8 @@
 
     var map1 = _processRules([
         //TAG
-        _rules.TAG_OPEN,
+        _rules.TAG_OPEN_START,
+        _rules.TAG_OPEN_END,
         _rules.TAG_CLOSE
 
     ]);
@@ -1087,7 +1093,9 @@
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state, i = 0;
         this._pos = 0;
+        this.states = ["INIT"];
         this._imgHandles = new $m.$stack();
+        this._imgHandles.push(1);
         while (tpl) {
             i++;
             split = map1['TAG'];
@@ -1099,17 +1107,19 @@
             this._pos += mlen;
 
         }
-        this._imgHandles.push(1);
+        // end of file
+        tokens.push({type: 'EOF'});
+        return tokens;
     };
 
-    var _lp = _Lexer.prototype;
-
-    _lp.next = function (scale) {
-        this._pos += (scale || 1);
-    };
-
-    _lp.parse = function () {
-
+    _Lexer.prototype = {
+        next: function (scale) {
+            this._pos += (scale || 1);
+        },
+        leave: function (state) {
+            var states = this.states;
+            if (!state || states[states.length - 1] === state) states.pop()
+        }
     };
 
     var _watch = function (obj, callback) {
@@ -1123,7 +1133,7 @@
         }
     };
     _watch();
-    
+
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
