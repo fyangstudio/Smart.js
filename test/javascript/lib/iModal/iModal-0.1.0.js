@@ -1099,6 +1099,7 @@
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state, i = 0;
         this._pos = 0;
+        this._imgHandles = new $m.$stack();
         while (tpl) {
             i++;
             split = map1['TAG'];
@@ -1110,6 +1111,7 @@
             this._pos += mlen;
 
         }
+        this._imgHandles.push(1);
     };
 
     var _rp = _render.prototype;
