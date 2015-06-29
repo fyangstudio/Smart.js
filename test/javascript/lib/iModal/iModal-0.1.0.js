@@ -1045,16 +1045,8 @@
         }, 'TAG']
     };
 
-    var _create = function (type, namespace) {
-        return !namespace ? document.createElement(type) : document.createElementNS(namespace, type);
-    };
-
-    var _fragment = function () {
-        return document.createDocumentFragment();
-    };
-
     var _processRules = function (rules) {
-        var map = {}, sign, _rules, _matchs, _reg;
+        var map = {}, sign, _rules, _matchs, _reg, _retain;
 
         var _replaceFn = function ($, one) {
             return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
@@ -1066,12 +1058,16 @@
         });
         // add map[sign]'s MATCH
         $m.$forIn(map, function (split) {
+            split.curIndex = 1;
             _rules = split.rules;
             _matchs = [];
             _rules.forEach(function (rule) {
                 _reg = rule[0];
                 if ($m.$isRegExp(_reg)) _reg = _reg.toString().slice(1, -1);
                 _reg = _reg.replace(/%(\w+)%/g, _replaceFn);
+                _retain = _.findSubCapture(reg) + 1;
+                split.links.push([split.curIndex, _retain, rule[1]]);
+                split.curIndex += _retain;
                 _matchs.push(_reg);
             });
             split.MATCH = new RegExp("^(?:(" + _matchs.join(")|(") + "))");
@@ -1080,11 +1076,11 @@
     };
 
     var map1 = _processRules([
-        //TAG
+        // TAG
         _rules.TAG_OPEN_START,
         _rules.TAG_OPEN_END,
         _rules.TAG_CLOSE
-
+        // JST
     ]);
     console.log(map1);
 
@@ -1131,6 +1127,14 @@
         }
     };
     _watch();
+
+    var _create = function (type, namespace) {
+        return !namespace ? document.createElement(type) : document.createElementNS(namespace, type);
+    };
+
+    var _fragment = function () {
+        return document.createDocumentFragment();
+    };
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
