@@ -1037,7 +1037,7 @@
         }, 'TAG'],
         TAG_OPEN_END: [/[\>\/=&]/, function (all) {
             if (all === '>') this.leave();
-            return {type: all, value: all}
+            return {type: 'TAG_OPEN_END', value: all}
         }, 'TAG'],
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function (all, one) {
             this.leave();
@@ -1053,13 +1053,9 @@
         };
 
         var _getRetain = function (regStr) {
-            var brackets = 0, len = regStr.length, ignored = regStr.match(_ignoredReg);
-            ignored = ignored ? ignored.length : 0;
-            for (; len--;) {
-                var letter = regStr.charAt(len);
-                if ((len === 0 || regStr.charAt(len - 1) !== "\\") && letter === "(") brackets++;
-            }
-            return brackets - ignored;
+            var series = 0, ignored = regStr.match(_ignoredReg);
+            for (var l = regStr.length; l--;) if ((l === 0 || regStr.charAt(l - 1) !== "\\") && regStr.charAt(l) === "(") series++;
+            return ignored ? series - ignored.length : series;
         };
 
         // add map[sign]
@@ -1107,10 +1103,9 @@
             test = split.MATCH.exec(tpl);
             mlen = test ? test[0].length : 1;
             tpl = tpl.slice(mlen);
-            token = this.process.call(this, test, split, tpl);
+            token = this.process(test, split, tpl);
             if (token) tokens.push(token);
             this._pos += mlen;
-
         }
         // end of file
         tokens.push({type: 'EOF'});
@@ -1122,20 +1117,13 @@
         next: function (scale) {
             this._pos += (scale || 1);
         },
-        process: function (args, split, str) {
-
-            var links = split.links, marched = false, token;
-
+        process: function (args, split) {
+            var links = split.links, token;
             for (var len = links.length, i = 0; i < len; i++) {
-                var link = links[i],
-                    handler = link[2],
-                    index = link[0];
+                var link = links[i], handler = link[2], index = link[0];
                 if (!!args[index]) {
-                    marched = true;
-                    if (handler) {
-                        token = handler.apply(this, args.slice(index, index + link[1]));
-                        if (token)  token.pos = this._pos;
-                    }
+                    token = handler.apply(this, args.slice(index, index + link[1]));
+                    token.pos = this._pos;
                     break;
                 }
             }
