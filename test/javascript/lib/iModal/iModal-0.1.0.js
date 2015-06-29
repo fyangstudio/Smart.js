@@ -1130,7 +1130,7 @@
                 var link = links[i],
                     handler = link[2],
                     index = link[0];
-                if (args[index] !== undefined) {
+                if (!!args[index]) {
                     marched = true;
                     if (handler) {
                         token = handler.apply(this, args.slice(index, index + link[1]));
