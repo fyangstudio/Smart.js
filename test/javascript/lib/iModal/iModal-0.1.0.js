@@ -1061,13 +1061,14 @@
         TAG_ATTRIBUTE_NAME: [/(%NAME%)/, function ($, one) {
             return {type: 'TAG_ATTRIBUTE_NAME', value: one}
         }, 'TAG'],
+        TAG_ATTRIBUTE_INT: [/=/, null, 'TAG'],
         TAG_ATTRIBUTE_VALUE: [/'([^']*)'|"([^"]*)"/, function ($, one, two) {
             var value = one || two || "";
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
 
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
-        TAG_OPEN_END: [/[\>\/=&]/, function ($) {
+        TAG_OPEN_END: [/[\>\/&]/, function ($) {
             if ($ === '>') this.leave();
             return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
@@ -1123,6 +1124,7 @@
         // TAG
         _rules.TAG_OPEN_START,
         _rules.TAG_ATTRIBUTE_NAME,
+        _rules.TAG_ATTRIBUTE_INT,
         _rules.TAG_ATTRIBUTE_VALUE,
         _rules.TAG_SPACE,
         _rules.TAG_OPEN_END,
