@@ -1190,7 +1190,7 @@
             var links = split.links, token, marched = false;
             for (var len = links.length, i = 0; i < len; i++) {
                 var link = links[i], handler = link[2], index = link[0];
-                if (!!args[index]) {
+                if (args && args[index]) {
                     marched = true;
                     if (handler) {
                         token = handler.apply(this, args.slice(index, index + link[1]));
