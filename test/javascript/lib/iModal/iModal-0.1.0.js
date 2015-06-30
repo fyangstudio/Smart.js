@@ -1116,7 +1116,7 @@
         return map;
     };
 
-    var map1 = _processRules([
+    var _dictionary = _processRules([
         // INIT
         _rules.ENTER_TAG,
         _rules.ENTER_JST,
@@ -1131,14 +1131,13 @@
         _rules.TAG_CLOSE
         // JST
     ]);
-    console.log(map1);
 
     var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state, i = 0;
         this._pos = 0;
-        this._map = map1;
+        this._map = _dictionary;
         this._states = ["INIT"];
         while (tpl) {
             i++;
