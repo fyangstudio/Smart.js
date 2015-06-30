@@ -1043,12 +1043,12 @@
 
     var _rules = {
         //INIT
-        ENTER_TAG: [/[^\x00<>]*?(?=<)/, function ($) {
-            this.enter('TAG');
-            if ($) return {type: 'TEXT', value: $}
-        }, 'INIT'],
         ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
             this.enter('JST');
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
+        ENTER_TAG: [/[^\x00<>]*?(?=<)/, function ($) {
+            this.enter('TAG');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
         TEXT: [/[^\x00]+/, 'TEXT'],
@@ -1079,13 +1079,14 @@
         }, 'TAG'],
 
         // JST
-        JST_EXPR_OPEN: [/%BEGIN%/, function ($, one) {
+        JST_EXPR_OPEN: [/(%BEGIN%)/, function ($, one) {
             return {type: 'EXPR_OPEN', value: one}
         }, 'JST'],
-        JST_IDENT: [/%IDENT%/, function ($, one) {
+        JST_IDENT: [/(%IDENT%)/, function ($, one) {
             return {type: 'IDENT', value: one}
         }, 'JST'],
-        JST_EXPR_CLOSE: [/%END%/, function ($, one) {
+        JST_EXPR_CLOSE: [/(%END%)/, function ($, one) {
+            this.leave('JST');
             return {type: 'EXPR_END', value: one}
         }, 'JST']
     };
@@ -1129,8 +1130,8 @@
 
     var _dictionary = _processRules([
         // INIT
-        _rules.ENTER_TAG,
         _rules.ENTER_JST,
+        _rules.ENTER_TAG,
         _rules.TEXT,
         // TAG
         _rules.TAG_OPEN_START,
