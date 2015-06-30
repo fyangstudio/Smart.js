@@ -85,7 +85,7 @@
     $m.$fragment = function () {
         return _doc.createDocumentFragment();
     };
-    
+
     // The $m.$style() method specifies the style sheet language for the given document fragment.
     $m.$style = function (elem, name) {
         if (elem.currentStyle) return elem.currentStyle[name];
@@ -1047,6 +1047,10 @@
             this.enter('TAG');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
+        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
+            this.enter('JST');
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
         // TEXT
         TEXT: [/[^\x00]+/, 'TEXT'],
         // TAG
@@ -1122,10 +1126,9 @@
         while (tpl) {
             i++;
             state = this.state();
-            split = this._map['TAG'];
+            split = this._map[state];
             test = split.MATCH.exec(tpl);
             mlen = test ? test[0].length : 1;
-            console.log(mlen);
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
             if (token) tokens.push(token);
@@ -1153,15 +1156,22 @@
             var states = this._states;
             return states[states.length - 1];
         },
-        process: function (args, split) {
-            var links = split.links, token;
+        process: function (args, split, tpl) {
+            var links = split.links, token, marched = false;
             for (var len = links.length, i = 0; i < len; i++) {
                 var link = links[i], handler = link[2], index = link[0];
                 if (!!args[index]) {
-                    token = handler.apply(this, args.slice(index, index + link[1]));
-                    token.pos = this._pos;
+                    marched = true;
+                    if (handler) {
+                        token = handler.apply(this, args.slice(index, index + link[1]));
+                        token.pos = this._pos;
+                    }
                     break;
                 }
+            }
+            if (!marched) {
+                if (tpl.charAt(0) == '<') this.enter("TAG");
+                else this.enter("JST");
             }
             return token;
         }
