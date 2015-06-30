@@ -1051,16 +1051,27 @@
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
-        // TEXT
         TEXT: [/[^\x00]+/, 'TEXT'],
+
         // TAG
         TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
+
+        TAG_ATTRIBUTE_NAME: [/(%NAME%)/, function ($, one) {
+            return {type: 'TAG_ATTRIBUTE_NAME', value: one}
+        }, 'TAG'],
+        TAG_ATTRIBUTE_VALUE: [/'([^']*)'|"([^"]*)"/, function ($, one, two) {
+            var value = one || two || "";
+            return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
+        }, 'TAG'],
+
+        TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
         TAG_OPEN_END: [/[\>\/=&]/, function ($) {
             if ($ === '>') this.leave();
             return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
+
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
             this.leave();
             return {type: 'TAG_CLOSE', value: one}
@@ -1082,7 +1093,7 @@
 
         // add map[sign]
         rules.forEach(function (rule) {
-            sign = rule[2];
+            sign = rule[2] || 'INIT';
             (map[sign] || (map[sign] = {rules: [], links: []})).rules.push(rule);
         });
         // add map[sign]'s MATCH
@@ -1107,9 +1118,13 @@
     var map1 = _processRules([
         // INIT
         _rules.ENTER_TAG,
+        _rules.ENTER_JST,
         _rules.TEXT,
         // TAG
         _rules.TAG_OPEN_START,
+        _rules.TAG_ATTRIBUTE_NAME,
+        _rules.TAG_ATTRIBUTE_VALUE,
+        _rules.TAG_SPACE,
         _rules.TAG_OPEN_END,
         _rules.TAG_CLOSE
         // JST
@@ -1141,9 +1156,6 @@
     };
 
     _Lexer.prototype = {
-        next: function (scale) {
-            this._pos += (scale || 1);
-        },
         enter: function (state) {
             this._states.push(state);
             return this;
