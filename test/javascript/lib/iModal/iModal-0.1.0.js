@@ -1042,6 +1042,14 @@
     };
 
     var _rules = {
+        //INIT
+        ENTER_TAG: [/[^\x00<>]*?(?=<)/, function ($) {
+            this.enter('TAG');
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
+        // TEXT
+        TEXT: [/[^\x00]+/, 'TEXT'],
+        // TAG
         TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
@@ -1070,7 +1078,7 @@
 
         // add map[sign]
         rules.forEach(function (rule) {
-            sign = rule[2] || 'INIT';
+            sign = rule[2];
             (map[sign] || (map[sign] = {rules: [], links: []})).rules.push(rule);
         });
         // add map[sign]'s MATCH
@@ -1093,6 +1101,9 @@
     };
 
     var map1 = _processRules([
+        // INIT
+        _rules.ENTER_TAG,
+        _rules.TEXT,
         // TAG
         _rules.TAG_OPEN_START,
         _rules.TAG_OPEN_END,
@@ -1106,10 +1117,13 @@
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state, i = 0;
         this._pos = 0;
+        this._map = map1;
         this._states = ["INIT"];
         while (tpl) {
             i++;
-            split = map1['TAG'];
+            state = this.state();
+            console.log(state);
+            split = this._map['TAG'];
             test = split.MATCH.exec(tpl);
             mlen = test ? test[0].length : 1;
             tpl = tpl.slice(mlen);
@@ -1127,6 +1141,18 @@
         next: function (scale) {
             this._pos += (scale || 1);
         },
+        enter: function (state) {
+            this._states.push(state);
+            return this;
+        },
+        leave: function (state) {
+            var states = this._states;
+            if (!state || states[states.length - 1] === state) states.pop();
+        },
+        state: function () {
+            var states = this._states;
+            return states[states.length - 1];
+        },
         process: function (args, split) {
             var links = split.links, token;
             for (var len = links.length, i = 0; i < len; i++) {
@@ -1138,10 +1164,6 @@
                 }
             }
             return token;
-        },
-        leave: function (state) {
-            var states = this._states;
-            if (!state || states[states.length - 1] === state) states.pop();
         }
     };
 
