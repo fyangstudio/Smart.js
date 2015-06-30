@@ -1076,7 +1076,18 @@
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
             this.leave();
             return {type: 'TAG_CLOSE', value: one}
-        }, 'TAG']
+        }, 'TAG'],
+
+        // JST
+        JST_EXPR_OPEN: [/%BEGIN%/, function ($, one) {
+            return {type: 'EXPR_OPEN', value: one}
+        }, 'JST'],
+        JST_IDENT: [/%IDENT%/, function ($, one) {
+            return {type: 'IDENT', value: one}
+        }, 'JST'],
+        JST_EXPR_CLOSE: [/%END%/, function ($, one) {
+            return {type: 'EXPR_END', value: one}
+        }, 'JST']
     };
 
     var _processRules = function (rules) {
@@ -1128,9 +1139,14 @@
         _rules.TAG_ATTRIBUTE_VALUE,
         _rules.TAG_SPACE,
         _rules.TAG_OPEN_END,
-        _rules.TAG_CLOSE
+        _rules.TAG_CLOSE,
         // JST
+        _rules.JST_EXPR_OPEN,
+        _rules.JST_IDENT,
+        _rules.JST_EXPR_CLOSE
     ]);
+
+    console.log(_dictionary)
 
     var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
