@@ -10,8 +10,6 @@
 
     // iModal object
     var _version = '0.1.0';
-    // Object.observe
-    var _observe = Object.observe || undefined;
     // iModalJs object
     var $m = {iModal: _version};
     // Empty function
@@ -21,6 +19,8 @@
     var _ERROR = function (msg) {
         throw new Error(msg);
     };
+    // Object.observe
+    var _observe = Object.observe || _NOOP;
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
@@ -47,16 +47,6 @@
 
     /* Document information
      ---------------------------------------------------------------------- */
-    // Create the specified HTML element
-    var _create = function (type, namespace) {
-        return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
-    };
-
-    // Create an empty DocumentFragment object.
-    var _fragment = function () {
-        return _doc.createDocumentFragment();
-    };
-
     // Width (in pixels) of the browser window viewport
     var _winW = function () {
         return _win.innerWidth || _doc.documentElement.clientWidth || _doc.body.clientWidth;
@@ -86,6 +76,16 @@
         return _return;
     };
 
+    // Create the specified HTML element
+    $m.$create = function (type, namespace) {
+        return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
+    };
+
+    // Create an empty DocumentFragment object.
+    $m.$fragment = function () {
+        return _doc.createDocumentFragment();
+    };
+    
     // The $m.$style() method specifies the style sheet language for the given document fragment.
     $m.$style = function (elem, name) {
         if (elem.currentStyle) return elem.currentStyle[name];
@@ -401,7 +401,7 @@
             _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
         var _tag;
         if (_reg.test(txt)) _tag = _parentNodeMap[(RegExp.$1 || '').toLowerCase()] || '';
-        var _cnt = _create(_tag || 'div');
+        var _cnt = this.$create(_tag || 'div');
         _cnt.innerHTML = txt;
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
@@ -413,7 +413,7 @@
             _reg1 = /([^:])\/+/g,                           // get request protocol
             _reg2 = /[^\/]*$/,                              // get file name
             _reg3 = /\.js$/i,                               // get javascript file
-            _anchor = _create('a');                         // _anchor which can get browser machined path
+            _anchor = $m.$create('a');                      // _anchor which can get browser machined path
 
         // The _absolute() method can tell if uri is a absolute path.
         function _absolute(uri) {
@@ -1122,10 +1122,10 @@
         while (tpl) {
             i++;
             state = this.state();
-            console.log(state);
             split = this._map['TAG'];
             test = split.MATCH.exec(tpl);
             mlen = test ? test[0].length : 1;
+            console.log(mlen);
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
             if (token) tokens.push(token);
@@ -1191,7 +1191,7 @@
         $init: function (data) {
 
             var _fn = this.init;
-            this._node = _create('a');
+            this._node = $m.$create('a');
             this._node.href = '/';
             this._structure = new _Lexer(this.template);
 
@@ -1407,7 +1407,7 @@
         if (_state != null) return;
         _sCache[url] = 0;
         // load file
-        var _script = _create('script');
+        var _script = $m.$create('script');
         _script.iModal = !0;
         _script.type = 'text/javascript';
         _script.charset = _config.charset;
