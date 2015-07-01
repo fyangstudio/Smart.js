@@ -20,4 +20,14 @@ define([
     //$m.$addEvent(window, 'resize', function () {
     //    resizeFn(100);
     //});
+    var t1 = $m.$parseHTML('<div></div>');
+    var t2 = $m.$parseHTML('<p>2222</p>');
+    var f = $m.$fragment();
+    t1.appendChild(t2);
+    f.appendChild(t1);
+    $m.$get('#test1')[0].appendChild(f);
+    t1.onclick = function () {
+        t1.removeChild(t2);
+    };
+
 });

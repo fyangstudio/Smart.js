@@ -20,7 +20,7 @@
         throw new Error(msg);
     };
     // Object.observe
-    var _observe = Object.observe || _NOOP;
+    var _observe = Object.observe || undefined;
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
@@ -1147,7 +1147,7 @@
         _rules.JST_EXPR_CLOSE
     ]);
 
-    console.log(_dictionary)
+    console.log(_dictionary);
 
     var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
