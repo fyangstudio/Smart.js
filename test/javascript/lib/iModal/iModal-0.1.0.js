@@ -76,21 +76,28 @@
         return _return;
     };
 
+    // Special attribute map.
     var _AttrMap = {
+        // Check Boolean IDL Attribute
         BooleanAttr: /selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/i,
+        // Some Special Content attribute
         SpecialAttr: {
+            // Element's class
             'class': function (elem, value) {
                 if (value) elem.className = value;
                 else return elem.className;
             },
+            // Label's for
             'for': function (elem, value) {
                 if (value)  elem.htmlFor = value;
                 else return elem.htmlFor;
             },
+            // Element's style
             'style': function (elem, value) {
                 if (value) elem.style.cssText = value;
                 else return elem.style.cssText;
             },
+            // Input's value
             'value': function (elem, value) {
                 if (value) elem.value = value;
                 else return elem.value;
@@ -98,11 +105,12 @@
         }
     };
 
+    // Set or get an element attribute.
     $m.$attr = function (elem, name, value) {
         var _nType = elem.nodeType, _sAttr = _AttrMap.SpecialAttr[name];
         // Don't get/set attributes on attribute text and comment nodes.
         if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
-
+        // Set Attribute
         if (value != undefined) {
             if (_AttrMap.BooleanAttr.test(name)) {
                 elem[name] = !!value;
@@ -115,6 +123,7 @@
                 elem.setAttribute(name, value);
             }
         } else {
+            // Get Attribute
             return elem[name] || elem.getAttribute(name, 2) || _sAttr ? _sAttr(elem) : undefined;
         }
     };
