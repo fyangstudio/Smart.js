@@ -89,6 +89,16 @@
         return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
     };
 
+    // The $m.$replace() method replaces one child node of the specified element with another.
+    $m.$replace = function (elem, replaced) {
+        if (replaced.parentNode) replaced.parentNode.replaceChild(elem, replaced);
+    };
+
+    // The $m.$remove () method removes a child node from the it's parentNode.
+    $m.$remove = function (elem) {
+        if (elem.parentNode) elem.parentNode.removeChild(elem);
+    };
+
     // Create an empty DocumentFragment object.
     $m.$fragment = function () {
         return _doc.createDocumentFragment();
