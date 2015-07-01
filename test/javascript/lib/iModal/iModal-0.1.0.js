@@ -81,6 +81,9 @@
         // Don't get/set attributes on text, comment and attribute nodes
         if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
 
+        var _map = {
+            BooleanAttr: [/selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/, true]
+        }
 
     };
 
