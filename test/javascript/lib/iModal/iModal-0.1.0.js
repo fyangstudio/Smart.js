@@ -45,7 +45,7 @@
     else if (_win.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
     else if (_win.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
 
-    /* Document information
+    /* The document object model
      ---------------------------------------------------------------------- */
     // Width (in pixels) of the browser window viewport
     var _winW = function () {
