@@ -76,15 +76,39 @@
         return _return;
     };
 
+    var _AttrMap = {
+        BooleanAttr: /selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/i,
+        SpecialAttr: {
+            'class': function (elem, value) {
+                return elem.className = value || '';
+            },
+            'for': function (elem, value) {
+                ('htmlFor' in elem) ? elem.htmlFor = value : elem.setAttribute('for', value);
+            },
+            'style': function (elem, value) {
+                return elem.style.cssText = value || '';
+            },
+            'value': function (elem, value) {
+                return elem.value = value || '';
+            }
+        }
+    };
+
     $m.$attr = function (elem, name, value) {
         var _nType = elem.nodeType;
-        // Don't get/set attributes on text, comment and attribute nodes
+        // Don't get/set attributes on attribute text and comment nodes.
         if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
 
-        var _map = {
-            BooleanAttr: [/selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/, true]
-        }
+        if (value != undefined) {
+            if (_AttrMap.BooleanAttr.test(name)) {
+                elem[name] = !!value;
+                !!value ? elem.setAttribute(name, name) : elem.removeAttribute(name);
+                // Use defaultChecked for oldIE
+                if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
+            }
+        } else {
 
+        }
     };
 
     // Create the specified HTML element

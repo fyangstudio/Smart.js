@@ -28,6 +28,7 @@ define([
     t1.onclick = function () {
         $m.$replace($m.$parseHTML('<p>3333</p>'), t2);
     };
+    $m.$attr(t1, 'checked', false);
     $m.$get('#test1')[0].appendChild(f);
 
 });
