@@ -26,9 +26,7 @@ define([
     t1.appendChild(t2);
     f.appendChild(t1);
     t1.onclick = function () {
-        t1.removeChild(t2);
-        t2 = $m.$parseHTML('<p>3333</p>');
-        t1.appendChild(t2);
+        t1.replaceChild($m.$parseHTML('<p>3333</p>'), t2);
     };
     $m.$get('#test1')[0].appendChild(f);
 
