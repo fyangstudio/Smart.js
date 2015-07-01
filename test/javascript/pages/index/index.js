@@ -20,6 +20,14 @@ define([
     //$m.$addEvent(window, 'resize', function () {
     //    resizeFn(100);
     //});
+
+    loop1:for (var i = 0; i < 10; i++) {
+        loop2:for (var j = 0; j < 5; j++) {
+            if (i == 3 && j == 3) continue loop1;
+            console.log('!' + i + '!!' + j);
+        }
+    }
+
     var t1 = $m.$parseHTML('<div class="title" style="color:red;"></div>');
     var t2 = $m.$parseHTML('<p>2222</p>');
     var t3 = $m.$parseHTML('<input type="text" id="three" />');
