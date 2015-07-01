@@ -76,6 +76,14 @@
         return _return;
     };
 
+    $m.$attr = function (elem, name, value) {
+        var _nType = elem.nodeType;
+        // Don't get/set attributes on text, comment and attribute nodes
+        if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
+
+
+    };
+
     // Create the specified HTML element
     $m.$create = function (type, namespace) {
         return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
