@@ -80,22 +80,26 @@
         BooleanAttr: /selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/i,
         SpecialAttr: {
             'class': function (elem, value) {
-                return elem.className = value || '';
+                if (value) elem.className = value;
+                else return elem.className;
             },
             'for': function (elem, value) {
-                ('htmlFor' in elem) ? elem.htmlFor = value : elem.setAttribute('for', value);
+                if (value)  elem.htmlFor = value;
+                else return elem.htmlFor;
             },
             'style': function (elem, value) {
-                return elem.style.cssText = value || '';
+                if (value) elem.style.cssText = value;
+                else return elem.style.cssText;
             },
             'value': function (elem, value) {
-                return elem.value = value || '';
+                if (value) elem.value = value;
+                else return elem.value;
             }
         }
     };
 
     $m.$attr = function (elem, name, value) {
-        var _nType = elem.nodeType;
+        var _nType = elem.nodeType, _sAttr = _AttrMap.SpecialAttr[name];
         // Don't get/set attributes on attribute text and comment nodes.
         if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
 
@@ -105,9 +109,13 @@
                 !!value ? elem.setAttribute(name, name) : elem.removeAttribute(name);
                 // Use defaultChecked for oldIE
                 if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
+            } else if (_sAttr) {
+                _sAttr(elem, value);
+            } else {
+                elem.setAttribute(name, value);
             }
         } else {
-
+            return elem[name] || elem.getAttribute(name, 2) || _sAttr ? _sAttr(elem) : undefined;
         }
     };
 

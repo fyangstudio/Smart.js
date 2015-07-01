@@ -20,15 +20,19 @@ define([
     //$m.$addEvent(window, 'resize', function () {
     //    resizeFn(100);
     //});
-    var t1 = $m.$parseHTML('<div></div>');
+    var t1 = $m.$parseHTML('<div class="title" style="color:red;"></div>');
     var t2 = $m.$parseHTML('<p>2222</p>');
+    var t3 = $m.$parseHTML('<input type="text" id="three" />');
+    var t4 = $m.$parseHTML('<label for="three">xxx</label>');
     var f = $m.$fragment();
     t1.appendChild(t2);
+    t1.appendChild(t3);
+    t1.appendChild(t4);
     f.appendChild(t1);
     t1.onclick = function () {
         $m.$replace($m.$parseHTML('<p>3333</p>'), t2);
     };
-    $m.$attr(t1, 'checked', false);
+    console.log($m.$attr(t4, 'for'));
     $m.$get('#test1')[0].appendChild(f);
 
 });
