@@ -1265,8 +1265,9 @@
         }
     };
 
-    var _render = function (structure) {
-        console.log(structure);
+    var _render = function (template) {
+        this._operation = new _Lexer(template);
+        console.log(this._operation);
     };
     _render.prototype = {};
 
@@ -1296,8 +1297,7 @@
             var _fn = this.init;
             this._node = $m.$create('a');
             this._node.href = '/';
-            var _structure = new _Lexer(this.template);
-            var _node = new _render(_structure);
+            var _node = new _render(this.template);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
