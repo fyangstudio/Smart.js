@@ -1285,7 +1285,6 @@
             k = k || 1;
             if (k < 0) k = k + 1;
             var pos = this.pos + k - 1;
-            console.log(pos);
             if (pos > this.length - 1) {
                 return this.operation[this.length - 1];
             }
@@ -1293,15 +1292,29 @@
         },
         process: function () {
             var statements = [], poll = this.poll();
-            //while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-            //    statements.push(this.statement());
-            //
-            //}
-            poll = this.poll();
-            console.log(poll);
+            while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
+                statements.push(this.statement());
+                console.log(statements)
+                poll = this.poll();
+            }
             return statements;
         },
         statement: function () {
+            var poll = this.poll();
+            switch (poll.type) {
+                case 'TEXT':
+                    var text = poll.value;
+                    this.next();
+                    //while (ll = this.eat(['NAME', 'TEXT'])) {
+                    //    text += ll.value;
+                    //}
+                    return {
+                        type: "text",
+                        text: text
+                    };
+                default:
+                    this.error('Unexpected token: ' + this.la())
+            }
             return 1;
         }
 
