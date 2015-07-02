@@ -1211,12 +1211,11 @@
     var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
-        var tokens = [], split, test, mlen, token, state, i = 0;
+        var tokens = [], split, test, mlen, token, state;
         this._pos = 0;
         this._map = _dictionary;
         this._states = ["INIT"];
         while (tpl) {
-            i++;
             state = this.state();
             split = this._map[state];
             test = split.MATCH.exec(tpl);
@@ -1268,15 +1267,11 @@
     var _Render = function (template) {
         this.operation = new _Lexer(template);
         this.length = this.operation.length;
-        console.log(this.operation);
+        this.pos = 0;
+        this.process();
+        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
     };
     _Render.prototype = {
-        start: function () {
-            this.pos = 0;
-            var res = this.process();
-            if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-            return res;
-        },
         next: function (k) {
             k = k || 1;
             this.pos += k;
@@ -1285,19 +1280,16 @@
             k = k || 1;
             if (k < 0) k = k + 1;
             var pos = this.pos + k - 1;
-            if (pos > this.length - 1) {
-                return this.operation[this.length - 1];
-            }
+            if (pos > this.length - 1) return this.operation[this.length - 1];
             return this.operation[pos];
         },
         process: function () {
             var statements = [], poll = this.poll();
             while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
                 statements.push(this.statement());
-                console.log(statements)
                 poll = this.poll();
             }
-            return statements;
+            this.parse(statements);
         },
         statement: function () {
             var poll = this.poll();
@@ -1316,8 +1308,11 @@
                     this.error('Unexpected token: ' + this.la())
             }
             return 1;
-        }
+        },
 
+        parse: function (statements) {
+            console.log(statements);
+        }
     };
 
     var _watch = function (obj, callback) {
@@ -1345,7 +1340,7 @@
             var _fn = this.init;
             this._node = $m.$create('a');
             this._node.href = '/';
-            var _node = new _Render(this.template).start();
+            var _node = new _Render(this.template);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
