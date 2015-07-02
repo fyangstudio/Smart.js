@@ -1096,7 +1096,7 @@
         'BEGIN': '{{',
         'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'IDENT': /[\$_A-Za-z][_0-9A-Za-z\$]*/,
+        'EXPRESSION': /[\$\/#@!_A-Za-z][^}]*/,
         'SPACE': /[\r\n\f ]/
     };
 
@@ -1127,7 +1127,7 @@
         }, 'TAG'],
 
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
-        TAG_OPEN_END: [/[\>\/&]/, function ($) {
+        TAG_OPEN_END: [/[>\/&]/, function ($) {
             if ($ === '>') this.leave();
             return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
@@ -1138,15 +1138,15 @@
         }, 'TAG'],
 
         // JST
-        JST_EXPR_OPEN: [/(%BEGIN%)/, function ($, one) {
-            return {type: 'EXPR_OPEN', value: one}
+        JST_OPEN: [/(%BEGIN%)/, function ($, one) {
+            return {type: 'JST_OPEN', value: one}
         }, 'JST'],
-        JST_IDENT: [/(%IDENT%)/, function ($, one) {
-            return {type: 'IDENT', value: one}
+        JST_EXPRESSION: [/(%EXPRESSION%)/, function ($, one) {
+            return {type: 'JST_EXPRESSION', value: one}
         }, 'JST'],
-        JST_EXPR_CLOSE: [/(%END%)/, function ($, one) {
+        JST_CLOSE: [/(%END%)/, function ($, one) {
             this.leave('JST');
-            return {type: 'EXPR_END', value: one}
+            return {type: 'JST_CLOSE', value: one}
         }, 'JST']
     };
 
@@ -1201,9 +1201,9 @@
         _rules.TAG_OPEN_END,
         _rules.TAG_CLOSE,
         // JST
-        _rules.JST_EXPR_OPEN,
-        _rules.JST_IDENT,
-        _rules.JST_EXPR_CLOSE
+        _rules.JST_OPEN,
+        _rules.JST_EXPRESSION,
+        _rules.JST_CLOSE
     ]);
 
     console.log(_dictionary);

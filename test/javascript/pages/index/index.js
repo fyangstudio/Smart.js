@@ -21,26 +21,19 @@ define([
     //    resizeFn(100);
     //});
 
-    //loop1:for (var i = 0; i < 10; i++) {
-    //    loop2:for (var j = 0; j < 5; j++) {
-    //        if (i == 3 && j == 3) continue loop1;
-    //        console.log('!' + i + '!!' + j);
-    //    }
-    //}
-
-    var t1 = $m.$parseHTML('<div class="title" style="color:red;"></div>');
-    var t2 = $m.$parseHTML('<p>2222</p>');
-    var t3 = $m.$parseHTML('<input type="text" id="three" />');
-    var t4 = $m.$parseHTML('<label for="three">xxx</label>');
-    var f = $m.$fragment();
-    t1.appendChild(t2);
-    t1.appendChild(t3);
-    t1.appendChild(t4);
-    f.appendChild(t1);
-    t1.onclick = function () {
-        $m.$replace($m.$parseHTML('<p>3333</p>'), t2);
-    };
-    console.log($m.$attr(t3, 'id'));
-    $m.$get('#test1')[0].appendChild(f);
+    //var t1 = $m.$parseHTML('<div class="title" style="color:red;"></div>');
+    //var t2 = $m.$parseHTML('<p>2222</p>');
+    //var t3 = $m.$parseHTML('<input type="text" id="three" />');
+    //var t4 = $m.$parseHTML('<label for="three">xxx</label>');
+    //var f = $m.$fragment();
+    //t1.appendChild(t2);
+    //t1.appendChild(t3);
+    //t1.appendChild(t4);
+    //f.appendChild(t1);
+    //t1.onclick = function () {
+    //    $m.$replace($m.$parseHTML('<p>3333</p>'), t2);
+    //};
+    //console.log($m.$attr(t3, 'id'));
+    //$m.$get('#test1')[0].appendChild(f);
 
 });
