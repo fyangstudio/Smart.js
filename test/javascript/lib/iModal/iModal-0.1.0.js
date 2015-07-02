@@ -1152,7 +1152,7 @@
         }, 'JST']
     };
 
-    var _processRules = function (rules) {
+    var TPL_ProcessRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
 
         var _replaceFn = function ($, one) {
@@ -1189,7 +1189,7 @@
         return map;
     };
 
-    var _dictionary = _processRules([
+    var TPL_Dictionary = TPL_ProcessRules([
         // INIT
         TPL_RULES.ENTER_JST,
         TPL_RULES.ENTER_TAG,
@@ -1208,12 +1208,12 @@
         TPL_RULES.JST_CLOSE
     ]);
 
-    var _Lexer = function (tpl) {
+    var TPL_Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state;
         this._pos = 0;
-        this._map = _dictionary;
+        this._map = TPL_Dictionary;
         this._states = ["INIT"];
         while (tpl) {
             state = this.state();
@@ -1230,7 +1230,7 @@
         return tokens;
     };
 
-    _Lexer.prototype = {
+    TPL_Lexer.prototype = {
         enter: function (state) {
             this._states.push(state);
             return this;
@@ -1264,14 +1264,14 @@
         }
     };
 
-    var _Render = function (template) {
-        this.operation = new _Lexer(template);
+    var TPL_Parser = function (template) {
+        this.operation = new TPL_Lexer(template);
         this.length = this.operation.length;
         this.pos = 0;
         this.process();
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
     };
-    _Render.prototype = {
+    TPL_Parser.prototype = {
         next: function (k) {
             k = k || 1;
             this.pos += k;
@@ -1289,7 +1289,7 @@
                 statements.push(this.statement());
                 poll = this.poll();
             }
-            this.parse(statements);
+            return statements;
         },
         statement: function () {
             var poll = this.poll();
@@ -1340,7 +1340,7 @@
             var _fn = this.init;
             this._node = $m.$create('a');
             this._node.href = '/';
-            var _node = new _Render(this.template);
+            var _node = new TPL_Parser(this.template);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
