@@ -1092,7 +1092,7 @@
      *
      */
     // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
-    var _macro = {
+    var TPL_MACRO = {
         'BEGIN': '{{',
         'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
@@ -1100,7 +1100,7 @@
         'SPACE': /[\r\n\f ]/
     };
 
-    var _rules = {
+    var TPL_RULES = {
         //INIT
         ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
             this.enter('JST');
@@ -1156,7 +1156,7 @@
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
 
         var _replaceFn = function ($, one) {
-            return $m.$isString(_macro[one]) ? $m.$escapeRegExp(_macro[one]) : String(_macro[one]).slice(1, -1);
+            return $m.$isString(TPL_MACRO[one]) ? $m.$escapeRegExp(TPL_MACRO[one]) : String(TPL_MACRO[one]).slice(1, -1);
         };
 
         var _getRetain = function (regStr) {
@@ -1191,21 +1191,21 @@
 
     var _dictionary = _processRules([
         // INIT
-        _rules.ENTER_JST,
-        _rules.ENTER_TAG,
-        _rules.TEXT,
+        TPL_RULES.ENTER_JST,
+        TPL_RULES.ENTER_TAG,
+        TPL_RULES.TEXT,
         // TAG
-        _rules.TAG_OPEN_START,
-        _rules.TAG_ATTRIBUTE_NAME,
-        _rules.TAG_ATTRIBUTE_INT,
-        _rules.TAG_ATTRIBUTE_VALUE,
-        _rules.TAG_SPACE,
-        _rules.TAG_OPEN_END,
-        _rules.TAG_CLOSE,
+        TPL_RULES.TAG_OPEN_START,
+        TPL_RULES.TAG_ATTRIBUTE_NAME,
+        TPL_RULES.TAG_ATTRIBUTE_INT,
+        TPL_RULES.TAG_ATTRIBUTE_VALUE,
+        TPL_RULES.TAG_SPACE,
+        TPL_RULES.TAG_OPEN_END,
+        TPL_RULES.TAG_CLOSE,
         // JST
-        _rules.JST_OPEN,
-        _rules.JST_EXPRESSION,
-        _rules.JST_CLOSE
+        TPL_RULES.JST_OPEN,
+        TPL_RULES.JST_EXPRESSION,
+        TPL_RULES.JST_CLOSE
     ]);
 
     var _Lexer = function (tpl) {
@@ -1265,23 +1265,58 @@
         }
     };
 
-    var _render = function (template) {
-        this._operation = new _Lexer(template);
-        console.log(this._operation);
+    var _Render = function (template) {
+        this.operation = new _Lexer(template);
+        this.length = this.operation.length;
+        console.log(this.operation);
     };
-    _render.prototype = {};
+    _Render.prototype = {
+        start: function () {
+            this.pos = 0;
+            var res = this.process();
+            if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+            return res;
+        },
+        next: function (k) {
+            k = k || 1;
+            this.pos += k;
+        },
+        poll: function (k) {
+            k = k || 1;
+            if (k < 0) k = k + 1;
+            var pos = this.pos + k - 1;
+            console.log(pos);
+            if (pos > this.length - 1) {
+                return this.operation[this.length - 1];
+            }
+            return this.operation[pos];
+        },
+        process: function () {
+            var statements = [], poll = this.poll();
+            //while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
+            //    statements.push(this.statement());
+            //
+            //}
+            poll = this.poll();
+            console.log(poll);
+            return statements;
+        },
+        statement: function () {
+            return 1;
+        }
+
+    };
 
     var _watch = function (obj, callback) {
         if (_observe) {
-            var t = {s: 1, t: 2};
-            _observe(t, function (changes) {
-                console.log(t);
+            _observe(obj, function (changes) {
+                console.log(obj);
             });
-            t.s = 2;
-            t.s = 4;
         }
     };
-    _watch();
+    var _testObj = {s: 1, t: 2};
+    _watch(_testObj);
+    _testObj.s = 2;
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
@@ -1297,7 +1332,7 @@
             var _fn = this.init;
             this._node = $m.$create('a');
             this._node.href = '/';
-            var _node = new _render(this.template);
+            var _node = new _Render(this.template).start();
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
