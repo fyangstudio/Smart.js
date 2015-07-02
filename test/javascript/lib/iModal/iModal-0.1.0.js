@@ -827,7 +827,7 @@
                 this._createXhrObject = _methods[i];
                 return _methods[i]();
             }
-            _ERROR('$ajax: Could not create an XHR object');
+            _ERROR('$ajax: Could not create an XHR object!');
         }
     };
 
@@ -1208,8 +1208,6 @@
         _rules.JST_CLOSE
     ]);
 
-    console.log(_dictionary);
-
     var _Lexer = function (tpl) {
         if (!tpl) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
@@ -1230,7 +1228,6 @@
         }
         // end of file
         tokens.push({type: 'EOF'});
-        console.log(tokens);
         return tokens;
     };
 
@@ -1268,6 +1265,11 @@
         }
     };
 
+    var _render = function (structure) {
+        console.log(structure);
+    };
+    _render.prototype = {};
+
     var _watch = function (obj, callback) {
         if (_observe) {
             var t = {s: 1, t: 2};
@@ -1294,7 +1296,8 @@
             var _fn = this.init;
             this._node = $m.$create('a');
             this._node.href = '/';
-            this._structure = new _Lexer(this.template);
+            var _structure = new _Lexer(this.template);
+            var _node = new _render(_structure);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
@@ -1310,7 +1313,7 @@
             this.$emit('update');
             var _target = undefined;
             if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
-            if (!_target) _ERROR('$inject: Node is not found');
+            if (!_target) _ERROR('$inject: Node is not found!');
             _target.appendChild(this._node);
             return this;
         }
