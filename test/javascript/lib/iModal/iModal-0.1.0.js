@@ -120,7 +120,7 @@
                 if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
             } else elem.setAttribute(name, value);
         } else {
-            // Get Attribute
+            // Get Attribute ( getAttribute(name, 2) for a.href in oldIE )
             return _sAttr ? _sAttr(elem) : (elem[name] || elem.getAttribute(name, 2) || undefined);
         }
     };
