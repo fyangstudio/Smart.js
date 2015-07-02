@@ -1110,11 +1110,17 @@
             this.enter('TAG');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
-        TEXT: [/[^\x00]+/, 'TEXT'],
+        TEXT: [/[^\x00]+/, function ($) {
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
 
         // TAG
         TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
+        }, 'TAG'],
+        TAG_OPEN_END: [/[>\/&]/, function ($) {
+            if ($ === '>') this.leave();
+            return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
 
         TAG_ATTRIBUTE_NAME: [/(%NAME%)/, function ($, one) {
@@ -1127,10 +1133,6 @@
         }, 'TAG'],
 
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
-        TAG_OPEN_END: [/[>\/&]/, function ($) {
-            if ($ === '>') this.leave();
-            return {type: 'TAG_OPEN_END', value: $}
-        }, 'TAG'],
 
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
             this.leave();
