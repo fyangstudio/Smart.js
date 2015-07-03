@@ -76,54 +76,55 @@
         return _return;
     };
 
-    // Special attribute map.
-    var _AttrMap = {
-        // Check Boolean IDL Attribute
-        BooleanAttr: /selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/i,
-        // Some Special Content attribute
-        SpecialAttr: {
-            // Element's class
-            'class': function (elem, value) {
-                if (value) elem.className = value;
-                else return elem.className;
-            },
-            // Label's for
-            'for': function (elem, value) {
-                if (value)  elem.htmlFor = value;
-                else return elem.htmlFor;
-            },
-            // Element's style
-            'style': function (elem, value) {
-                if (value) elem.style.cssText = value;
-                else return elem.style.cssText;
-            },
-            // Input's value
-            'value': function (elem, value) {
-                if (value) elem.value = value;
-                else return elem.value;
-            }
-        }
-    };
-
     // Set or get an element attribute.
-    $m.$attr = function (elem, name, value) {
-        var _nType = elem.nodeType, _sAttr = _AttrMap.SpecialAttr[name];
-        // Don't get/set attributes on attribute text and comment nodes.
-        if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
-        // Set Attribute
-        if (value !== undefined) {
-            if (_sAttr) _sAttr(elem, value);
-            else if (_AttrMap.BooleanAttr.test(name)) {
-                elem[name] = !!value;
-                !!value ? elem.setAttribute(name, name) : elem.removeAttribute(name);
-                // Use defaultChecked for oldIE
-                if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
-            } else  !!value ? elem.setAttribute(name, value) : elem.removeAttribute(name);
-        } else {
-            // Get Attribute ( getAttribute(name, 2) for a.href in oldIE )
-            return _sAttr ? _sAttr(elem) : (elem[name] || elem.getAttribute(name, 2) || undefined);
-        }
-    };
+    $m.$attr = (function () {
+        // Special attribute map.
+        var _AttrMap = {
+            // Check Boolean IDL Attribute
+            BooleanAttr: /selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/i,
+            // Some Special Content attribute
+            SpecialAttr: {
+                // Element's class
+                'class': function (elem, value) {
+                    if (value) elem.className = value;
+                    else return elem.className;
+                },
+                // Label's for
+                'for': function (elem, value) {
+                    if (value)  elem.htmlFor = value;
+                    else return elem.htmlFor;
+                },
+                // Element's style
+                'style': function (elem, value) {
+                    if (value) elem.style.cssText = value;
+                    else return elem.style.cssText;
+                },
+                // Input's value
+                'value': function (elem, value) {
+                    if (value) elem.value = value;
+                    else return elem.value;
+                }
+            }
+        };
+        return function (elem, name, value) {
+            var _nType = elem.nodeType, _sAttr = _AttrMap.SpecialAttr[name];
+            // Don't get/set attributes on attribute text and comment nodes.
+            if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
+            // Set Attribute
+            if (value !== undefined) {
+                if (_sAttr) _sAttr(elem, value);
+                else if (_AttrMap.BooleanAttr.test(name)) {
+                    elem[name] = !!value;
+                    !!value ? elem.setAttribute(name, name) : elem.removeAttribute(name);
+                    // Use defaultChecked for oldIE
+                    if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
+                } else  !!value ? elem.setAttribute(name, value) : elem.removeAttribute(name);
+            } else {
+                // Get Attribute ( getAttribute(name, 2) for a.href in oldIE )
+                return _sAttr ? _sAttr(elem) : (elem[name] || elem.getAttribute(name, 2) || undefined);
+            }
+        };
+    })();
 
     // Create the specified HTML element
     $m.$create = function (type, namespace) {
@@ -144,6 +145,22 @@
     $m.$fragment = function () {
         return _doc.createDocumentFragment();
     };
+
+    // $m.$text() sets or gets all of the markup and content within a given element.
+    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
+    $m.$text = (function () {
+        // Special add text method map.
+        var _TextMap = {};
+        if ($m.$sys.$ie && $m.$sys.$ie < 9) {
+            _TextMap[1] = 'innerText';
+            _TextMap[3] = 'nodeValue';
+        } else _TextMap[1] = _TextMap[3] = 'textContent';
+        return function (elem, value) {
+            var textProp = _TextMap[elem.nodeType];
+            if (value === undefined) return textProp ? elem[textProp] : '';
+            elem[textProp] = value;
+        }
+    })();
 
     // The $m.$style() method specifies the style sheet language for the given document fragment.
     $m.$style = function (elem, name) {

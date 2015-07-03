@@ -21,19 +21,21 @@ define([
     //    resizeFn(100);
     //});
 
-    var t1 = $m.$parseHTML('<div class="title" style="color:red;"></div>');
-    var t2 = $m.$parseHTML('<p>2222</p>');
-    var t3 = $m.$parseHTML('<input type="text" data-abc="111" id="three" />');
-    var t4 = $m.$parseHTML('<label for="three">xxx</label>');
-    var f = $m.$fragment();
-    t1.appendChild(t2);
-    t1.appendChild(t3);
-    t1.appendChild(t4);
-    f.appendChild(t1);
-    t1.onclick = function () {
-        $m.$replace($m.$parseHTML('<p>3333</p>'), t2);
-    };
-    console.log($m.$attr(t3, 'id', '222'));
-    $m.$get('#test1')[0].appendChild(f);
+    //var t1 = $m.$parseHTML('<div class="title" style="color:red;"></div>');
+    //var t2 = $m.$parseHTML('<p>2222</p>');
+    //var t3 = $m.$parseHTML('<input type="text" data-abc="111" id="three" />');
+    //var t4 = $m.$parseHTML('<label for="three">xxx</label>');
+    //var f = $m.$fragment();
+    //t1.appendChild(t2);
+    //t1.appendChild(t3);
+    //t1.appendChild(t4);
+    //f.appendChild(t1);
+    //t1.onclick = function () {
+    //    $m.$replace($m.$parseHTML('<p>3333</p>'), t2);
+    //};
+    //console.log($m.$attr(t3, 'id', null));
+    //$m.$get('#test1')[0].appendChild(f);
+
+    //console.log($m.$text($m.$get('.test2')[0]));
 
 });
