@@ -111,14 +111,14 @@
         // Don't get/set attributes on attribute text and comment nodes.
         if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
         // Set Attribute
-        if (value != undefined) {
+        if (value !== undefined) {
             if (_sAttr) _sAttr(elem, value);
             else if (_AttrMap.BooleanAttr.test(name)) {
                 elem[name] = !!value;
                 !!value ? elem.setAttribute(name, name) : elem.removeAttribute(name);
                 // Use defaultChecked for oldIE
                 if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
-            } else elem.setAttribute(name, value);
+            } else  !!value ? elem.setAttribute(name, value) : elem.removeAttribute(name);
         } else {
             // Get Attribute ( getAttribute(name, 2) for a.href in oldIE )
             return _sAttr ? _sAttr(elem) : (elem[name] || elem.getAttribute(name, 2) || undefined);
