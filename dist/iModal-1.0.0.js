@@ -1,5 +1,5 @@
 /**
- * iModal JavaScript Component v0.1.0
+ * iModalJs JavaScript Component v1.0.0
  *
  * Author YangFan(18767120422@163.com)
  *
@@ -8,17 +8,24 @@
 //<![CDATA[
 (function (_doc, _win, undefined) {
 
-    // iModal object
-    var _version = '0.1.0';
-    var $m = {iModal: _version};
+    // iModalJs version
+    var _version = '1.0.0';
+    // iModalJs object
+    var $m = {iModalJs: _version};
     // Empty function
-    var _noop = function () {
+    var _NOOP = function () {
     };
+    // Error function
+    var _ERROR = function (msg) {
+        throw new Error(msg);
+    };
+    // Object.observe
+    var _observe = Object.observe || undefined;
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
     /*!
-     * iModal Tools Component
+     * iModalJs Tools Component
      *
      * #include
      * Primary javascript API syntax fix
@@ -38,7 +45,7 @@
     else if (_win.openDatabase) _sys.$safari = _ua.match(/version\/([\d.]+)/)[1];
     else if (_win.opera) _sys.$opera = _ua.match(/opera.([\d.]+)/)[1];
 
-    /* size
+    /* The document object model
      ---------------------------------------------------------------------- */
     // Width (in pixels) of the browser window viewport
     var _winW = function () {
@@ -69,6 +76,92 @@
         return _return;
     };
 
+    // Set or get an element attribute.
+    $m.$attr = (function () {
+        // Special attribute map.
+        var _AttrMap = {
+            // Check Boolean IDL Attribute
+            BooleanAttr: /selected|checked|disabled|readOnly|autofocus|controls|autoplay|loop/i,
+            // Some Special Content attribute
+            SpecialAttr: {
+                // Element's class
+                'class': function (elem, value) {
+                    if (value) elem.className = value;
+                    else return elem.className;
+                },
+                // Label's for
+                'for': function (elem, value) {
+                    if (value)  elem.htmlFor = value;
+                    else return elem.htmlFor;
+                },
+                // Element's style
+                'style': function (elem, value) {
+                    if (value) elem.style.cssText = value;
+                    else return elem.style.cssText;
+                },
+                // Input's value
+                'value': function (elem, value) {
+                    if (value) elem.value = value;
+                    else return elem.value;
+                }
+            }
+        };
+        return function (elem, name, value) {
+            var _nType = elem.nodeType, _sAttr = _AttrMap.SpecialAttr[name];
+            // Don't get/set attributes on attribute text and comment nodes.
+            if (!elem || _nType === 2 || _nType === 3 || _nType === 8) return;
+            // Set Attribute
+            if (value !== undefined) {
+                if (_sAttr) _sAttr(elem, value);
+                else if (_AttrMap.BooleanAttr.test(name)) {
+                    elem[name] = !!value;
+                    !!value ? elem.setAttribute(name, name) : elem.removeAttribute(name);
+                    // Use defaultChecked for oldIE
+                    if (this.$sys.$ie && this.$sys.$ie <= 7) elem.defaultChecked = !!value;
+                } else  !!value ? elem.setAttribute(name, value) : elem.removeAttribute(name);
+            } else {
+                // Get Attribute ( getAttribute(name, 2) for a.href in oldIE )
+                return _sAttr ? _sAttr(elem) : (elem[name] || elem.getAttribute(name, 2) || undefined);
+            }
+        };
+    })();
+
+    // Create the specified HTML element
+    $m.$create = function (type, namespace) {
+        return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
+    };
+
+    // The $m.$replace() method replaces one child node of the specified element with another.
+    $m.$replace = function (elem, replaced) {
+        if (replaced.parentNode) replaced.parentNode.replaceChild(elem, replaced);
+    };
+
+    // The $m.$remove () method removes a child node from the it's parentNode.
+    $m.$remove = function (elem) {
+        if (elem.parentNode) elem.parentNode.removeChild(elem);
+    };
+
+    // Create an empty DocumentFragment object.
+    $m.$fragment = function () {
+        return _doc.createDocumentFragment();
+    };
+
+    // $m.$text() sets or gets all of the markup and content within a given element.
+    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
+    $m.$text = (function () {
+        // Special add text method map.
+        var _TextMap = {};
+        if ($m.$sys.$ie && $m.$sys.$ie < 9) {
+            _TextMap[1] = 'innerText';
+            _TextMap[3] = 'nodeValue';
+        } else _TextMap[1] = _TextMap[3] = 'textContent';
+        return function (elem, value) {
+            var textProp = _TextMap[elem.nodeType];
+            if (value === undefined) return textProp ? elem[textProp] : '';
+            elem[textProp] = value;
+        }
+    })();
+
     // The $m.$style() method specifies the style sheet language for the given document fragment.
     $m.$style = function (elem, name) {
         if (elem.currentStyle) return elem.currentStyle[name];
@@ -90,7 +183,6 @@
 
     /* Event
      ---------------------------------------------------------------------- */
-
     // Event listener
     if (_doc.addEventListener) {
         $m.$addEvent = function (node, event, fn) {
@@ -154,7 +246,7 @@
      ---------------------------------------------------------------------- */
     $m.$queue = function () {
         this.dataStore = [];
-    }
+    };
     $m.$queue.prototype = {
         // add an item to the queue, generally at the "back" of the queue
         enqueue: function (element) {
@@ -175,10 +267,6 @@
         // get queue length
         length: function () {
             return this.dataStore.length;
-        },
-        // to determine whether empty queue
-        empty: function () {
-            return this.dataStore.length == 0 ? true : false;
         }
     };
 
@@ -192,13 +280,14 @@
 
     // The $m.$isXXX() method returns true if an object is an XXX, false if it is not.
     $m.$isArray = Array.isArray || _isType('Array');
+    $m.$isDate = _isType('Date');
+    $m.$isRegExp = _isType('RegExp');
     $m.$isObject = _isType('Object');
     $m.$isString = _isType('String');
     $m.$isFunction = _isType('Function');
 
     /* Syntax fix
      ---------------------------------------------------------------------- */
-
     // The trim() method removes whitespace from both ends of a string.
     if (!String.prototype.trim) {
         String.prototype.trim = function () {
@@ -215,11 +304,11 @@
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
                 fBound = function () {
-                    return fToBind.apply(this instanceof _noop && oThis ? this : oThis || _win,
+                    return fToBind.apply(this instanceof _NOOP && oThis ? this : oThis || _win,
                         aArgs.concat(Array.prototype.slice.call(arguments)));
                 };
-            _noop.prototype = this.prototype;
-            fBound.prototype = new _noop();
+            _NOOP.prototype = this.prototype;
+            fBound.prototype = new _NOOP();
             return fBound;
         };
     }
@@ -288,7 +377,7 @@
                 json = json.trim();
                 if (json) return ( new Function('return ' + json) )();
             }
-            throw new Error('Invalid JSON: ' + json);
+            _ERROR('Invalid JSON: ' + json);
         };
         // The JSON.stringify() method converts a JavaScript value to a JSON string, optionally replacing values if a replacer function is specified,
         // or optionally including only the specified properties if a replacer array is specified.
@@ -315,9 +404,9 @@
     // Low version of the browser compatibility without console object.
     if (!_win.console) {
         _win.console = {
-            log: _noop,
-            warn: _noop,
-            error: _noop
+            log: _NOOP,
+            warn: _NOOP,
+            error: _NOOP
         };
     }
 
@@ -339,7 +428,7 @@
                 _calls.push(fn);
             }
             return context;
-        }
+        };
         // Relieve custom event
         context.$off = function (event, fn) {
             if (!context._handles) return;
@@ -359,7 +448,7 @@
                 }
             }
             return context;
-        }
+        };
         // Trigger custom events
         context.$emit = function (event) {
             var handles = context._handles, calls, args, type;
@@ -378,6 +467,7 @@
             return context;
         }
     };
+
     /* Parse
      ---------------------------------------------------------------------- */
     // The $m.$parseHTML() method can change a string of html to a html node.
@@ -387,7 +477,7 @@
             _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
         var _tag;
         if (_reg.test(txt)) _tag = _parentNodeMap[(RegExp.$1 || '').toLowerCase()] || '';
-        var _cnt = _doc.createElement(_tag || 'div');
+        var _cnt = this.$create(_tag || 'div');
         _cnt.innerHTML = txt;
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
@@ -399,7 +489,7 @@
             _reg1 = /([^:])\/+/g,                           // get request protocol
             _reg2 = /[^\/]*$/,                              // get file name
             _reg3 = /\.js$/i,                               // get javascript file
-            _anchor = _doc.createElement('a');              // _anchor which can get browser machined path
+            _anchor = $m.$create('a');                      // _anchor which can get browser machined path
 
         // The _absolute() method can tell if uri is a absolute path.
         function _absolute(uri) {
@@ -416,7 +506,7 @@
             // append _anchor to document
             if (!_addA) {
                 _addA = true;
-                _anchor.id = 'iModal_anchor';
+                _anchor.id = 'iModalJs_anchor';
                 _anchor.style.display = 'none';
                 _doc.body.appendChild(_anchor);
             }
@@ -460,6 +550,51 @@
             return _parse(uri, type);
         };
     })();
+
+    /* Format
+     ---------------------------------------------------------------------- */
+    // Transforms a "yyyy-MM-dd hh:mm:ss" timestamp into the specified date/time format.
+    $m.$formatTime = function (time, format) {
+        if (this.$isString(time)) time = new Date(Date.parse(time));
+        if (!this.$isDate(time)) time = new Date(time);
+        var _format = function (value) {
+            return RegExp.$1.length == 1 ? value : ('00' + value).substr(('' + value).length);
+        };
+        var _map = [
+            // Format Year
+            [/(y+)/, function () {
+                return (time.getFullYear() + '').substr(4 - RegExp.$1.length);
+            }],
+            // Format Month
+            [/(M+)/, function () {
+                return _format(time.getMonth() + 1);
+            }],
+            // Format Date
+            [/(d+)/, function () {
+                return _format(time.getDate());
+            }],
+            // Format Hour
+            [/(h+)/, function () {
+                return _format(time.getHours());
+            }],
+            // Format Minutes
+            [/(m+)/, function () {
+                return _format(time.getMinutes());
+            }],
+            // Format Seconds
+            [/(s+)/, function () {
+                return _format(time.getSeconds());
+            }],
+            // Format Milliseconds
+            [/(ms)/, function () {
+                return _format(time.getMilliseconds());
+            }]
+        ];
+        _map.forEach(function (value) {
+            format = format.replace(value[0], value[1]);
+        });
+        return format;
+    };
 
     /* Transform
      ---------------------------------------------------------------------- */
@@ -657,8 +792,8 @@
                     _url = config.url,                                          // url
                     _data = config.data || null,                                // send data
                     _dataType = (config.dataType || 'JSON').toLowerCase(),      // request data type
-                    _success = config.success || _noop,                         // request success callback
-                    _error = config.error || _noop,                             // request fail callback
+                    _success = config.success || _NOOP,                         // request success callback
+                    _error = config.error || _NOOP,                             // request fail callback
                     _xhr = this._createXhrObject();                             // XMLHttpRequest
                 // data to string
                 var _d2s = function (data) {
@@ -672,7 +807,7 @@
                 _xhr.onreadystatechange = function () {
                     if (_xhr.readyState !== 4) return;
                     var _responseData = _dataType == 'json' ? JSON.parse(_xhr.responseText) : _xhr.responseText;
-                    (_xhr.status === 200) ? _success(_responseData) : _error(_xhr.status);
+                    (_xhr.status === 200) ? _success(_responseData) : _error(_xhr);
                 };
                 _xhr.open(_method, _url, true);
                 // Set request header
@@ -709,14 +844,14 @@
                 this._createXhrObject = _methods[i];
                 return _methods[i]();
             }
-            throw new Error('Could not create an XHR object');
+            _ERROR('$ajax: Could not create an XHR object!');
         }
     };
 
     // The $m.$ajax() method perform an asynchronous HTTP request.
     $m.$ajax = function (config) {
         if (this.$isObject(config)) return new _ajaxHandler()._request(config);
-        else throw new Error('Ajax parameter error');
+        else _ERROR('$ajax: Parameter error');
     };
 
     /* Encode & Decode
@@ -729,6 +864,13 @@
             return _result != null ? _result : $1;
         });
     };
+    // Escapes all reserved characters for regular expressions by preceding them with a backslash.
+    // Credit: XRegExp 0.6.1 (c) 2007-2008 Steven Levithan <http://stevenlevithan.com/regex/xregexp/> MIT License
+    $m.$escapeRegExp = function (str) {
+        return str.replace(/[-[\]{}()*+?.\\^$|,#\s]/g, function (match) {
+            return '\\' + match;
+        });
+    };
     // The $m.$escape() method computes a new string,
     // in which certain characters have been replaced by a hexadecimal escape sequence.
     // Use entity transform or encodeURIComponent instead.
@@ -738,7 +880,7 @@
             '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
             '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
         };
-        var ret = _encode(_map, content)
+        var ret = _encode(_map, content);
         return encodeURL != undefined ? encodeURIComponent(ret) : ret;
     };
 
@@ -771,7 +913,7 @@
     function _interpret(query, context) {
         var parts = query.replace(/\s+/, ' ').split(' ');
         var part = parts.pop();
-        var selector = _selectorFactory.create(part);
+        var selector = _selectorFactory.createSelector(part);
         var ret = selector.find(context);
 
         return (parts[0] && ret[0]) ? _domFilter(parts, ret) : ret;
@@ -871,7 +1013,7 @@
     // If result has parent node, filter result
     function _domFilter(parts, nodeList) {
         var part = parts.pop();
-        var selector = _selectorFactory.create(part);
+        var selector = _selectorFactory.createSelector(part);
         var ret = [];
         var parent;
 
@@ -890,7 +1032,7 @@
 
     // Create dom selector
     var _selectorFactory = {
-        create: function (query) {
+        createSelector: function (query) {
             if (_IdSelector.test(query)) return new _IdSelector(query);
             else if (_ClassSelector.test(query)) return new _ClassSelector(query);
             else return new _TagSelector(query);
@@ -907,7 +1049,6 @@
     // Extend
     Class.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
-
         var _super = this.prototype;
 
         // Class state change
@@ -922,7 +1063,7 @@
                 prototype[name] = (function (name, fn) {
                     if ($m.$isFunction(prop[name])) {
                         return function () {
-                            var _superFn = _noop;
+                            var _superFn = _NOOP;
                             if (!!_super[name] && $m.$isFunction(_super[name])) _superFn = _super[name];
                             // Add custom event handles
                             if (eventInit) {
@@ -956,77 +1097,291 @@
         return $mClass;
     };
 
-    // iModal base module
+    // iModalJs base module
     $m.$module = Class;
 
     /*!
-     * iModal Templates Component
+     * iModalJs Templates Component
      *
      * #include
      * Living dom
      *
      */
-
-    var _macro = {
+    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
+    var TPL_MACRO = {
         'BEGIN': '{{',
         'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'IDENT': /[\$_A-Za-z][_0-9A-Za-z\$]*/,
+        'EXPRESSION': /[\$\/#@!_A-Za-z][^}]*/,
         'SPACE': /[\r\n\f ]/
     };
 
-    var rules = {
-        TAG_OPEN: [/<({NAME})\s*/, function (all, one) {
-            return {type: 'TAG_OPEN', value: one}
+    var TPL_RULES = {
+        //INIT
+        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
+            this.enter('JST');
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
+        ENTER_TAG: [/[^\x00<>]*?(?=<)/, function ($) {
+            this.enter('TAG');
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
+        TEXT: [/[^\x00]+/, function ($) {
+            if ($) return {type: 'TEXT', value: $}
+        }, 'INIT'],
+
+        // TAG
+        TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
+            return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
-        TAG_CLOSE: [/<\/({NAME})[\r\n\f ]*>/, function (all, one) {
+        TAG_OPEN_END: [/[>\/&]/, function ($) {
+            if ($ === '>') this.leave();
+            return {type: 'TAG_OPEN_END', value: $}
+        }, 'TAG'],
+
+        TAG_ATTRIBUTE_NAME: [/(%NAME%)/, function ($, one) {
+            return {type: 'TAG_ATTRIBUTE_NAME', value: one}
+        }, 'TAG'],
+        TAG_ATTRIBUTE_INT: [/=/, null, 'TAG'],
+        TAG_ATTRIBUTE_VALUE: [/'([^']*)'|"([^"]*)"/, function ($, one, two) {
+            var value = one || two || "";
+            return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
+        }, 'TAG'],
+
+        TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
+
+        TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
+            this.leave();
             return {type: 'TAG_CLOSE', value: one}
-        }, 'TAG']
+        }, 'TAG'],
+
+        // JST
+        JST_OPEN: [/(%BEGIN%)/, function ($, one) {
+            return {type: 'JST_OPEN', value: one}
+        }, 'JST'],
+        JST_EXPRESSION: [/(%EXPRESSION%)/, function ($, one) {
+            return {type: 'JST_EXPRESSION', value: one}
+        }, 'JST'],
+        JST_CLOSE: [/(%END%)/, function ($, one) {
+            this.leave('JST');
+            return {type: 'JST_CLOSE', value: one}
+        }, 'JST']
     };
+
+    var TPL_ProcessRules = function (rules) {
+        var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
+
+        var _replaceFn = function ($, one) {
+            return $m.$isString(TPL_MACRO[one]) ? $m.$escapeRegExp(TPL_MACRO[one]) : String(TPL_MACRO[one]).slice(1, -1);
+        };
+
+        var _getRetain = function (regStr) {
+            var series = 0, ignored = regStr.match(_ignoredReg);
+            for (var l = regStr.length; l--;) if ((l === 0 || regStr.charAt(l - 1) !== "\\") && regStr.charAt(l) === "(") series++;
+            return ignored ? series - ignored.length : series;
+        };
+
+        // add map[sign]
+        rules.forEach(function (rule) {
+            sign = rule[2] || 'INIT';
+            (map[sign] || (map[sign] = {rules: [], links: []})).rules.push(rule);
+        });
+        // add map[sign]'s MATCH
+        $m.$forIn(map, function (split) {
+            split.curIndex = 1;
+            _rules = split.rules;
+            _matchs = [];
+            _rules.forEach(function (rule) {
+                _reg = rule[0];
+                if ($m.$isRegExp(_reg)) _reg = _reg.toString().slice(1, -1);
+                _reg = _reg.replace(/%(\w+)%/g, _replaceFn);
+                _retain = _getRetain(_reg) + 1;
+                split.links.push([split.curIndex, _retain, rule[1]]);
+                split.curIndex += _retain;
+                _matchs.push(_reg);
+            });
+            split.MATCH = new RegExp("^(?:(" + _matchs.join(")|(") + "))");
+        });
+        return map;
+    };
+
+    var TPL_Dictionary = TPL_ProcessRules([
+        // INIT
+        TPL_RULES.ENTER_JST,
+        TPL_RULES.ENTER_TAG,
+        TPL_RULES.TEXT,
+        // TAG
+        TPL_RULES.TAG_OPEN_START,
+        TPL_RULES.TAG_ATTRIBUTE_NAME,
+        TPL_RULES.TAG_ATTRIBUTE_INT,
+        TPL_RULES.TAG_ATTRIBUTE_VALUE,
+        TPL_RULES.TAG_SPACE,
+        TPL_RULES.TAG_OPEN_END,
+        TPL_RULES.TAG_CLOSE,
+        // JST
+        TPL_RULES.JST_OPEN,
+        TPL_RULES.JST_EXPRESSION,
+        TPL_RULES.JST_CLOSE
+    ]);
+
+    var TPL_Lexer = function (tpl) {
+        if (!tpl) _ERROR('$tpl: Template not found!');
+        tpl = tpl.trim();
+        var tokens = [], split, test, mlen, token, state;
+        this._pos = 0;
+        this._map = TPL_Dictionary;
+        this._states = ["INIT"];
+        while (tpl) {
+            state = this.state();
+            split = this._map[state];
+            test = split.MATCH.exec(tpl);
+            mlen = test ? test[0].length : 1;
+            tpl = tpl.slice(mlen);
+            token = this.process(test, split, tpl);
+            if (token) tokens.push(token);
+            this._pos += mlen;
+        }
+        // end of file
+        tokens.push({type: 'EOF'});
+        return tokens;
+    };
+
+    TPL_Lexer.prototype = {
+        enter: function (state) {
+            this._states.push(state);
+            return this;
+        },
+        leave: function (state) {
+            var states = this._states;
+            if (!state || states[states.length - 1] === state) states.pop();
+        },
+        state: function () {
+            var states = this._states;
+            return states[states.length - 1];
+        },
+        process: function (args, split, tpl) {
+            var links = split.links, token, marched = false;
+            for (var len = links.length, i = 0; i < len; i++) {
+                var link = links[i], handler = link[2], index = link[0];
+                if (args && args[index]) {
+                    marched = true;
+                    if (handler) {
+                        token = handler.apply(this, args.slice(index, index + link[1]));
+                        token.pos = this._pos;
+                    }
+                    break;
+                }
+            }
+            if (!marched) {
+                if (tpl.charAt(0) == '<') this.enter("TAG");
+                else this.enter("JST");
+            }
+            return token;
+        }
+    };
+
+    var TPL_Parser = function (template) {
+        this.operation = new TPL_Lexer(template);
+        this.length = this.operation.length;
+        this.pos = 0;
+        this.parsed = false;
+        this.statements = [];
+        this.process();
+        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+    };
+    TPL_Parser.prototype = {
+        next: function (k) {
+            k = k || 1;
+            this.pos += k;
+        },
+        poll: function (k) {
+            k = k || 1;
+            if (k < 0) k = k + 1;
+            var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
+            if (criticalFlag && !this.parsed)this.parse();
+            return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
+        },
+        process: function () {
+            var poll = this.poll();
+            while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
+                this.statements.push(this.statement());
+                poll = this.poll();
+            }
+        },
+        statement: function () {
+            var poll = this.poll();
+            switch (poll.type) {
+                case 'TEXT':
+                    var text = poll.value;
+                    this.next();
+                    //while (ll = this.eat(['NAME', 'TEXT'])) {
+                    //    text += ll.value;
+                    //}
+                    return {
+                        type: "text",
+                        text: text
+                    };
+                default:
+                    this.error('Unexpected token: ' + this.la())
+            }
+            return 1;
+        },
+
+        parse: function (statements) {
+            this.parsed = true;
+            console.log(this.statements);
+        }
+    };
+
+    var _watch = function (obj, callback) {
+        if (_observe) {
+            _observe(obj, function (changes) {
+                console.log(obj);
+            });
+        }
+    };
+    var _testObj = {s: 1, t: 2};
+    _watch(_testObj);
+    _testObj.s = 2;
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
-            // this.$update();
-            console.log(this);
+            this.$update();
         }.bind(this), _config.delay);
         $m.$addEvent(window, _resizeEvt, _resizeFn);
     };
 
     $m.$tpl = $m.$module.$extend({
-        $init: function (context) {
-            var _fn = this.init;
-            this._node = _doc.createElement('a');
-            this._node.href = '/';
+        $init: function (data) {
 
+            var _fn = this.init;
+            this._node = $m.$create('a');
+            this._node.href = '/';
+            var _node = new TPL_Parser(this.template);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
+
+            this.$on('update', this.$update);
         },
 
-        $inject: function (refer, position) {
+        $update: function () {
+            console.log('update');
+        },
 
-            var _first, _next, _target = $m.$get(refer)[0], _position = position || 'bottom';
-            switch (_position) {
-                case 'bottom':
-                    _target.appendChild(this._node);
-                    break;
-                case 'top':
-                    if (_first = _target.firstChild) _target.insertBefore(this._node, _first);
-                    else _target.appendChild(this._node);
-                    break;
-                case 'after':
-                    if (_next = _target.nextSibling) _next.parentNode.insertBefore(this._node, _next);
-                    else _target.parentNode.appendChild(this._node);
-                    break;
-                case 'before':
-                    _target.parentNode.insertBefore(this._node, _target);
-            }
+        $inject: function (parentNode) {
+            this.$emit('update');
+            var _target = undefined;
+            if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
+            if (!_target) _ERROR('$inject: Node is not found!');
+            _target.appendChild(this._node);
+            return this;
         }
     });
 
     /*!
-     * iModal Module Component
+     * iModalJs Module Component
      *
      * #include
      * Define (SAMD)
@@ -1088,7 +1443,7 @@
     // Declare define mode - samd.
     $m.$define.samd = 'Selective Asynchronous Module Definition';
 
-    // Define and iModal init function
+    // Define and iModalJs init function
     var _init = function () {
         var _list = _doc.getElementsByTagName('script');
 
@@ -1102,7 +1457,7 @@
         // Return iModal
         if (!_win.define) _win.define = $m.$define;
         _win.$M = _win.$m = $m;
-    }
+    };
 
     // The _parsePlugin() method can determine whether a file is meet selective options.
     var _parsePlugin = (function () {
@@ -1149,8 +1504,8 @@
                     _target = _target.substring(1);
                 }
                 // load function to assignment
-                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _noop : null;
-                else if (!_fun) _fun = _negation ? null : _noop;
+                if ($m.$sys[_sys] && _parseVersion(_target, _sys)) _fun = _negation ? _NOOP : null;
+                else if (!_fun) _fun = _negation ? null : _NOOP;
                 _sOption = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
@@ -1217,7 +1572,7 @@
         if (_state != null) return;
         _sCache[url] = 0;
         // load file
-        var _script = _doc.createElement('script');
+        var _script = $m.$create('script');
         _script.iModal = !0;
         _script.type = 'text/javascript';
         _script.charset = _config.charset;
@@ -1324,13 +1679,14 @@
                 }
             }
             return !0;
-        };
+        }
+
         // check whether all files are loaded
         function _isFinishLoaded() {
-            for (var x in _sCache)
-                if (_sCache[x] === 0) return !1;
+            for (var x in _sCache) if (_sCache.hasOwnProperty(x) && _sCache[x] === 0) return !1;
             return !0;
-        };
+        }
+
         return function () {
             if (!_iList.length) return;
             for (var i = _iList.length - 1, _item; i >= 0;) {
@@ -1348,8 +1704,8 @@
             }
             // check circular reference
             if (_iList.length > 0 && _isFinishLoaded()) {
-                var _item = _circular() || _iList.pop();
-                _execFn(_item);
+                var _itemFn = _circular() || _iList.pop();
+                _execFn(_itemFn);
                 _checkLoading();
             }
         };
@@ -1378,9 +1734,9 @@
                 } else {
                     // for namespace return
                     _ret = _ret || {};
-                    for (var x in _result) {
-                        _ret[x] = _result[x];
-                    }
+                    $m.$forIn(_result, function (value, key) {
+                        _ret[key] = value;
+                    });
                 }
             }
             _rCache[_uri] = _ret;
@@ -1393,7 +1749,7 @@
                 _mergeResult(_item.n, _result);
             }
             _sCache[_item.n] = 2;
-            console.log('iModal: ' + _item.n);
+            console.log('iModalJs: ' + _item.n);
         };
     })();
 
@@ -1460,13 +1816,12 @@
                     _list[k] = _itm;
                     _arr[1](_itm);
                 }
-
             }
             _checkLoading();
         };
     })();
 
-    // iModal start
+    // iModalJs start
     _init();
 })
 (document, window);
