@@ -1,5 +1,5 @@
 /**
- * iModal JavaScript Component v0.1.0
+ * iModalJs JavaScript Component v1.0.0
  *
  * Author YangFan(18767120422@163.com)
  *
@@ -8,10 +8,10 @@
 //<![CDATA[
 (function (_doc, _win, undefined) {
 
-    // iModal object
-    var _version = '0.1.0';
+    // iModalJs version
+    var _version = '1.0.0';
     // iModalJs object
-    var $m = {iModal: _version};
+    var $m = {iModalJs: _version};
     // Empty function
     var _NOOP = function () {
     };
@@ -25,7 +25,7 @@
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
 
     /*!
-     * iModal Tools Component
+     * iModalJs Tools Component
      *
      * #include
      * Primary javascript API syntax fix
@@ -1081,11 +1081,11 @@
         return $mClass;
     };
 
-    // iModal base module
+    // iModalJs base module
     $m.$module = Class;
 
     /*!
-     * iModal Templates Component
+     * iModalJs Templates Component
      *
      * #include
      * Living dom
@@ -1363,7 +1363,7 @@
     });
 
     /*!
-     * iModal Module Component
+     * iModalJs Module Component
      *
      * #include
      * Define (SAMD)
@@ -1425,7 +1425,7 @@
     // Declare define mode - samd.
     $m.$define.samd = 'Selective Asynchronous Module Definition';
 
-    // Define and iModal init function
+    // Define and iModalJs init function
     var _init = function () {
         var _list = _doc.getElementsByTagName('script');
 
@@ -1731,7 +1731,7 @@
                 _mergeResult(_item.n, _result);
             }
             _sCache[_item.n] = 2;
-            console.log('iModal: ' + _item.n);
+            console.log('iModalJs: ' + _item.n);
         };
     })();
 
@@ -1803,7 +1803,7 @@
         };
     })();
 
-    // iModal start
+    // iModalJs start
     _init();
 })
 (document, window);
