@@ -1134,8 +1134,8 @@
         TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
-        TAG_OPEN_END: [/[>\/&]/, function ($) {
-            if ($ === '>') this.leave();
+        TAG_OPEN_END: [/(\/?>)/, function ($) {
+            this.leave();
             return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
 
@@ -1282,10 +1282,9 @@
 
     var TPL_Parser = function (template) {
         this.operation = new TPL_Lexer(template);
+        console.log(this.operation);
         this.length = this.operation.length;
         this.pos = 0;
-        this.parsed = false;
-        this.statements = [];
         this.process();
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
     };
@@ -1298,15 +1297,36 @@
             k = k || 1;
             if (k < 0) k = k + 1;
             var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
-            if (criticalFlag && !this.parsed)this.parse();
             return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
         },
-        process: function () {
+        verify: function (type, value) {
             var poll = this.poll();
+            if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
+                this.next();
+                return poll;
+            }
+            return false;
+        },
+        la: function (k) {
+            return (this.poll(k) || '').type;
+        },
+        match: function (type, value) {
+            var ll;
+            if (!(ll = this.verify(type, value))) {
+                ll = this.poll();
+                _ERROR('expect [' + type + (value == null ? '' : ':' + value) + ']" -> got "[' + ll.type + (value == null ? '' : ':' + ll.value) + ']', this.pos)
+            } else {
+                return ll;
+            }
+        },
+        process: function () {
+            var statements = [], poll = this.poll();
             while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-                this.statements.push(this.statement());
+                statements.push(this.statement());
                 poll = this.poll();
             }
+            console.log(statements);
+            return statements;
         },
         statement: function () {
             var poll = this.poll();
@@ -1314,22 +1334,36 @@
                 case 'TEXT':
                     var text = poll.value;
                     this.next();
-                    //while (ll = this.eat(['NAME', 'TEXT'])) {
-                    //    text += ll.value;
-                    //}
                     return {
                         type: "text",
                         text: text
                     };
+                case 'TAG_OPEN_START':
+                    return this.element();
                 default:
-                    this.error('Unexpected token: ' + this.la())
+                    _ERROR('Unexpected token: ' + this.la())
             }
             return 1;
+        },
+        element: function () {
+            var name, children, selfClosed;
+            name = this.match('TAG_OPEN_START').value;
+            selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
+
+            if (!selfClosed) {
+                children = this.process();
+                if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: expect </' + name + '> got no matched closeTag!');
+            }
+            return {
+                type: 'element',
+                tag: name,
+                children: children
+            }
         },
 
         parse: function (statements) {
             this.parsed = true;
-            console.log(this.statements);
+            //console.log(this.statements);
         }
     };
 
