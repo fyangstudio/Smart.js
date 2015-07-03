@@ -1301,33 +1301,19 @@
         },
         verify: function (type, value) {
             var poll = this.poll();
-            if (typeof type !== 'string') {
-                for (var len = type.length; len--;) {
-                    console.log(type)
-                    if (poll.type === type[len]) {
-                        console.log(type[len])
-                        this.next();
-                        return poll;
-                    }
-                }
-            } else {
-                if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
-                    this.next();
-                    return poll;
-                }
+            if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
+                this.next();
+                return poll;
             }
             return false;
         },
-        la: function (k) {
-            return (this.poll(k) || '').type;
-        },
         match: function (type, value) {
-            var ll;
-            if (!(ll = this.verify(type, value))) {
-                ll = this.poll();
-                _ERROR('expect [' + type + (value == null ? '' : ':' + value) + ']" -> got "[' + ll.type + (value == null ? '' : ':' + ll.value) + ']', this.pos)
+            var poll;
+            if (!(poll = this.verify(type, value))) {
+                poll = this.poll();
+                _ERROR('expect [' + type + (value == null ? '' : ':' + value) + ']" -> got "[' + poll.type + (value == null ? '' : ':' + poll.value) + ']');
             } else {
-                return ll;
+                return poll;
             }
         },
         process: function () {
@@ -1352,17 +1338,17 @@
                 case 'TAG_OPEN_START':
                     return this.element();
                 default:
-                    _ERROR('Unexpected token: ' + this.la())
+                    _ERROR('Unexpected token: ' + (this.poll() || '').type)
             }
             return 1;
         },
         element: function () {
-            var name, attrs = [], ll, children, selfClosed;
+            var name, attr, attrs = [], children, selfClosed;
             name = this.match('TAG_OPEN_START').value;
-            while (ll = this.verify('TAG_ATTRIBUTE_NAME')) {
+            while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
                 attrs.push({
                     type: 'attribute',
-                    name: ll.value,
+                    name: attr.value,
                     value: this.verify('TAG_ATTRIBUTE_VALUE').value
                 })
             }
