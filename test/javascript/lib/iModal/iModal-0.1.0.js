@@ -1049,7 +1049,6 @@
     // Extend
     Class.$extend = function (prop) {
         if (!$m.$isObject(prop)) return;
-
         var _super = this.prototype;
 
         // Class state change
@@ -1285,6 +1284,8 @@
         this.operation = new TPL_Lexer(template);
         this.length = this.operation.length;
         this.pos = 0;
+        this.parsed = false;
+        this.statements = [];
         this.process();
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
     };
@@ -1296,17 +1297,16 @@
         poll: function (k) {
             k = k || 1;
             if (k < 0) k = k + 1;
-            var pos = this.pos + k - 1;
-            if (pos > this.length - 1) return this.operation[this.length - 1];
-            return this.operation[pos];
+            var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
+            if (criticalFlag && !this.parsed)this.parse();
+            return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
         },
         process: function () {
-            var statements = [], poll = this.poll();
+            var poll = this.poll();
             while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-                statements.push(this.statement());
+                this.statements.push(this.statement());
                 poll = this.poll();
             }
-            return statements;
         },
         statement: function () {
             var poll = this.poll();
@@ -1328,7 +1328,8 @@
         },
 
         parse: function (statements) {
-            console.log(statements);
+            this.parsed = true;
+            console.log(this.statements);
         }
     };
 
