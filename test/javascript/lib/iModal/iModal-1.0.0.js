@@ -1280,6 +1280,8 @@
         }
     };
 
+    var voidTag = /area|br|embed|img|input|meta|source/i;
+
     var TPL_Parser = function (template) {
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
@@ -1343,7 +1345,7 @@
             return 1;
         },
         element: function () {
-            var name, attr, attrs = [], children, selfClosed;
+            var name, attr, attrs = [], children = [], selfClosed;
             name = this.match('TAG_OPEN_START').value;
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
                 attrs.push({
@@ -1353,8 +1355,7 @@
                 })
             }
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
-
-            if (!selfClosed) {
+            if (!selfClosed && !voidTag.test(name)) {
                 children = this.process();
                 if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: expect </' + name + '> got no matched closeTag!');
             }
