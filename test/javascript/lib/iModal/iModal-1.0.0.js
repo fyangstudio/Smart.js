@@ -1287,8 +1287,9 @@
         console.log(this.operation);
         this.length = this.operation.length;
         this.pos = 0;
-        this.process();
+        var ret = this.process();
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+        return ret;
     };
     TPL_Parser.prototype = {
         next: function (k) {
@@ -1324,7 +1325,6 @@
                 statements.push(this.statement());
                 poll = this.poll();
             }
-            console.log(statements);
             return statements;
         },
         statement: function () {
@@ -1399,6 +1399,7 @@
             this._node = $m.$create('a');
             this._node.href = '/';
             var _node = new TPL_Parser(this.template);
+            console.log(_node);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
