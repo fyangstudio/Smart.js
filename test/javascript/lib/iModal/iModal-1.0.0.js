@@ -1283,26 +1283,23 @@
     var voidTag = /area|br|embed|img|input|meta|source/i;
 
     var TPL_Parser = function (template) {
+        var _fn = '"use strict"; \
+            this._container = $m.$fragment(); \
+            var _dom' + (this._seed++) + ' = 1;\
+            try { \
+                %main function% \
+            } catch(e) {throw new Error("$tpl: "+e.message);}';
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
         this.pos = 0;
         this._seed = +new Date;
-        var ret = this.process();
-        this._fn = '"use strict"; \
-            this._container = $m.$fragment(); \
-            var _dom' + (this._seed++) + ' = 1;\
-            try { \
-                %mainFunction% \
-            } catch(e) {throw new Error("$tpl: "+e.message);}';
-        this._fragment = 'console.log(1);';
-        this._fn = this._fn.replace(/%mainFunction%/gm, this._fragment);
-        console.log(this._fn);
-        var _r = new Function('$m, init', this._fn);
-        _r.apply(this, [$m]);
-        console.log(this);
+        var test = this.process();
+        console.log(test);
+        this._fragment = 'console.log(this);';
+        _fn = _fn.replace(/%main function%/gm, this._fragment);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-        return ret;
+        return new Function('$m, init', _fn);
     };
     TPL_Parser.prototype = {
         next: function (k) {
@@ -1419,8 +1416,8 @@
             var _fn = this.init;
             this._node = $m.$create('a');
             this._node.href = '/';
-            var _node = new TPL_Parser(this.template);
-            console.log(_node);
+            this._handler = new TPL_Parser(this.template);
+            this._handler.apply(this, [$m]);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
