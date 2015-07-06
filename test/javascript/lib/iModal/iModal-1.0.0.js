@@ -1359,7 +1359,7 @@
                 children = this.process();
                 if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: expect </' + name + '> got no matched closeTag!');
             } else {
-                _ERROR('$tpl: Unclosed Tag ' + name + '!');
+                _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
             }
             return {
                 type: 'element',
