@@ -1337,12 +1337,18 @@
                         type: "text",
                         text: text
                     };
+                case 'JST_OPEN':
+                    return this.jst();
                 case 'TAG_OPEN_START':
                     return this.element();
                 default:
-                    _ERROR('Unexpected token: ' + (this.poll() || '').type)
+                    _ERROR('$tpl: Unexpected token ' + (this.poll() || '').type)
             }
             return 1;
+        },
+        jst: function () {
+            this.next(3);
+            console.log(1)
         },
         element: function () {
             var name, attr, attrs = [], children = [], selfClosed;
