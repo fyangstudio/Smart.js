@@ -1290,13 +1290,14 @@
         this._seed = +new Date;
         var ret = this.process();
         this._fn = '"use strict"; \
-            var _container = $m.$create("div"); \
-            var _dom' + (this._seed++) + '=1;\
+            this._container = $m.$fragment(); \
+            var _dom' + (this._seed++) + ' = 1;\
             try { \
-                console.log(_container); \
+                console.log(1); \
             } catch(e) {throw new Error("$tpl: "+e.message);}';
         var _r = new Function('$m, init', this._fn);
-        console.log(_r);
+        _r.apply(this, [$m]);
+        console.log(this);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
         return ret;
     };
