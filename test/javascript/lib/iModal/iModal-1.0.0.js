@@ -1287,15 +1287,15 @@
         console.log(this.operation);
         this.length = this.operation.length;
         this.pos = 0;
-        var ret = this.process();
         this._seed = +new Date;
+        var ret = this.process();
         this._fn = '"use strict"; \
             var _container = $m.$create("div"); \
             var _dom' + (this._seed++) + '=1;\
             try { \
                 console.log(_container); \
             } catch(e) {throw new Error("$tpl: "+e.message);}';
-        var _r = new Function('$m', this._fn);
+        var _r = new Function('$m, init', this._fn);
         console.log(_r);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
         return ret;
