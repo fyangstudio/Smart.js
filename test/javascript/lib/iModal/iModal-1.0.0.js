@@ -1293,8 +1293,11 @@
             this._container = $m.$fragment(); \
             var _dom' + (this._seed++) + ' = 1;\
             try { \
-                console.log(1); \
+                %mainFunction% \
             } catch(e) {throw new Error("$tpl: "+e.message);}';
+        this._fragment = 'console.log(1);';
+        this._fn = this._fn.replace(/%mainFunction%/gm, this._fragment);
+        console.log(this._fn);
         var _r = new Function('$m, init', this._fn);
         _r.apply(this, [$m]);
         console.log(this);
