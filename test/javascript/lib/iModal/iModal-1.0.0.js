@@ -1288,6 +1288,16 @@
         this.length = this.operation.length;
         this.pos = 0;
         var ret = this.process();
+        this._fn = '"use strict"; \
+            var _tpl = {}; \
+            var _out = ""; \
+            var _event = []; \
+            var _eventCount = 0; \
+            try { \
+                <%innerFunction%>"; \
+                var _result = _render.bind(this); \
+                return _result(_out, "tpl_event", _event, _helper, _dataCache); \
+            } catch(e) {throw new Error("$tpl: "+e.message);}';
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
         return ret;
     };
