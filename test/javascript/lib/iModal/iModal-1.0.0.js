@@ -1358,6 +1358,8 @@
             if (!selfClosed && !voidTag.test(name)) {
                 children = this.process();
                 if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: expect </' + name + '> got no matched closeTag!');
+            } else {
+                _ERROR('$tpl: Unclosed Tag ' + name + '!');
             }
             return {
                 type: 'element',
