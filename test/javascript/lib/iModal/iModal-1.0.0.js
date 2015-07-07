@@ -1284,11 +1284,10 @@
 
     var TPL_Parser = function (template) {
 
-        this.operation = new TPL_Lexer(template);
-        console.log(this.operation);
-        this.length = this.operation.length;
         this.pos = 0;
         this._seed = 0;
+        this.operation = new TPL_Lexer(template);
+        this.length = this.operation.length;
 
         var _fn = [].join('');
 
@@ -1298,11 +1297,11 @@
         _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
         _fn += 'iModalJs_children.forEach(function (elem) {this._container.appendChild(elem);}, this);';
 
-
-        this._fragment = this.process();
-        _fn = _fn.replace(/<%main function%>/gm, this._fragment);
-        console.log(_fn);
+        _fn = _fn.replace(/<%main function%>/gm, this.process());
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+
+        console.log(_fn);
+        console.log(this.operation);
         return new Function('$m, init', _fn);
     };
     TPL_Parser.prototype = {
