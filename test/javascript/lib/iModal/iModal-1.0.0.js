@@ -1373,7 +1373,7 @@
             ret = 'var ' + sign + ' = $m.$create("' + name + '");';
             // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
-                ret += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");'
+                ret += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");';
             }
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
             if (!selfClosed && !voidTag.test(name)) {
@@ -1425,12 +1425,31 @@
     };
 
     $m.$tpl = $m.$module.$extend({
-        $init: function (data) {
+        $init: function (param) {
+
+            if (param && $m.$isObject(param)) {
+                $m.$forIn(param, function (value, key) {
+                    this[key] = value;
+                }, this);
+            }
+
+            if (!!this['watchHash']) {
+                var _hashFn = function () {
+                    var _hash = $m.$hash(), _path = _hash.match(/(!\/.+\?)/);
+                    if (_path) this.data.iModalJs_URI = _path[0].slice(2, -1);
+                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[1], ''));
+                    $m.$forIn(_hash, function (value, key) {
+                        this.data[key] = value;
+                    }, this);
+                }.bind(this);
+                $m.$watchHash(_hashFn);
+                _hashFn();
+            }
 
             var _fn = this.init;
             this._handler = new TPL_Parser(this.template);
             this._handler.apply(this, [$m]);
-            console.log(this._handler);
+
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);

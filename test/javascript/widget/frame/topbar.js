@@ -8,6 +8,7 @@ define([
         name: 'bar',
         template: tpl,
         responsive: true,
+        watchHash: true,
         init: function () {
             this.$on('ok1', this.test1);
         },
@@ -31,7 +32,7 @@ define([
     //    }
     //});
 
-    new base().$inject('#test1');
+    new base({data: {t: 1}}).$inject('#test1');
 
     //console.log(json);
     //var parent = m.$extend({
