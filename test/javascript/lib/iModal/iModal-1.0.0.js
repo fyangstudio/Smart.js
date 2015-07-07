@@ -1283,12 +1283,13 @@
     var voidTag = /area|br|embed|img|input|meta|source/i;
 
     var TPL_Parser = function (template) {
-        var _fn = '"use strict"; \
-            this._container = $m.$fragment(); \
-            var _dom' + (this._seed++) + ' = 1;\
-            try { \
-                %main function% \
-            } catch(e) {throw new Error("$tpl: "+e.message);}';
+        var _fn = [].join('');
+
+        _fn += '"use strict";';
+        _fn += 'this._container = $m.$fragment();';
+        _fn += 'var _dom' + (this._seed++) + ' = 1;';
+        _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
+        
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
@@ -1297,7 +1298,7 @@
         var test = this.process();
         console.log(test);
         this._fragment = 'console.log(this);';
-        _fn = _fn.replace(/%main function%/gm, this._fragment);
+        _fn = _fn.replace(/<%main function%>/gm, this._fragment);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
         return new Function('$m, init', _fn);
     };
@@ -1343,10 +1344,7 @@
                 case 'TEXT':
                     var text = poll.value;
                     this.next();
-                    return {
-                        type: "text",
-                        text: text
-                    };
+                    return '';
                 case 'JST_OPEN':
                     return this.jst();
                 case 'TAG_OPEN_START':
