@@ -1347,7 +1347,7 @@
             var poll = this.poll();
             switch (poll.type) {
                 case 'TEXT':
-                    var text = poll.value.trim();
+                    var text = poll.value.trim().replace(/\n/g, '');
                     this.next();
                     return {
                         type: 'text',
@@ -1363,8 +1363,9 @@
             return 1;
         },
         jst: function () {
-            this.next(3);
-            console.log(1)
+            this.next(2);
+            console.log(1);
+            return '';
         },
         element: function () {
             var ret, sign, name, attr, children = [], selfClosed;

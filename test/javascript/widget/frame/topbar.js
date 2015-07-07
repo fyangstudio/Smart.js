@@ -8,7 +8,7 @@ define([
         name: 'bar',
         template: tpl,
         responsive: true,
-        watchHash: true,
+        //watchHash: true,
         init: function () {
             this.$on('ok1', this.test1);
         },
