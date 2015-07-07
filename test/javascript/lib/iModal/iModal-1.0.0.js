@@ -1367,16 +1367,13 @@
             console.log(1)
         },
         element: function () {
-            var ret, sign, name, attr, attrs = [], children = [], selfClosed;
+            var ret, sign, name, attr, children = [], selfClosed;
             name = this.match('TAG_OPEN_START').value;
             sign = 'iModalJs_dom' + (++this._seed);
             ret = 'var ' + sign + ' = $m.$create("' + name + '");';
+            // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
-                attrs.push({
-                    type: 'attribute',
-                    name: attr.value,
-                    value: this.verify('TAG_ATTRIBUTE_VALUE').value
-                })
+                ret += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");'
             }
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
             if (!selfClosed && !voidTag.test(name)) {
@@ -1398,7 +1395,6 @@
             return {
                 type: 'element',
                 sign: sign,
-                attrs: [],
                 fragment: ret
             }
         },
