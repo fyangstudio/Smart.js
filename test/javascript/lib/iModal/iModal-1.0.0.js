@@ -1287,6 +1287,7 @@
         this.pos = 0;
         this._seed = 0;
         this.operation = new TPL_Lexer(template);
+        console.log(this.operation);
         this.length = this.operation.length;
 
         var _fn = [].join(''), main = '';
@@ -1304,7 +1305,6 @@
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
         //console.log(_fn);
-        console.log(this.operation);
         return new Function('$m, init', _fn);
     };
     TPL_Parser.prototype = {
@@ -1358,14 +1358,18 @@
                 case 'TAG_OPEN_START':
                     return this.element();
                 default:
-                    _ERROR('$tpl: Unexpected token ' + (this.poll() || '').type)
+                    _ERROR('$tpl1: Unexpected token ' + (this.poll() || '').type)
             }
             return 1;
         },
         jst: function () {
-            this.next(2);
-            console.log(1);
-            return '';
+            this.next();
+            console.log(this.verify('JST_EXPRESSION'));
+            if (!this.verify('JST_CLOSE')) _ERROR('$tpl: Unclosed JST!');
+            return {
+                type: 'jst',
+                fragment: ''
+            }
         },
         element: function () {
             var ret, sign, name, attr, children = [], selfClosed;
