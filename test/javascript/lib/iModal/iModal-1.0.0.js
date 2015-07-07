@@ -1289,7 +1289,7 @@
         this.operation = new TPL_Lexer(template);
         this.length = this.operation.length;
 
-        var _fn = [].join('');
+        var _fn = [].join(''), main = '';
 
         _fn += '"use strict";';
         _fn += 'var iModalJs_children = [];';
@@ -1297,7 +1297,11 @@
         _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
         _fn += 'iModalJs_children.forEach(function (elem) {this._container.appendChild(elem);}, this);';
 
-        _fn = _fn.replace(/<%main function%>/gm, this.process());
+        this.process().forEach(function (statement) {
+            main += statement.fragment;
+        });
+
+        _fn = _fn.replace(/<%main function%>/gm, main);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
         console.log(_fn);
@@ -1381,13 +1385,16 @@
             } else {
                 _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
             }
+            console.log(children);
             if (!!children.length) {
                 children.forEach(function (value) {
                     ret += value.fragment;
                 }, this)
             }
-            console.log(ret);
-            return ret;
+            return {
+                type: "element",
+                fragment: ret
+            };
             //return {
             //    type: 'element',
             //    tag: name,
