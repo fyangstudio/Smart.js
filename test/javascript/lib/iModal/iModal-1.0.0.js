@@ -1440,10 +1440,9 @@
         },
 
         $inject: function (parentNode) {
-            this.$emit('update');
-            var _target = undefined;
-            if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
-            if (!_target) _ERROR('$inject: Node is not found!');
+            if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
+            var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
+            if (!_target) _ERROR('$tpl: Inject node is not found!');
             _target.appendChild(this._container);
             return this;
         }
