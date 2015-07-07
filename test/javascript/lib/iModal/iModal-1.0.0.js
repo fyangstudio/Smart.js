@@ -1288,17 +1288,18 @@
         console.log(this.operation);
         this.length = this.operation.length;
         this.pos = 0;
-        this._seed = +new Date;
+        this._seed = 0;
 
         var _fn = [].join('');
 
         _fn += '"use strict";';
-        _fn += 'this._container = $m.$fragment();';
-        _fn += 'var iModalJs_dom' + (this._seed++) + ' = 1;';
+        _fn += 'var iModalJs_children = [];';
+        _fn += 'var iModalJs_dom0 = this._container = $m.$fragment();';
         _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
-        var test = this.process();
-        console.log(test);
-        this._fragment = 'console.log(this);';
+        _fn += 'iModalJs_children.forEach(function (elem) {this._container.appendChild(elem);}, this);';
+
+
+        this._fragment = this.process();
         _fn = _fn.replace(/<%main function%>/gm, this._fragment);
         console.log(_fn);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
@@ -1346,7 +1347,10 @@
                 case 'TEXT':
                     var text = poll.value;
                     this.next();
-                    return '';
+                    return {
+                        type: "text",
+                        fragment: '$m.$text(iModalJs_dom' + this._seed + ', ' + text + ');'
+                    };
                 case 'JST_OPEN':
                     return this.jst();
                 case 'TAG_OPEN_START':
@@ -1361,8 +1365,9 @@
             console.log(1)
         },
         element: function () {
-            var name, attr, attrs = [], children = [], selfClosed;
+            var ret, name, attr, attrs = [], children = [], selfClosed;
             name = this.match('TAG_OPEN_START').value;
+            ret = 'var iModalJs_dom' + (++this._seed) + ' = $m.$create("' + name + '");iModalJs_children.push(iModalJs_dom' + this._seed + ');';
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
                 attrs.push({
                     type: 'attribute',
@@ -1377,12 +1382,19 @@
             } else {
                 _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
             }
-            return {
-                type: 'element',
-                tag: name,
-                attrs: attrs,
-                children: children
+            if (!!children.length) {
+                children.forEach(function (value) {
+                    ret += value.fragment;
+                }, this)
             }
+            console.log(ret);
+            return ret;
+            //return {
+            //    type: 'element',
+            //    tag: name,
+            //    attrs: attrs,
+            //    children: children
+            //}
         },
 
         parse: function (statements) {
@@ -1414,8 +1426,6 @@
         $init: function (data) {
 
             var _fn = this.init;
-            this._node = $m.$create('a');
-            this._node.href = '/';
             this._handler = new TPL_Parser(this.template);
             this._handler.apply(this, [$m]);
 
@@ -1434,7 +1444,7 @@
             var _target = undefined;
             if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$inject: Node is not found!');
-            _target.appendChild(this._node);
+            _target.appendChild(this._container);
             return this;
         }
     });
