@@ -1292,19 +1292,18 @@
         var _fn = [].join(''), main = '';
 
         _fn += '"use strict";';
-        _fn += 'var iModalJs_children = [];';
         _fn += 'var iModalJs_dom0 = this._container = $m.$fragment();';
         _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
-        _fn += 'iModalJs_children.forEach(function (elem) {this._container.appendChild(elem);}, this);';
 
         this.process().forEach(function (statement) {
             main += statement.fragment;
+            if (statement.type === 'element') main += 'this._container.appendChild(' + statement.sign + ');';
         });
 
         _fn = _fn.replace(/<%main function%>/gm, main);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
-        console.log(_fn);
+        //console.log(_fn);
         console.log(this.operation);
         return new Function('$m, init', _fn);
     };
@@ -1351,7 +1350,7 @@
                     var text = poll.value;
                     this.next();
                     return {
-                        type: "text",
+                        type: 'text',
                         fragment: '$m.$text(iModalJs_dom' + this._seed + ', ' + text + ');'
                     };
                 case 'JST_OPEN':
@@ -1368,9 +1367,10 @@
             console.log(1)
         },
         element: function () {
-            var ret, name, attr, attrs = [], children = [], selfClosed;
+            var ret, sign, name, attr, attrs = [], children = [], selfClosed;
             name = this.match('TAG_OPEN_START').value;
-            ret = 'var iModalJs_dom' + (++this._seed) + ' = $m.$create("' + name + '");iModalJs_children.push(iModalJs_dom' + this._seed + ');';
+            sign = 'iModalJs_dom' + (++this._seed);
+            ret = 'var ' + sign + ' = $m.$create("' + name + '");';
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
                 attrs.push({
                     type: 'attribute',
@@ -1385,14 +1385,19 @@
             } else {
                 _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
             }
-            console.log(children);
+            // console.log(children);
             if (!!children.length) {
                 children.forEach(function (value) {
-                    ret += value.fragment;
+                    if (value.type === 'element') {
+                        ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
+                    } else {
+                        ret += value.fragment;
+                    }
                 }, this)
             }
             return {
-                type: "element",
+                type: 'element',
+                sign: sign,
                 fragment: ret
             };
             //return {
@@ -1434,6 +1439,7 @@
             var _fn = this.init;
             this._handler = new TPL_Parser(this.template);
             this._handler.apply(this, [$m]);
+            console.log(this._handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
