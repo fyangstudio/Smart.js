@@ -1347,11 +1347,11 @@
             var poll = this.poll();
             switch (poll.type) {
                 case 'TEXT':
-                    var text = poll.value;
+                    var text = poll.value.trim();
                     this.next();
                     return {
                         type: 'text',
-                        fragment: '$m.$text(iModalJs_dom' + this._seed + ', ' + text + ');'
+                        fragment: !text ? '' : '$m.$text(iModalJs_dom' + this._seed + ', "' + text + '");'
                     };
                 case 'JST_OPEN':
                     return this.jst();
@@ -1398,14 +1398,9 @@
             return {
                 type: 'element',
                 sign: sign,
+                attrs: [],
                 fragment: ret
-            };
-            //return {
-            //    type: 'element',
-            //    tag: name,
-            //    attrs: attrs,
-            //    children: children
-            //}
+            }
         },
 
         parse: function (statements) {
