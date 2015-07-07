@@ -1283,22 +1283,24 @@
     var voidTag = /area|br|embed|img|input|meta|source/i;
 
     var TPL_Parser = function (template) {
-        var _fn = [].join('');
 
-        _fn += '"use strict";';
-        _fn += 'this._container = $m.$fragment();';
-        _fn += 'var _dom' + (this._seed++) + ' = 1;';
-        _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
-        
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
         this.pos = 0;
         this._seed = +new Date;
+
+        var _fn = [].join('');
+
+        _fn += '"use strict";';
+        _fn += 'this._container = $m.$fragment();';
+        _fn += 'var iModalJs_dom' + (this._seed++) + ' = 1;';
+        _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
         var test = this.process();
         console.log(test);
         this._fragment = 'console.log(this);';
         _fn = _fn.replace(/<%main function%>/gm, this._fragment);
+        console.log(_fn);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
         return new Function('$m, init', _fn);
     };
