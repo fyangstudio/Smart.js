@@ -1358,6 +1358,7 @@
                         return {
                             type: 'text',
                             sign: sign,
+                            handler: '',
                             fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
                         };
                     }
