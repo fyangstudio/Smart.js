@@ -147,7 +147,6 @@
     };
 
     // $m.$text() sets or gets all of the markup and content within a given element.
-    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     $m.$text = (function () {
         // Special add text method map.
         var _TextMap = {};
@@ -156,9 +155,11 @@
             _TextMap[3] = 'nodeValue';
         } else _TextMap[1] = _TextMap[3] = 'textContent';
         return function (elem, value) {
+            if (elem == null) elem = _doc.createTextNode('');
             var textProp = _TextMap[elem.nodeType];
             if (value === undefined) return textProp ? elem[textProp] : '';
             elem[textProp] = value;
+            return elem;
         }
     })();
 
@@ -1345,25 +1346,26 @@
         },
         statement: function () {
             var poll = this.poll();
+            console.log(poll);
             switch (poll.type) {
                 case 'TEXT':
                     var text = poll.value.trim().replace(/\n/g, '');
                     this.next();
                     return {
                         type: 'text',
-                        fragment: !text ? '' : '$m.$text(iModalJs_dom' + this._seed + ', "' + text + '");'
+                        fragment: !text ? '' : '$m.$text(null, "' + text + '");'
                     };
                 case 'JST_OPEN':
+                    this.next();
                     return this.jst();
                 case 'TAG_OPEN_START':
                     return this.element();
                 default:
-                    _ERROR('$tpl1: Unexpected token ' + (this.poll() || '').type)
+                    _ERROR('$tpl: Unexpected token ' + (this.poll() || '').type + '!');
             }
             return 1;
         },
         jst: function () {
-            this.next();
             console.log(this.verify('JST_EXPRESSION'));
             if (!this.verify('JST_CLOSE')) _ERROR('$tpl: Unclosed JST!');
             return {
@@ -1390,10 +1392,17 @@
             // console.log(children);
             if (!!children.length) {
                 children.forEach(function (value) {
-                    if (value.type === 'element') {
-                        ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
-                    } else {
-                        ret += value.fragment;
+                    switch (value.type) {
+                        case 'element':
+                            ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
+                            break;
+                        case 'text':
+                            ret += (sign + '.appendChild(' + value.fragment.replace(/;$/, '') + ');');
+                            break;
+                        case 'jst':
+                            break;
+                        default:
+                            _ERROR('$tpl: Unexpected token ' + value.type + '!');
                     }
                 }, this)
             }
@@ -1453,6 +1462,7 @@
 
             var _fn = this.init;
             this._handler = new TPL_Parser(this.template);
+            console.log(this._handler);
             this._handler.apply(this, [$m]);
 
 
