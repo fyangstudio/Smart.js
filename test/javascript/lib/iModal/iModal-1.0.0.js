@@ -1119,7 +1119,7 @@
 
     var TPL_RULES = {
         //INIT
-        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
+        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%%EXPRESSION%%END%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
@@ -1158,6 +1158,7 @@
 
         // JST
         JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
+            console.log(1)
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
         }, 'JST']
@@ -1279,12 +1280,12 @@
 
         this.pos = 0;
         this.seed = 0;
-        this.variables = [];
+        this.buffer = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), init = '', main = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = '', init = '', main = '', statements = this.process() || [];
 
         _fn += '"use strict";';
         _fn += 'var m_dom0 = this._container = $m.$fragment();';
@@ -1294,15 +1295,16 @@
             if (statement) {
                 init += statement.fragment;
                 init += 'this._container.appendChild(' + statement.sign + ');';
+                main += statement.handler || '';
             }
         });
 
-        this.variables.forEach(function (variable) {
-            main += 'var ' + variable + ' = data.' + variable + '||"";'
+        this.buffer.forEach(function (variable) {
+            prefix += 'var ' + variable + ' = data.' + variable + '||"";'
         });
         //main += 'console.log(t);';
         _fn = _fn.replace(/<%init%>/, init);
-        _fn = _fn.replace(/<%main%>/, main);
+        _fn = _fn.replace(/<%main%>/, prefix + main);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
         //console.log(_fn);
@@ -1372,13 +1374,13 @@
         },
         jst: function (poll) {
             var sign = 'm_dom' + (++this.seed);
-            this.variables.push(poll.value.split('.')[0]);
-            console.log(this.variables);
+            this.buffer.push(poll.value.split('.')[0]);
+            console.log(this.buffer);
             return {
                 type: 'jst',
                 sign: sign,
-                handler: '',
-                fragment: 'var ' + sign + ' = $m.$text(null, "' + poll.value + '");'
+                handler: '$m.$text(' + sign + ', ' + poll.value + ');',
+                fragment: 'var ' + sign + ' = $m.$text(null, "");'
             }
         },
         element: function () {
