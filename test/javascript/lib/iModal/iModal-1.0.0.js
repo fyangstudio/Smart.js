@@ -1291,18 +1291,19 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), main = '';
+        var _fn = [].join(''), init = '';
 
         _fn += '"use strict";';
         _fn += 'var iModalJs_dom0 = this._container = $m.$fragment();';
-        _fn += 'try {<%main function%>} catch(e) {throw new Error("$tpl: " + e.message);}';
+        _fn += 'try {<%init%> return function(data){<%main%>};} catch(e) {throw new Error("$tpl: " + e.message);}';
 
         this.process().forEach(function (statement) {
-            main += statement.fragment;
-            if (statement.type === 'element') main += 'this._container.appendChild(' + statement.sign + ');';
+            init += statement.fragment;
+            if (statement.type === 'element') init += 'this._container.appendChild(' + statement.sign + ');';
         });
 
-        _fn = _fn.replace(/<%main function%>/gm, main);
+        _fn = _fn.replace(/<%init%>/, init);
+        _fn = _fn.replace(/<%main%>/, 'console.log(1);');
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
         //console.log(_fn);
@@ -1461,9 +1462,9 @@
             }
 
             var _fn = this.init;
-            this._handler = new TPL_Parser(this.template);
-            console.log(this._handler);
-            this._handler.apply(this, [$m]);
+            var _handler = new TPL_Parser(this.template);
+            this._handler = _handler.apply(this, [$m]);
+            this._handler();
 
 
             if (!!this['responsive']) _addResponsive.call(this);
