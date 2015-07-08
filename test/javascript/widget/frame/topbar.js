@@ -7,6 +7,7 @@ define([
     var base = $m.$tpl.$extend({
         name: 'bar',
         template: tpl,
+        autoUpdate: true,
         responsive: true,
         //watchHash: true,
         init: function () {

@@ -1374,8 +1374,8 @@
         },
         jst: function (poll) {
             var sign = 'm_dom' + (++this.seed);
+            // interpolate
             this.buffer.push(poll.value.split('.')[0]);
-            console.log(this.buffer);
             return {
                 type: 'jst',
                 sign: sign,
@@ -1384,13 +1384,13 @@
             }
         },
         element: function () {
-            var ret, sign, name, attr, children = [], selfClosed;
+            var attr, fragment, name, sign, selfClosed, handler = '', children = [];
             name = this.match('TAG_OPEN_START').value;
             sign = 'm_dom' + (++this.seed);
-            ret = 'var ' + sign + ' = $m.$create("' + name + '");';
+            fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
             // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
-                ret += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");';
+                fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");';
             }
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
             if (!selfClosed && !voidTag.test(name)) {
@@ -1403,23 +1403,17 @@
             if (!!children.length) {
                 children.forEach(function (value) {
                     if (value) {
-                        switch (value.type) {
-                            case 'element':
-                            case 'text':
-                                ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
-                                break;
-                            case 'jst':
-                                break;
-                            default:
-                                _ERROR('$tpl: Unexpected token ' + value.type + '!');
-                        }
+                        fragment += (value.fragment
+                        + 'if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}');
+                        handler += value.handler || '';
                     }
                 }, this)
             }
             return {
                 type: 'element',
                 sign: sign,
-                fragment: ret
+                handler: handler,
+                fragment: fragment
             }
         },
 
@@ -1473,8 +1467,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this.$update = _handler.apply(this, [$m]);
-            console.log(this.$update);
-
+            console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
@@ -1483,7 +1476,7 @@
         },
 
         $inject: function (parentNode) {
-            this.$update(this.data);
+            this.$update();
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
