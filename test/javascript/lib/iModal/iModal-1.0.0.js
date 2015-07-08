@@ -1291,19 +1291,20 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), init = '';
+        var _fn = [].join(''), init = '', main = '', statements = this.process() || [];
 
         _fn += '"use strict";';
-        _fn += 'var iModalJs_dom0 = this._container = $m.$fragment();';
+        _fn += 'var m_dom0 = this._container = $m.$fragment();';
         _fn += 'try {<%init%> return function(data){<%main%>};} catch(e) {throw new Error("$tpl: " + e.message);}';
 
-        this.process().forEach(function (statement) {
+        statements.forEach(function (statement) {
             init += statement.fragment;
+            console.log(statement)
             if (statement.type === 'element') init += 'this._container.appendChild(' + statement.sign + ');';
         });
 
         _fn = _fn.replace(/<%init%>/, init);
-        _fn = _fn.replace(/<%main%>/, 'console.log(1);');
+        _fn = _fn.replace(/<%main%>/, main);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
         //console.log(_fn);
@@ -1350,11 +1351,12 @@
             console.log(poll);
             switch (poll.type) {
                 case 'TEXT':
-                    var text = poll.value.trim().replace(/\n/g, '');
+                    var sign = 'm_dom' + (++this._seed), text = poll.value.trim().replace(/\n/g, '');
                     this.next();
                     return {
                         type: 'text',
-                        fragment: !text ? '' : '$m.$text(null, "' + text + '");'
+                        sign: sign,
+                        fragment: !text ? '' : 'var ' + sign + ' = $m.$text(null, "' + text + '");'
                     };
                 case 'JST_OPEN':
                     this.next();
@@ -1377,7 +1379,7 @@
         element: function () {
             var ret, sign, name, attr, children = [], selfClosed;
             name = this.match('TAG_OPEN_START').value;
-            sign = 'iModalJs_dom' + (++this._seed);
+            sign = 'm_dom' + (++this._seed);
             ret = 'var ' + sign + ' = $m.$create("' + name + '");';
             // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
@@ -1395,10 +1397,8 @@
                 children.forEach(function (value) {
                     switch (value.type) {
                         case 'element':
-                            ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
-                            break;
                         case 'text':
-                            ret += (sign + '.appendChild(' + value.fragment.replace(/;$/, '') + ');');
+                            ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
                             break;
                         case 'jst':
                             break;
@@ -1464,7 +1464,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._handler = _handler.apply(this, [$m]);
-            this._handler();
+            console.log(this._handler);
 
 
             if (!!this['responsive']) _addResponsive.call(this);
