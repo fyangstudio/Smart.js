@@ -33,7 +33,8 @@ define([
     //});
 
     var t = new base({data: {t: 1}}).$inject('#test1');
-    console.log(t);
+    //t.data.t = 2;
+    //t.$update();
 
     //console.log(json);
     //var parent = m.$extend({
