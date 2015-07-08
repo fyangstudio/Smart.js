@@ -1295,6 +1295,10 @@
             if (statement.type === 'element') init += 'this._container.appendChild(' + statement.sign + ');';
         });
 
+        this.variables.forEach(function (variable) {
+            main += 'var ' + variable + ' = data.' + variable + '||"";'
+        });
+        main += 'console.log(t);';
         _fn = _fn.replace(/<%init%>/, init);
         _fn = _fn.replace(/<%main%>/, main);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
@@ -1472,6 +1476,7 @@
         },
 
         $inject: function (parentNode) {
+            this._handler(this.data);
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
