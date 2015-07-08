@@ -1291,14 +1291,16 @@
         _fn += 'try {<%init%> return function(data){<%main%>};} catch(e) {throw new Error("$tpl: " + e.message);}';
 
         statements.forEach(function (statement) {
-            init += statement.fragment;
-            if (statement.type === 'element') init += 'this._container.appendChild(' + statement.sign + ');';
+            if (statement) {
+                init += statement.fragment;
+                init += 'this._container.appendChild(' + statement.sign + ');';
+            }
         });
 
         this.variables.forEach(function (variable) {
             main += 'var ' + variable + ' = data.' + variable + '||"";'
         });
-        main += 'console.log(t);';
+        //main += 'console.log(t);';
         _fn = _fn.replace(/<%init%>/, init);
         _fn = _fn.replace(/<%main%>/, main);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
@@ -1347,13 +1349,17 @@
             //console.log(poll);
             switch (poll.type) {
                 case 'TEXT':
-                    var sign = 'm_dom' + (++this.seed), text = poll.value.trim().replace(/\n/g, '');
+                    var text = poll.value.trim().replace(/\n/g, '');
                     this.next();
-                    return {
-                        type: 'text',
-                        sign: sign,
-                        fragment: !text ? '' : 'var ' + sign + ' = $m.$text(null, "' + text + '");'
-                    };
+                    if (!!text) {
+                        var sign = 'm_dom' + (++this.seed);
+                        return {
+                            type: 'text',
+                            sign: sign,
+                            fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
+                        };
+                    }
+                    return null;
                 case 'JST_EXPRESSION':
                     this.next();
                     return this.jst(poll);
@@ -1370,8 +1376,9 @@
             console.log(this.variables);
             return {
                 type: 'jst',
+                sign: sign,
                 handler: '',
-                fragment: ''
+                fragment: 'var ' + sign + ' = $m.$text(null, "' + poll.value + '");'
             }
         },
         element: function () {
@@ -1393,15 +1400,17 @@
             // console.log(children);
             if (!!children.length) {
                 children.forEach(function (value) {
-                    switch (value.type) {
-                        case 'element':
-                        case 'text':
-                            ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
-                            break;
-                        case 'jst':
-                            break;
-                        default:
-                            _ERROR('$tpl: Unexpected token ' + value.type + '!');
+                    if (value) {
+                        switch (value.type) {
+                            case 'element':
+                            case 'text':
+                                ret += (value.fragment + sign + '.appendChild(' + value.sign + ');');
+                                break;
+                            case 'jst':
+                                break;
+                            default:
+                                _ERROR('$tpl: Unexpected token ' + value.type + '!');
+                        }
                     }
                 }, this)
             }
