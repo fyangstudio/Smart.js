@@ -1157,15 +1157,9 @@
         }, 'TAG'],
 
         // JST
-        JST_OPEN: [/(%BEGIN%)/, function ($, one) {
-            return {type: 'JST_OPEN', value: one}
-        }, 'JST'],
-        JST_EXPRESSION: [/(%EXPRESSION%)/, function ($, one) {
-            return {type: 'JST_EXPRESSION', value: one}
-        }, 'JST'],
-        JST_CLOSE: [/(%END%)/, function ($, one) {
+        JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
             this.leave('JST');
-            return {type: 'JST_CLOSE', value: one}
+            return {type: 'JST_EXPRESSION', value: one}
         }, 'JST']
     };
 
@@ -1220,9 +1214,7 @@
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
-        TPL_RULES.JST_OPEN,
-        TPL_RULES.JST_EXPRESSION,
-        TPL_RULES.JST_CLOSE
+        TPL_RULES.JST_EXPRESSION
     ]);
 
     var TPL_Lexer = function (tpl) {
@@ -1286,7 +1278,8 @@
     var TPL_Parser = function (template) {
 
         this.pos = 0;
-        this._seed = 0;
+        this.seed = 0;
+        this.variables = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
@@ -1299,7 +1292,6 @@
 
         statements.forEach(function (statement) {
             init += statement.fragment;
-            console.log(statement)
             if (statement.type === 'element') init += 'this._container.appendChild(' + statement.sign + ');';
         });
 
@@ -1348,38 +1340,40 @@
         },
         statement: function () {
             var poll = this.poll();
-            console.log(poll);
+            //console.log(poll);
             switch (poll.type) {
                 case 'TEXT':
-                    var sign = 'm_dom' + (++this._seed), text = poll.value.trim().replace(/\n/g, '');
+                    var sign = 'm_dom' + (++this.seed), text = poll.value.trim().replace(/\n/g, '');
                     this.next();
                     return {
                         type: 'text',
                         sign: sign,
                         fragment: !text ? '' : 'var ' + sign + ' = $m.$text(null, "' + text + '");'
                     };
-                case 'JST_OPEN':
+                case 'JST_EXPRESSION':
                     this.next();
-                    return this.jst();
+                    return this.jst(poll);
                 case 'TAG_OPEN_START':
                     return this.element();
                 default:
-                    _ERROR('$tpl: Unexpected token ' + (this.poll() || '').type + '!');
+                    _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
             }
             return 1;
         },
-        jst: function () {
-            console.log(this.verify('JST_EXPRESSION'));
-            if (!this.verify('JST_CLOSE')) _ERROR('$tpl: Unclosed JST!');
+        jst: function (poll) {
+            var sign = 'm_dom' + (++this.seed);
+            this.variables.push(poll.value.split('.')[0]);
+            console.log(this.variables);
             return {
                 type: 'jst',
+                handler: '',
                 fragment: ''
             }
         },
         element: function () {
             var ret, sign, name, attr, children = [], selfClosed;
             name = this.match('TAG_OPEN_START').value;
-            sign = 'm_dom' + (++this._seed);
+            sign = 'm_dom' + (++this.seed);
             ret = 'var ' + sign + ' = $m.$create("' + name + '");';
             // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
