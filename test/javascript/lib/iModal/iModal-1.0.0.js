@@ -1285,11 +1285,11 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = '', init = '', main = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var _data = this.data;', init = '', main = '', statements = this.process() || [];
 
         _fn += '"use strict";';
         _fn += 'var m_dom0 = this._container = $m.$fragment();';
-        _fn += 'try {<%init%> return function(data){<%main%>};} catch(e) {throw new Error("$tpl: " + e.message);}';
+        _fn += 'try {<%init%>return function(){<%main%>};} catch(e) {throw new Error("$tpl: " + e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
@@ -1300,7 +1300,7 @@
         });
 
         this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + ' = data.' + variable + '||"";'
+            prefix += 'var ' + variable + ' = _data.' + variable + '||"";'
         });
         //main += 'console.log(t);';
         _fn = _fn.replace(/<%init%>/, init);
@@ -1472,8 +1472,8 @@
 
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
-            this._handler = _handler.apply(this, [$m]);
-            console.log(this._handler);
+            this.$update = _handler.apply(this, [$m]);
+            console.log(this.$update);
 
 
             if (!!this['responsive']) _addResponsive.call(this);
@@ -1482,12 +1482,8 @@
             this.$on('update', this.$update);
         },
 
-        $update: function () {
-            console.log('update');
-        },
-
         $inject: function (parentNode) {
-            this._handler(this.data);
+            this.$update(this.data);
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
