@@ -1286,7 +1286,7 @@
         }
     };
 
-    var voidTag = /area|br|embed|img|input|meta|source/i;
+    var _voidTag = /area|br|embed|img|input|meta|source/i;
 
     var TPL_Parser = function (template) {
 
@@ -1335,9 +1335,18 @@
         },
         verify: function (type, value) {
             var poll = this.poll();
-            if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
-                this.next();
-                return poll;
+            if (!$m.$isString(type)) {
+                for (var len = type.length; len--;) {
+                    if (poll.type === type[len]) {
+                        this.next();
+                        return poll;
+                    }
+                }
+            } else {
+                if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
+                    this.next();
+                    return poll;
+                }
             }
             return false;
         },
@@ -1407,13 +1416,12 @@
 
             // todo
             // set Attribute
-            while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
+            while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
                 fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");';
             }
-            console.log(this.verify('JST_EXPRESSION'));
 
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
-            if (!selfClosed && !voidTag.test(name)) {
+            if (!selfClosed && !_voidTag.test(name)) {
                 children = this.process();
                 if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
             } else {
