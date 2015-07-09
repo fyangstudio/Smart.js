@@ -1238,7 +1238,8 @@
             state = this.state();
             split = this._map[state];
             test = split.MATCH.exec(tpl);
-            mlen = test ? test[0].length : 1;
+            if (!test) _ERROR('$tpl: Unrecognized Token!');
+            mlen = test[0].length;
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
             if (token) tokens.push(token);
@@ -1294,7 +1295,7 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var _data = this.data;', init = '', main = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var M_DATA = this.data;', init = '', main = '', statements = this.process() || [];
 
         _fn += '"use strict";';
         _fn += 'var M_DOM0 = $m.$fragment();';
@@ -1309,7 +1310,7 @@
         });
 
         this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + ' = _data.' + variable + '||"";'
+            prefix += 'var ' + variable + ' = M_DATA.' + variable + '||"";'
         });
         //main += 'console.log(t);';
         _fn = _fn.replace(/<%init%>/, init);
