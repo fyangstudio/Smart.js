@@ -1,9 +1,13 @@
 /**
  * iModalJs JavaScript Component v1.0.0
  *
+ * Copyright 2015-2015 fyangstudio and other contributors
+ * Released under the MIT license
+ * https://github.com/fyangstudio/iModalJs/blob/master/LICENSE
+ *
  * Author YangFan(18767120422@163.com)
  *
- * Date: 2015-05-20
+ * Start: 2015-05-20
  */
 //<![CDATA[
 (function (_doc, _win, undefined) {
@@ -23,6 +27,70 @@
     var _observe = Object.observe || undefined;
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
+    /*!
+     * iModalJs Data Structure Component
+     *
+     * #include
+     * Stack & Queue
+     *
+     */
+    /* Stack
+     ---------------------------------------------------------------------- */
+    $m.$stack = function () {
+        this.top = 0;
+        this.dataStore = [];
+    };
+    $m.$stack.prototype = {
+        // placing item on top
+        push: function (element) {
+            this.dataStore[this.top++] = element;
+        },
+        // get the current item
+        peek: function () {
+            return this.dataStore[this.top - 1];
+        },
+        // taking the top item off the stack
+        pop: function () {
+            return this.dataStore[--this.top];
+        },
+        // clear the stack
+        clear: function () {
+            this.top = 0;
+            this.dataStore = [];
+        },
+        // get stack length
+        length: function () {
+            return this.top;
+        }
+    };
+
+    /* Queue
+     ---------------------------------------------------------------------- */
+    $m.$queue = function () {
+        this.dataStore = [];
+    };
+    $m.$queue.prototype = {
+        // add an item to the queue, generally at the "back" of the queue
+        enqueue: function (element) {
+            this.dataStore.push(element);
+        },
+        // remove an item from the queue, generally from the "front" of the queue
+        dequeue: function () {
+            return this.dataStore.shift();
+        },
+        // get the "front" of the queue
+        front: function () {
+            return this.dataStore[0]
+        },
+        // get the "back" of the queue
+        back: function () {
+            return this.dataStore[this.dataStore.length - 1];
+        },
+        // get queue length
+        length: function () {
+            return this.dataStore.length;
+        }
+    };
 
     /*!
      * iModalJs Tools Component
@@ -211,64 +279,6 @@
     // Get event target.
     $m.$getTarget = function (event) {
         return !event ? null : (event.target || event.srcElement);
-    };
-
-    /* Stack
-     ---------------------------------------------------------------------- */
-    $m.$stack = function () {
-        this.top = 0;
-        this.dataStore = [];
-    };
-    $m.$stack.prototype = {
-        // placing item on top
-        push: function (element) {
-            this.dataStore[this.top++] = element;
-        },
-        // get the current item
-        peek: function () {
-            return this.dataStore[this.top - 1];
-        },
-        // taking the top item off the stack
-        pop: function () {
-            return this.dataStore[--this.top];
-        },
-        // clear the stack
-        clear: function () {
-            this.top = 0;
-            this.dataStore = [];
-        },
-        // get stack length
-        length: function () {
-            return this.top;
-        }
-    };
-
-    /* Queue
-     ---------------------------------------------------------------------- */
-    $m.$queue = function () {
-        this.dataStore = [];
-    };
-    $m.$queue.prototype = {
-        // add an item to the queue, generally at the "back" of the queue
-        enqueue: function (element) {
-            this.dataStore.push(element);
-        },
-        // remove an item from the queue, generally from the "front" of the queue
-        dequeue: function () {
-            return this.dataStore.shift();
-        },
-        // get the "front" of the queue
-        front: function () {
-            return this.dataStore[0]
-        },
-        // get the "back" of the queue
-        back: function () {
-            return this.dataStore[this.dataStore.length - 1];
-        },
-        // get queue length
-        length: function () {
-            return this.dataStore.length;
-        }
     };
 
     /* Type of
@@ -1158,7 +1168,6 @@
 
         // JST
         JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
-            console.log(1)
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
         }, 'JST']
