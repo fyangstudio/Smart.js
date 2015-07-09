@@ -1,7 +1,7 @@
 /**
  * iModalJs JavaScript Component v1.0.0
  *
- * Copyright 2015-2015 fyangstudio and other contributors
+ * Copyright 2015-2015 YangFan and other contributors
  * Released under the MIT license
  * https://github.com/fyangstudio/iModalJs/blob/master/LICENSE
  *
