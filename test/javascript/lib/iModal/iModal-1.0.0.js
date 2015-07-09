@@ -1120,16 +1120,14 @@
      */
     // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     var TPL_MACRO = {
-        'BEGIN': '{{',
-        'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'EXPRESSION': /[\$\/#@!_A-Za-z][^}]*/,
+        'EXPRESSION': /\{\{([\$\/#@!_A-Za-z][^}]*)\}\}/,
         'SPACE': /[\r\n\f ]/
     };
 
     var TPL_RULES = {
         //INIT
-        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%%EXPRESSION%%END%)/, function ($) {
+        ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
@@ -1167,7 +1165,7 @@
         }, 'TAG'],
 
         // JST
-        JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
+        JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
         }, 'JST']
@@ -1394,6 +1392,9 @@
                 fragment: 'var ' + sign + ' = $m.$text(null, "");'
             }
         },
+        attr: function () {
+
+        },
         element: function () {
             var attr, fragment, name, sign, selfClosed, handler = '', children = [];
             name = this.match('TAG_OPEN_START').value;
@@ -1426,11 +1427,6 @@
                 handler: handler,
                 fragment: fragment
             }
-        },
-
-        parse: function (statements) {
-            this.parsed = true;
-            //console.log(this.statements);
         }
     };
 
