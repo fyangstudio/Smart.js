@@ -1409,15 +1409,25 @@
 
         },
         element: function () {
-            var attr, fragment, name, sign, selfClosed, handler = '', children = [];
+            var attr, fragment, name, sign, selfClosed, test, attrValue, handler = '', children = [];
             name = this.match('TAG_OPEN_START').value;
             sign = 'M_DOM' + (++this.seed);
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
 
-            // todo
             // set Attribute
             while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
-                fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");';
+                if (attr.type === 'TAG_ATTRIBUTE_NAME') {
+                    attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
+                    test = attrValue.match(TPL_MACRO.EXPRESSION);
+                    if (!test) {
+                        fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                    } else {
+                        console.log(test);
+                        handler += '';
+                    }
+                } else {
+                    console.log(attr);
+                }
             }
 
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
