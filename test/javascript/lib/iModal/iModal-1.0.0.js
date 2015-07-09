@@ -1297,13 +1297,13 @@
         var _fn = [].join(''), prefix = 'var _data = this.data;', init = '', main = '', statements = this.process() || [];
 
         _fn += '"use strict";';
-        _fn += 'var m_dom0 = this._container = $m.$fragment();';
-        _fn += 'try {<%init%>return function(){<%main%>};} catch(e) {throw new Error("$tpl: " + e.message);}';
+        _fn += 'var M_DOM0 = $m.$fragment();';
+        _fn += 'try {<%init%>return function(){<%main%>return M_DOM0;};} catch(e) {throw new Error("$tpl: " + e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
                 init += statement.fragment;
-                init += 'this._container.appendChild(' + statement.sign + ');';
+                init += 'M_DOM0.appendChild(' + statement.sign + ');';
                 main += statement.handler || '';
             }
         });
@@ -1363,7 +1363,7 @@
                     var text = poll.value.trim().replace(/\n/g, '');
                     this.next();
                     if (!!text) {
-                        var sign = 'm_dom' + (++this.seed);
+                        var sign = 'M_DOM' + (++this.seed);
                         return {
                             type: 'text',
                             sign: sign,
@@ -1383,7 +1383,7 @@
             return 1;
         },
         jst: function (poll) {
-            var sign = 'm_dom' + (++this.seed);
+            var sign = 'M_DOM' + (++this.seed);
             // interpolate
             this.buffer.push(poll.value.split('.')[0]);
             return {
@@ -1396,7 +1396,7 @@
         element: function () {
             var attr, fragment, name, sign, selfClosed, handler = '', children = [];
             name = this.match('TAG_OPEN_START').value;
-            sign = 'm_dom' + (++this.seed);
+            sign = 'M_DOM' + (++this.seed);
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
             // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
@@ -1486,11 +1486,10 @@
         },
 
         $inject: function (parentNode) {
-            this.$update();
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            _target.appendChild(this._container);
+            _target.appendChild(this.$update());
             return this;
         }
     });
