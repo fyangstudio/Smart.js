@@ -1415,15 +1415,21 @@
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
 
             // set Attribute
+            var reg = /\{\{([\$\/#@!_A-Za-z][^}]*)\}\}/g;
             while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
                 if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                     attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
-                    test = attrValue.match(TPL_MACRO.EXPRESSION);
-                    if (!test) {
-                        fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                    if (reg.test(attrValue)) {
+                        var buffer = [];
+                        attrValue = attrValue.replace(reg, function ($) {
+                            var variable = $.slice(2, -2);
+                            buffer.push(variable.split('.')[0]);
+                            return '" + ' + variable + ' + "';
+                        });
+                        Array.prototype.push.apply(this.buffer, buffer);
+                        handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
                     } else {
-                        console.log(test);
-                        handler += '';
+                        fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
                     }
                 } else {
                     console.log(attr);
