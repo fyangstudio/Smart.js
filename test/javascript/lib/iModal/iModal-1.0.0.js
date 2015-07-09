@@ -1157,6 +1157,9 @@
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
 
+        TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
+            this.enter('JST');
+        }, 'TAG'],
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
 
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
@@ -1218,6 +1221,7 @@
         TPL_RULES.TAG_ATTRIBUTE_NAME,
         TPL_RULES.TAG_ATTRIBUTE_INT,
         TPL_RULES.TAG_ATTRIBUTE_VALUE,
+        TPL_RULES.TAG_ENTER_JST,
         TPL_RULES.TAG_SPACE,
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
@@ -1400,14 +1404,18 @@
             name = this.match('TAG_OPEN_START').value;
             sign = 'M_DOM' + (++this.seed);
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
+
+            // todo
             // set Attribute
             while (attr = this.verify('TAG_ATTRIBUTE_NAME')) {
                 fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + this.verify('TAG_ATTRIBUTE_VALUE').value + '");';
             }
+            console.log(this.verify('JST_EXPRESSION'));
+
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
             if (!selfClosed && !voidTag.test(name)) {
                 children = this.process();
-                if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: expect </' + name + '> got no matched closeTag!');
+                if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
             } else {
                 _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
             }
