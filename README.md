@@ -19,6 +19,7 @@ define(['dep1', 'dep2'], function (dep1, dep2) {
 SAMD
 ```javascript
 //Calling define with a selective dependency array and a factory function
+//Such as $chrome!, $ie!, $firefox!, $safari!, $opera! and $pixel!
 define([
   '$chrome!dep1',             //chrome dependency   
   '6<=$ie<9!dep2',            //IE6~IE9 dependency
@@ -31,4 +32,5 @@ define([
     return {};
 });
 ```
+
 
