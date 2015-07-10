@@ -1420,13 +1420,11 @@
                 if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                     attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
                     if (reg.test(attrValue)) {
-                        var buffer = [];
                         attrValue = attrValue.replace(reg, function ($) {
                             var variable = $.slice(2, -2);
-                            buffer.push(variable.split('.')[0]);
+                            this.buffer.push(variable.split('.')[0]);
                             return '" + ' + variable + ' + "';
-                        });
-                        Array.prototype.push.apply(this.buffer, buffer);
+                        }.bind(this));
                         handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
                     } else {
                         fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
