@@ -9,7 +9,7 @@ define([
         template: tpl,
         autoUpdate: true,
         responsive: true,
-        //watchHash: true,
+        watchHash: true,
         init: function () {
             this.$on('ok1', this.test1);
         },

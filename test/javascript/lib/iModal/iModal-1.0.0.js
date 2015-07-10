@@ -1495,6 +1495,7 @@
                     $m.$forIn(_hash, function (value, key) {
                         this.data[key] = value;
                     }, this);
+                    console.log(this.data);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
                 _hashFn();
