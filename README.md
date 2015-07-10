@@ -37,6 +37,7 @@ define([
 ```javascript
 define(function () {
     return $m.$module.$extend({
+        // Each $m.$module has a auto execute $init method
         $init: function () {
             this.getUserInfo();
         },
