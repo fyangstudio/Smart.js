@@ -1415,7 +1415,7 @@
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
 
             // set Attribute
-            var reg = /\{\{([\$\/#@!_A-Za-z][^}]*)\}\}/g;
+            var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
             while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
                 if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                     attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
