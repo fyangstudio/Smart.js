@@ -1420,10 +1420,9 @@
                 if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                     attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
                     if (reg.test(attrValue)) {
-                        attrValue = attrValue.replace(reg, function ($) {
-                            var variable = $.slice(2, -2);
-                            this.buffer.push(variable.split('.')[0]);
-                            return '" + ' + variable + ' + "';
+                        attrValue = attrValue.replace(reg, function ($, one) {
+                            this.buffer.push(one.split('.')[0]);
+                            return '" + ' + one + ' + "';
                         }.bind(this));
                         handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
                     } else {
