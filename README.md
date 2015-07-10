@@ -28,7 +28,7 @@ define([
     //[macbook pro's chrome], Don't load the dep3 and the oldIE_dep will be an empty object.
     
     //Define the module value by returning a value.
-    return function () {};
+    return {};
 });
 ```
 
