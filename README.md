@@ -33,4 +33,17 @@ define([
 });
 ```
 ##Quirk Start
+###Example 1: define a simple Base Module
+```javascript
+define(function () {
+    return $m.$module.$extend({
+        $init: function () {
+            this.getUserInfo();
+        },
+        getUserInfo: function () {
+            // do something
+        }
+    })
+});
+```
 
