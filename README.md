@@ -34,11 +34,12 @@ define([
 ```
 ##Quirk Start
 ###Example 1: define a simple Base Module
+Define a common module
 ```javascript
 define(function () {
     return $m.$module.$extend({
         // Each $m.$module has a auto execute $init method
-        $init: function () {
+        $init: function (options) {
             this.getUserInfo();
         },
         getUserInfo: function () {
@@ -47,4 +48,19 @@ define(function () {
     })
 });
 ```
+Use the common module create new module
+```javascript
+define([
+    './module'
+], function (m) {
+    var page_index = m.$extend({
+      $init: function (options) {
+        //this.$super() method can call the parent's this function
+        this.$super(options);
+        
+        // do something
+      },
+    });
+    return new page_index({name: 'yangfan'});
+});
 
