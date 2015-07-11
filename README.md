@@ -55,7 +55,9 @@ define([
 ], function (m) {
     var page_index = m.$extend({
       $init: function (options) {
+        //this.$super() method can call the parents's this function
         this.$super(options);
+        
         // do something
       },
     });
