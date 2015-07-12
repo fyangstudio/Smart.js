@@ -1249,8 +1249,7 @@
             mlen = test[0].length;
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
-            // console.log(token);
-            if (token && token.type !== 'JST_COMMENT') tokens.push(token);
+            if (token && !!token.value.trim()) tokens.push(token);
             this._pos += mlen;
         }
         // end of file
