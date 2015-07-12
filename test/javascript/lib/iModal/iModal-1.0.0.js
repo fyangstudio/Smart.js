@@ -1127,7 +1127,7 @@
 
     var TPL_RULES = {
         //INIT
-        ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
+        ENTER_JST: [/[^\x00<]*?(?=\{\{)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
@@ -1157,7 +1157,7 @@
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
 
-        TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
+        TAG_ENTER_JST: [/(?=\{\{)/, function () {
             this.enter('JST');
         }, 'TAG'],
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
@@ -1168,7 +1168,10 @@
         }, 'TAG'],
 
         // JST
-        JST_COMMENT: [/\{\{!(.*)!\}\}/, null, 'JST'],
+        JST_COMMENT: [/\{\{!(.+)!\}\}/, function ($, one) {
+            this.leave('JST');
+            return {type: 'JST_COMMENT', value: ''}
+        }, 'JST'],
         JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
@@ -1246,7 +1249,8 @@
             mlen = test[0].length;
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
-            if (token) tokens.push(token);
+            // console.log(token);
+            if (token && token.type !== 'JST_COMMENT') tokens.push(token);
             this._pos += mlen;
         }
         // end of file
