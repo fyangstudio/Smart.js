@@ -1168,6 +1168,7 @@
         }, 'TAG'],
 
         // JST
+        JST_COMMENT: [/\{\{!(.*)!\}\}/, null, 'JST'],
         JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
@@ -1226,6 +1227,7 @@
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
+        TPL_RULES.JST_COMMENT,
         TPL_RULES.JST_EXPRESSION
     ]);
 
