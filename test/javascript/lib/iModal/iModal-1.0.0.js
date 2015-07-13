@@ -1161,6 +1161,7 @@
             this.enter('JST');
         }, 'TAG'],
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
+        TAG_COMMENT: [/<!--([^\x00]*?)-->/, null, 'TAG'],
 
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
             this.leave();
@@ -1223,6 +1224,7 @@
         TPL_RULES.TAG_ATTRIBUTE_VALUE,
         TPL_RULES.TAG_ENTER_JST,
         TPL_RULES.TAG_SPACE,
+        TPL_RULES.TAG_COMMENT,
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
