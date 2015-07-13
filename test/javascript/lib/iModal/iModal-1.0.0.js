@@ -1121,7 +1121,7 @@
     // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     var TPL_MACRO = {
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'EXPRESSION': /\{\{([\$\/#@!_A-Za-z][^}]*)\}\}/,
+        'EXPRESSION': /\{\{!?([\$\/#@!_A-Za-z][^}]*)!?\}\}/,
         'SPACE': /[\r\n\f ]/
     };
 
@@ -1168,13 +1168,9 @@
         }, 'TAG'],
 
         // JST
-        JST_COMMENT: [/\{\{!(.+)!\}\}/, function ($, one) {
-            this.leave('JST');
-            return {type: 'JST_COMMENT', value: ''}
-        }, 'JST'],
         JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
             this.leave('JST');
-            return {type: 'JST_EXPRESSION', value: one}
+            return {type: 'JST_EXPRESSION', value: $.indexOf('!') == 2 ? '' : one}
         }, 'JST']
     };
 
@@ -1230,7 +1226,6 @@
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
-        TPL_RULES.JST_COMMENT,
         TPL_RULES.JST_EXPRESSION
     ]);
 
