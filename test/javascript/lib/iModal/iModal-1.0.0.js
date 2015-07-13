@@ -1327,140 +1327,145 @@
         //console.log(_fn);
         return new Function('$m, init', _fn);
     };
-    TPL_Parser.prototype = {
-        next: function (k) {
-            k = k || 1;
-            this.pos += k;
-        },
-        poll: function (k) {
-            k = k || 1;
-            if (k < 0) k = k + 1;
-            var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
-            return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
-        },
-        verify: function (type, value) {
-            var poll = this.poll();
-            if (!$m.$isString(type)) {
-                for (var len = type.length; len--;) {
-                    if (poll.type === type[len]) {
-                        this.next();
-                        return poll;
-                    }
-                }
-            } else {
-                if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
+
+    var _tp = TPL_Parser.prototype;
+
+    _tp.next = function (k) {
+        k = k || 1;
+        this.pos += k;
+    };
+
+    _tp.poll = function (k) {
+        k = k || 1;
+        if (k < 0) k = k + 1;
+        var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
+        return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
+    };
+
+    _tp.verify = function (type, value) {
+        var poll = this.poll();
+        if (!$m.$isString(type)) {
+            for (var len = type.length; len--;) {
+                if (poll.type === type[len]) {
                     this.next();
                     return poll;
                 }
             }
-            return false;
-        },
-        match: function (type, value) {
-            var poll;
-            if (!(poll = this.verify(type, value))) {
-                poll = this.poll();
-                _ERROR('expect [' + type + (value == null ? '' : ':' + value) + ']" -> got "[' + poll.type + (value == null ? '' : ':' + poll.value) + ']');
-            } else {
+        } else {
+            if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
+                this.next();
                 return poll;
             }
-        },
-        process: function () {
-            var statements = [], poll = this.poll();
-            while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-                statements.push(this.statement());
-                poll = this.poll();
-            }
-            return statements;
-        },
-        statement: function () {
-            var poll = this.poll();
-            //console.log(poll);
-            switch (poll.type) {
-                case 'TEXT':
-                    var text = poll.value.trim().replace(/\n/g, '');
-                    this.next();
-                    if (!!text) {
-                        var sign = 'M_DOM' + (++this.seed);
-                        return {
-                            type: 'text',
-                            sign: sign,
-                            handler: '',
-                            fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
-                        };
-                    }
-                    return null;
-                case 'JST_EXPRESSION':
-                    this.next();
-                    return this.jst(poll);
-                case 'TAG_OPEN_START':
-                    return this.element();
-                default:
-                    _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
-            }
-            return 1;
-        },
-        jst: function (poll) {
-            var sign = 'M_DOM' + (++this.seed);
-            // interpolate
-            this.buffer.push(poll.value.split('.')[0]);
-            return {
-                type: 'jst',
-                sign: sign,
-                handler: '$m.$text(' + sign + ', ' + poll.value + ');',
-                fragment: 'var ' + sign + ' = $m.$text(null, "");'
-            }
-        },
-        attr: function () {
+        }
+        return false;
+    };
 
-        },
-        element: function () {
-            var attr, fragment, name, sign, selfClosed, test, attrValue, handler = '', children = [];
-            name = this.match('TAG_OPEN_START').value;
-            sign = 'M_DOM' + (++this.seed);
-            fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
+    _tp.match = function (type, value) {
+        var poll;
+        if (!(poll = this.verify(type, value))) {
+            poll = this.poll();
+            _ERROR('expect [' + type + (value == null ? '' : ':' + value) + ']" -> got "[' + poll.type + (value == null ? '' : ':' + poll.value) + ']');
+        } else {
+            return poll;
+        }
+    };
 
-            // set Attribute
-            var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-            while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
-                if (attr.type === 'TAG_ATTRIBUTE_NAME') {
-                    attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
-                    if (reg.test(attrValue)) {
-                        attrValue = attrValue.replace(reg, function ($, one) {
-                            this.buffer.push(one.split('.')[0]);
-                            return '" + ' + one + ' + "';
-                        }.bind(this));
-                        handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
-                    } else {
-                        fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
-                    }
-                } else {
-                    console.log(attr);
+    _tp.process = function () {
+        var statements = [], poll = this.poll();
+        while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
+            statements.push(this.statement());
+            poll = this.poll();
+        }
+        return statements;
+    };
+
+    _tp.statement = function () {
+        var poll = this.poll();
+        //console.log(poll);
+        switch (poll.type) {
+            case 'TEXT':
+                var text = poll.value.trim().replace(/\n/g, '');
+                this.next();
+                if (!!text) {
+                    var sign = 'M_DOM' + (++this.seed);
+                    return {
+                        type: 'text',
+                        sign: sign,
+                        handler: '',
+                        fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
+                    };
                 }
-            }
+                return null;
+            case 'JST_EXPRESSION':
+                this.next();
+                return this.jst(poll);
+            case 'TAG_OPEN_START':
+                return this.element();
+            default:
+                _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
+        }
+        return 1;
+    };
 
-            selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
-            if (!selfClosed && !_voidTag.test(name)) {
-                children = this.process();
-                if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
+    _tp.jst = function (poll) {
+        var sign = 'M_DOM' + (++this.seed);
+        // interpolate
+        this.buffer.push(poll.value.split('.')[0]);
+        return {
+            type: 'jst',
+            sign: sign,
+            handler: '$m.$text(' + sign + ', ' + poll.value + ');',
+            fragment: 'var ' + sign + ' = $m.$text(null, "");'
+        }
+    };
+
+    _tp.element = function () {
+        var attr, fragment, name, sign, selfClosed, test, attrValue, handler = '', children = [];
+        name = this.match('TAG_OPEN_START').value;
+        sign = 'M_DOM' + (++this.seed);
+        fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
+
+        // set Attribute
+        var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
+            if (attr.type === 'TAG_ATTRIBUTE_NAME') {
+                attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
+                if (reg.test(attrValue)) {
+                    attrValue = attrValue.replace(reg, function ($, one) {
+                        this.buffer.push(one.split('.')[0]);
+                        return '" + ' + one + ' + "';
+                    }.bind(this));
+                    handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                } else {
+                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                }
             } else {
-                _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
+                console.log(attr);
             }
-            // console.log(children);
-            if (!!children.length) {
-                children.forEach(function (value) {
-                    if (value) {
-                        fragment += (value.fragment
-                        + 'if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}');
-                        handler += value.handler || '';
-                    }
-                }, this)
-            }
-            return {
-                type: 'element',
-                sign: sign,
-                handler: handler,
-                fragment: fragment
-            }
+        }
+
+        selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
+        if (!selfClosed && !_voidTag.test(name)) {
+            children = this.process();
+            if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
+        } else {
+            _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
+        }
+        // console.log(children);
+        if (!!children.length) {
+            children.forEach(function (value) {
+                if (value) {
+                    fragment += (value.fragment
+                    + 'if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}');
+                    handler += value.handler || '';
+                }
+            }, this)
+        }
+        return {
+            type: 'element',
+            sign: sign,
+            handler: handler,
+            fragment: fragment
         }
     };
 
