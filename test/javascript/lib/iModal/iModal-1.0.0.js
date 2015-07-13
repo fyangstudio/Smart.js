@@ -1118,13 +1118,14 @@
      * Living dom
      *
      */
-    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
+    // TPL_MACRO for TPL_Lexer
     var TPL_MACRO = {
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
         'EXPRESSION': /\{\{!?([\$\/#@!_A-Za-z][^}]*)!?\}\}/,
         'SPACE': /[\r\n\f ]/
     };
-
+    // TPL_RULES for TPL_Lexer
+    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     var TPL_RULES = {
         //INIT
         ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
@@ -1175,6 +1176,7 @@
         }, 'JST']
     };
 
+    // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
     var TPL_ProcessRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
 
@@ -1212,6 +1214,7 @@
         return map;
     };
 
+    // TPL_Lexer's map
     var TPL_Dictionary = TPL_ProcessRules([
         // INIT
         TPL_RULES.ENTER_JST,
@@ -1505,6 +1508,7 @@
 
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
+            this._watchers = [];
             this.$update = _handler.apply(this, [$m]);
             console.log(_handler);
 
