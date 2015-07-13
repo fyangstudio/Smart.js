@@ -1127,7 +1127,7 @@
 
     var TPL_RULES = {
         //INIT
-        ENTER_JST: [/[^\x00<]*?(?=\{\{)/, function ($) {
+        ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
@@ -1157,7 +1157,7 @@
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
 
-        TAG_ENTER_JST: [/(?=\{\{)/, function () {
+        TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
             this.enter('JST');
         }, 'TAG'],
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
