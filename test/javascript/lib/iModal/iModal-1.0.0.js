@@ -1431,22 +1431,23 @@
     };
 
     _tp.attr = function () {
-        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
+        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed, transfer = new $m.$stack();
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
-                attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']).value;
-                if (attrValue) {
-                    if (reg.test(attrValue)) {
-                        attrValue = attrValue.replace(reg, function ($, one) {
-                            this.buffer.push(one.split('.')[0]);
-                            return '" + ' + one + ' + "';
-                        }.bind(this));
-                        handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
-                    } else {
-                        fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
-                    }
+                attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
+
+                if (attrValue.type === 'JST_EXPRESSION') {
+                    handler += '$m.$attr(' + sign + ', "' + attr.value + '", ' + attrValue.value + ');';
+                } else if (reg.test(attrValue.value)) {
+                    attrValue = attrValue.value.replace(reg, function ($, one) {
+                        this.buffer.push(one.split('.')[0]);
+                        return '" + ' + one + ' + "';
+                    }.bind(this));
+                    handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                } else {
+                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue.value + '");';
                 }
             } else {
                 console.log(attr);
