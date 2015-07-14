@@ -1204,17 +1204,16 @@
     // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
     var TPL_ProcessRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
-
+        // replace the rule's macro string to regexp
         var _replaceFn = function ($, one) {
             return $m.$isString(TPL_MACRO[one]) ? $m.$escapeRegExp(TPL_MACRO[one]) : String(TPL_MACRO[one]).slice(1, -1);
         };
-
+        // get the rules retain length
         var _getRetain = function (regStr) {
             var series = 0, ignored = regStr.match(_ignoredReg);
             for (var l = regStr.length; l--;) if ((l === 0 || regStr.charAt(l - 1) !== "\\") && regStr.charAt(l) === "(") series++;
             return ignored ? series - ignored.length : series;
         };
-
         // add map[sign]
         rules.forEach(function (rule) {
             sign = rule[2] || 'INIT';
@@ -1259,8 +1258,9 @@
         TPL_RULES.JST_EXPRESSION
     ]);
 
+    // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
     var TPL_Lexer = function (tpl) {
-        if (!tpl) _ERROR('$tpl: Template not found!');
+        if (tpl == undefined) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state;
         this._pos = 0;
@@ -1283,24 +1283,29 @@
     };
 
     TPL_Lexer.prototype = {
+        // enter state mode
         enter: function (state) {
             this._states.push(state);
             return this;
         },
+        // leave state mode
         leave: function (state) {
             var states = this._states;
             if (!state || states[states.length - 1] === state) states.pop();
         },
+        // get present state
         state: function () {
             var states = this._states;
             return states[states.length - 1];
         },
+        // process 'tpl' to piece
         process: function (args, split, tpl) {
             var links = split.links, token, marched = false;
             for (var len = links.length, i = 0; i < len; i++) {
                 var link = links[i], handler = link[2], index = link[0];
                 if (args && args[index]) {
                     marched = true;
+                    // rule's handler function
                     if (handler) {
                         token = handler.apply(this, args.slice(index, index + link[1]));
                         token.pos = this._pos;
@@ -1308,6 +1313,7 @@
                     break;
                 }
             }
+            // change mode, when no marched
             if (!marched) {
                 if (tpl.charAt(0) == '<') this.enter("TAG");
                 else this.enter("JST");
