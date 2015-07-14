@@ -1297,6 +1297,7 @@
 
         this.pos = 0;
         this.seed = 0;
+        this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
@@ -1384,6 +1385,7 @@
         //console.log(poll);
         switch (poll.type) {
             case 'TEXT':
+                this.state = 'TEXT';
                 var text = poll.value.trim().replace(/\n/g, '');
                 this.next();
                 if (!!text) {
@@ -1400,6 +1402,7 @@
                 this.next();
                 return this.jst(poll);
             case 'TAG_OPEN_START':
+                this.state = 'TAG';
                 return this.element();
             default:
                 _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
@@ -1408,6 +1411,7 @@
     };
 
     _tp.jst = function (poll) {
+        console.log(this.state);
         var sign = 'M_DOM' + (++this.seed);
         // interpolate
         this.buffer.push(poll.value.split('.')[0]);
