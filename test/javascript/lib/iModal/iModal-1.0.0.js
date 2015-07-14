@@ -1435,9 +1435,9 @@
 
             }.bind(this),
             'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed);
+                var sign = 'M_DOM' + (++this.seed), buf = value.split('.')[0];
                 // interpolate
-                this.buffer.push(value.split('.')[0]);
+                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                 return {
                     type: 'jst',
                     sign: sign,
@@ -1461,7 +1461,8 @@
                     handler += '$m.$attr(' + sign + ', "' + attr.value + '", ' + attrValue.value + ');';
                 } else if (reg.test(attrValue.value)) {
                     attrValue = attrValue.value.replace(reg, function ($, one) {
-                        this.buffer.push(one.split('.')[0]);
+                        var buf = one.split('.')[0];
+                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                         return '" + ' + one + ' + "';
                     }.bind(this));
                     handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
