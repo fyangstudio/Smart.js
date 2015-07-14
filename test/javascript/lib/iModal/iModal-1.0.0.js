@@ -1457,13 +1457,13 @@
     };
 
     _tp.element = function () {
-        var attr, fragment, name, sign, selfClosed, handler = '', children = [];
-
-        name = this.match('TAG_OPEN_START').value;
-        sign = 'M_DOM' + (++this.seed);
-        fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
-        attr = this.attr();
-        selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
+        var
+            handler = '', children = [],
+            name = this.match('TAG_OPEN_START').value,
+            sign = 'M_DOM' + (++this.seed),
+            fragment = 'var ' + sign + ' = $m.$create("' + name + '");',
+            attr = this.attr(),
+            selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
         
         if (!selfClosed && !_voidTag.test(name)) {
             children = this.process();
