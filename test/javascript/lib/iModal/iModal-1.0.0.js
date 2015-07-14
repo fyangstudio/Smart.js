@@ -345,6 +345,25 @@
         };
     }
 
+    // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+    if (!Array.prototype.indexOf) {
+        Array.prototype.indexOf = function (element, fromIndex) {
+            var len = this.length;
+            if (len) {
+                // Init search position flag
+                var i = fromIndex ? fromIndex < 0 ? Math.max(0, len + fromIndex) : fromIndex : 0;
+
+                for (; i < len; i++) {
+                    // Skip accessing in sparse arrays
+                    if (i in this && this[i] === element) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+    }
+
     // The Object.keys() method returns an array of a given object's own enumerable properties.
     if (!Object.keys) {
         Object.keys = (function () {

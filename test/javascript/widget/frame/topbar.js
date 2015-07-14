@@ -33,7 +33,7 @@ define([
     //    }
     //});
 
-    var t = new base({data: {t: 1}}).$inject('#test1');
+    var t = new base({data: {t: 1, x: 'id'}}).$inject('#test1');
     //t.data.t = 2;
     //t.$update();
 
