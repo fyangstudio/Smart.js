@@ -1431,20 +1431,22 @@
     };
 
     _tp.attr = function () {
-        var attr, attrValue, fragment = '', handler = '', ret = '', sign = 'M_DOM' + this.seed;
+        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
-                attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
-                if (reg.test(attrValue)) {
-                    attrValue = attrValue.replace(reg, function ($, one) {
-                        this.buffer.push(one.split('.')[0]);
-                        return '" + ' + one + ' + "';
-                    }.bind(this));
-                    handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
-                } else {
-                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']).value;
+                if (attrValue) {
+                    if (reg.test(attrValue)) {
+                        attrValue = attrValue.replace(reg, function ($, one) {
+                            this.buffer.push(one.split('.')[0]);
+                            return '" + ' + one + ' + "';
+                        }.bind(this));
+                        handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                    } else {
+                        fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                    }
                 }
             } else {
                 console.log(attr);
@@ -1464,7 +1466,7 @@
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");',
             attr = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
-        
+
         if (!selfClosed && !_voidTag.test(name)) {
             children = this.process();
             if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
