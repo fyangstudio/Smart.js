@@ -1137,29 +1137,33 @@
      * Living dom
      *
      */
-    // TPL_MACRO for TPL_Lexer
+    // Macro for TPL parse function
     var TPL_MACRO = {
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
         'EXPRESSION': /\{\{!?([\$\/#@!_A-Za-z][^}]*)!?\}\}/,
         'SPACE': /[\r\n\f ]/
     };
-    // TPL_RULES for TPL_Lexer
+    // Rules for TPL parse function
     // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     var TPL_RULES = {
-        //INIT
+        /* INIT */
+        // Enter JST mode
         ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
+        // Enter TAG mode
         ENTER_TAG: [/[^\x00<>]*?(?=<)/, function ($) {
             this.enter('TAG');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
+        // Start with TEXT
         TEXT: [/[^\x00]+/, function ($) {
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
 
-        // TAG
+        /* TAG */
+        // TAG open
         TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
@@ -1167,7 +1171,7 @@
             this.leave();
             return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
-
+        // Get TAG attribute
         TAG_ATTRIBUTE_NAME: [/(%NAME%)/, function ($, one) {
             return {type: 'TAG_ATTRIBUTE_NAME', value: one}
         }, 'TAG'],
@@ -1176,11 +1180,13 @@
             var value = one || two || "";
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
-
+        // In TAG mode change to JST mode
         TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
             this.enter('JST');
         }, 'TAG'],
+        // TAG SPACE
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
+        // TAG COMMENT
         TAG_COMMENT: [/<!--([^\x00]*?)-->/, null, 'TAG'],
 
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
@@ -1188,7 +1194,7 @@
             return {type: 'TAG_CLOSE', value: one}
         }, 'TAG'],
 
-        // JST
+        /* JST */
         JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: $.indexOf('!') == 2 ? '' : one}
