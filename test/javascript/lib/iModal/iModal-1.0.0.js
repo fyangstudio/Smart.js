@@ -1470,6 +1470,7 @@
                     fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue.value + '");';
                 }
             } else {
+                if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
                 console.log(attr);
             }
         }
