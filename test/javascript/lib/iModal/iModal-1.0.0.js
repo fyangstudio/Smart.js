@@ -1400,7 +1400,7 @@
                 return null;
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst(poll);
+                return this.jst(poll.value);
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
                 return this.element();
@@ -1410,28 +1410,31 @@
         return 1;
     };
 
-    _tp.jst = function (poll) {
-        console.log(this.state);
-        var sign = 'M_DOM' + (++this.seed);
-        // interpolate
-        this.buffer.push(poll.value.split('.')[0]);
-        return {
-            type: 'jst',
-            sign: sign,
-            handler: '$m.$text(' + sign + ', ' + poll.value + ');',
-            fragment: 'var ' + sign + ' = $m.$text(null, "");'
-        }
+    _tp.jst = function (value) {
+        var operation = {
+            'TAG': function () {
+
+            }.bind(this),
+            'TEXT': function () {
+                var sign = 'M_DOM' + (++this.seed);
+                // interpolate
+                this.buffer.push(value.split('.')[0]);
+                return {
+                    type: 'jst',
+                    sign: sign,
+                    handler: '$m.$text(' + sign + ', ' + value + ');',
+                    fragment: 'var ' + sign + ' = $m.$text(null, "");'
+                }
+            }.bind(this)
+        };
+        return operation[this.state]();
     };
 
-    _tp.element = function () {
-        var attr, fragment, name, sign, selfClosed, test, attrValue, handler = '', children = [];
-        name = this.match('TAG_OPEN_START').value;
-        sign = 'M_DOM' + (++this.seed);
-        fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
-
+    _tp.attr = function () {
+        var attr, attrValue, fragment = '', handler = '', ret = '', sign = 'M_DOM' + this.seed;
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION'])) {
+        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                 attrValue = this.verify('TAG_ATTRIBUTE_VALUE').value;
                 if (reg.test(attrValue)) {
@@ -1447,8 +1450,21 @@
                 console.log(attr);
             }
         }
+        return {
+            handler: handler,
+            fragment: fragment
+        }
+    };
 
+    _tp.element = function () {
+        var attr, fragment, name, sign, selfClosed, handler = '', children = [];
+
+        name = this.match('TAG_OPEN_START').value;
+        sign = 'M_DOM' + (++this.seed);
+        fragment = 'var ' + sign + ' = $m.$create("' + name + '");';
+        attr = this.attr();
         selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
+        
         if (!selfClosed && !_voidTag.test(name)) {
             children = this.process();
             if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
@@ -1468,8 +1484,8 @@
         return {
             type: 'element',
             sign: sign,
-            handler: handler,
-            fragment: fragment
+            handler: handler + attr.handler,
+            fragment: fragment + attr.fragment
         }
     };
 
