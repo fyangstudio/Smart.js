@@ -214,6 +214,7 @@
         return _doc.createDocumentFragment();
     };
 
+    // The $m.$hasChild() method returns a Boolean value indicating whether the current Node has child nodes or not.
     $m.$hasChild = function () {
         var args = arguments, len = args.length, parent = args[0], child = args[1];
         if (parent && parent.nodeType) {
