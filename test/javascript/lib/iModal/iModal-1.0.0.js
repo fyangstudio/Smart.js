@@ -1451,19 +1451,35 @@
         return 1;
     };
 
-    _tp.jst = function (value) {
+    _tp.jst = function (elem) {
         var operation = {
             'TAG': function () {
-
+                var attrVal, buf, handler, sign = 'M_DOM' + this.seed, reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+                if (reg.test(elem.value)) {
+                    attrVal = elem.value.replace(reg, function ($, one) {
+                        buf = one.split('.')[0];
+                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                        return '" + ' + one + ' + "';
+                    }.bind(this));
+                } else {
+                    buf = elem.value.split('.')[0];
+                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                    attrVal = '" + ' + elem.value + ' + "';
+                }
+                handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
+                return {
+                    handler: handler,
+                    fragment: ''
+                }
             }.bind(this),
             'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed), buf = value.split('.')[0];
+                var sign = 'M_DOM' + (++this.seed), buf = elem.split('.')[0];
                 // interpolate
                 if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                 return {
                     type: 'jst',
                     sign: sign,
-                    handler: '$m.$text(' + sign + ', ' + value + ');',
+                    handler: '$m.$text(' + sign + ', ' + elem + ');',
                     fragment: 'var ' + sign + ' = $m.$text(null, "");'
                 }
             }.bind(this)
@@ -1472,22 +1488,15 @@
     };
 
     _tp.attr = function () {
-        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed, transfer = new $m.$stack();
+        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                 attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
 
-                if (attrValue.type === 'JST_EXPRESSION') {
-                    handler += '$m.$attr(' + sign + ', "' + attr.value + '", ' + attrValue.value + ');';
-                } else if (reg.test(attrValue.value)) {
-                    attrValue = attrValue.value.replace(reg, function ($, one) {
-                        var buf = one.split('.')[0];
-                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                        return '" + ' + one + ' + "';
-                    }.bind(this));
-                    handler += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue + '");';
+                if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
+                    handler += this.jst({attr: attr.value, value: attrValue.value}).handler;
                 } else {
                     fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue.value + '");';
                 }
