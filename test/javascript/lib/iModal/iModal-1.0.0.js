@@ -1454,7 +1454,8 @@
     _tp.jst = function (elem) {
         var operation = {
             'TAG': function () {
-                var attrVal, buf, handler, sign = 'M_DOM' + this.seed, reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+                var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
+                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
                 if (reg.test(elem.value)) {
                     attrVal = elem.value.replace(reg, function ($, one) {
                         buf = one.split('.')[0];
@@ -1484,7 +1485,11 @@
                 }
             }.bind(this)
         };
-        return operation[this.state]();
+        if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
+            console.log(elem.match(/([A-Za-z]+)/))
+        } else {
+            return operation[this.state]();
+        }
     };
 
     _tp.attr = function () {
