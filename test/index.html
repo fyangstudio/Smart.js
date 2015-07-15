@@ -16,6 +16,9 @@
 <script src="javascript/lib/iModal/iModal.config.js"></script>
 <script src="javascript/pages/index/index.js"></script>
 <script>
+    var cnt = document.getElementById('test1');
+    var td = $m.$get('.test2')[0];
+    console.log($m.$hasChild(cnt, td));
     //    var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
     //    var t2 = $m.$o2s(t);
     //    $m.$watchHash(function (_hash) {

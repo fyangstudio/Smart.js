@@ -214,6 +214,15 @@
         return _doc.createDocumentFragment();
     };
 
+    $m.$hasChild = function () {
+        var args = arguments, len = args.length, parent = args[0], child = args[1];
+        if (parent && parent.nodeType) {
+            if (len == 1) return parent.hasChildNodes();
+            else if (child && child.nodeType) return child.parentNode == parent;
+        }
+        return false;
+    };
+
     // $m.$text() sets or gets all of the markup and content within a given element.
     $m.$text = (function () {
         // Special add text method map.
