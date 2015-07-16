@@ -199,16 +199,6 @@
         return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
     };
 
-    // The $m.$replace() method replaces one child node of the specified element with another.
-    $m.$replace = function (elem, replaced) {
-        if (replaced.parentNode) replaced.parentNode.replaceChild(elem, replaced);
-    };
-
-    // The $m.$remove () method removes a child node from the it's parentNode.
-    $m.$remove = function (elem) {
-        if (elem.parentNode) elem.parentNode.removeChild(elem);
-    };
-
     // Create an empty DocumentFragment object.
     $m.$fragment = function () {
         return _doc.createDocumentFragment();
@@ -222,6 +212,30 @@
             else if (child && child.nodeType) return child.parentNode == parent;
         }
         return false;
+    };
+
+    // The Node.insertAfter() method inserts the specified node after a reference node as a child of the current node.
+    $m.$insertAfter = function (elem, target) {
+        var parent = target.parentNode;
+        if (parent.lastChild == target) parent.appendChild(elem);
+        else parent.insertBefore(elem, target.nextSibling);
+        return elem;
+    };
+
+    // The $m.$replace() method replaces one child node of the specified element with another.
+    $m.$replace = function (elem, replaced) {
+        if (replaced.parentNode) replaced.parentNode.replaceChild(elem, replaced);
+    };
+
+    // The $m.$remove () method removes a child node from the it's parentNode.
+    $m.$remove = function (elem) {
+        if (elem.parentNode) elem.parentNode.removeChild(elem);
+    };
+
+    // The $m.$style() method specifies the style sheet language for the given document fragment.
+    $m.$style = function (elem, name) {
+        if (elem.currentStyle) return elem.currentStyle[name];
+        return getComputedStyle(elem, null)[name];
     };
 
     // $m.$text() sets or gets all of the markup and content within a given element.
@@ -240,12 +254,6 @@
             return elem;
         }
     })();
-
-    // The $m.$style() method specifies the style sheet language for the given document fragment.
-    $m.$style = function (elem, name) {
-        if (elem.currentStyle) return elem.currentStyle[name];
-        return getComputedStyle(elem, null)[name];
-    };
 
     // The $m.$width() method can get element's width in pixels.
     $m.$width = function (elem, inner) {
@@ -439,15 +447,6 @@
             }
         };
         _win.JSON = _json;
-    }
-
-    // The Node.insertAfter() method inserts the specified node after a reference node as a child of the current node.
-    if (Element) {
-        Element.prototype.insertAfter = function (elem, target) {
-            if (this.lastChild == target) this.appendChild(elem);
-            else this.insertBefore(elem, target.nextSibling);
-            return elem;
-        };
     }
 
     // Low version of the browser compatibility without console object.
