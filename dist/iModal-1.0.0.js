@@ -1,9 +1,13 @@
 /**
  * iModalJs JavaScript Component v1.0.0
  *
+ * Copyright 2015-2015 YangFan and other contributors
+ * Released under the MIT license
+ * https://github.com/fyangstudio/iModalJs/blob/master/LICENSE
+ *
  * Author YangFan(18767120422@163.com)
  *
- * Date: 2015-05-20
+ * Start: 2015-05-20
  */
 //<![CDATA[
 (function (_doc, _win, undefined) {
@@ -23,6 +27,70 @@
     var _observe = Object.observe || undefined;
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
+    /*!
+     * iModalJs Data Structure Component
+     *
+     * #include
+     * Stack & Queue
+     *
+     */
+    /* Stack
+     ---------------------------------------------------------------------- */
+    $m.$stack = function () {
+        this.top = 0;
+        this.dataStore = [];
+    };
+    $m.$stack.prototype = {
+        // placing item on top
+        push: function (element) {
+            this.dataStore[this.top++] = element;
+        },
+        // get the current item
+        peek: function () {
+            return this.dataStore[this.top - 1];
+        },
+        // taking the top item off the stack
+        pop: function () {
+            return this.dataStore[--this.top];
+        },
+        // clear the stack
+        clear: function () {
+            this.top = 0;
+            this.dataStore = [];
+        },
+        // get stack length
+        length: function () {
+            return this.top;
+        }
+    };
+
+    /* Queue
+     ---------------------------------------------------------------------- */
+    $m.$queue = function () {
+        this.dataStore = [];
+    };
+    $m.$queue.prototype = {
+        // add an item to the queue, generally at the "back" of the queue
+        enqueue: function (element) {
+            this.dataStore.push(element);
+        },
+        // remove an item from the queue, generally from the "front" of the queue
+        dequeue: function () {
+            return this.dataStore.shift();
+        },
+        // get the "front" of the queue
+        front: function () {
+            return this.dataStore[0]
+        },
+        // get the "back" of the queue
+        back: function () {
+            return this.dataStore[this.dataStore.length - 1];
+        },
+        // get queue length
+        length: function () {
+            return this.dataStore.length;
+        }
+    };
 
     /*!
      * iModalJs Tools Component
@@ -146,8 +214,17 @@
         return _doc.createDocumentFragment();
     };
 
+    // The $m.$hasChild() method returns a Boolean value indicating whether the current Node has child nodes or not.
+    $m.$hasChild = function () {
+        var args = arguments, len = args.length, parent = args[0], child = args[1];
+        if (parent && parent.nodeType) {
+            if (len == 1) return parent.hasChildNodes();
+            else if (child && child.nodeType) return child.parentNode == parent;
+        }
+        return false;
+    };
+
     // $m.$text() sets or gets all of the markup and content within a given element.
-    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     $m.$text = (function () {
         // Special add text method map.
         var _TextMap = {};
@@ -156,9 +233,11 @@
             _TextMap[3] = 'nodeValue';
         } else _TextMap[1] = _TextMap[3] = 'textContent';
         return function (elem, value) {
+            if (elem == null) elem = _doc.createTextNode('');
             var textProp = _TextMap[elem.nodeType];
             if (value === undefined) return textProp ? elem[textProp] : '';
             elem[textProp] = value;
+            return elem;
         }
     })();
 
@@ -210,64 +289,6 @@
     // Get event target.
     $m.$getTarget = function (event) {
         return !event ? null : (event.target || event.srcElement);
-    };
-
-    /* Stack
-     ---------------------------------------------------------------------- */
-    $m.$stack = function () {
-        this.top = 0;
-        this.dataStore = [];
-    };
-    $m.$stack.prototype = {
-        // placing item on top
-        push: function (element) {
-            this.dataStore[this.top++] = element;
-        },
-        // get the current item
-        peek: function () {
-            return this.dataStore[this.top - 1];
-        },
-        // taking the top item off the stack
-        pop: function () {
-            return this.dataStore[--this.top];
-        },
-        // clear the stack
-        clear: function () {
-            this.top = 0;
-            this.dataStore = [];
-        },
-        // get stack length
-        length: function () {
-            return this.top;
-        }
-    };
-
-    /* Queue
-     ---------------------------------------------------------------------- */
-    $m.$queue = function () {
-        this.dataStore = [];
-    };
-    $m.$queue.prototype = {
-        // add an item to the queue, generally at the "back" of the queue
-        enqueue: function (element) {
-            this.dataStore.push(element);
-        },
-        // remove an item from the queue, generally from the "front" of the queue
-        dequeue: function () {
-            return this.dataStore.shift();
-        },
-        // get the "front" of the queue
-        front: function () {
-            return this.dataStore[0]
-        },
-        // get the "back" of the queue
-        back: function () {
-            return this.dataStore[this.dataStore.length - 1];
-        },
-        // get queue length
-        length: function () {
-            return this.dataStore.length;
-        }
     };
 
     /* Type of
@@ -332,6 +353,25 @@
                 k++;
             }
         };
+    }
+
+    // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+    if (!Array.prototype.indexOf) {
+        Array.prototype.indexOf = function (element, fromIndex) {
+            var len = this.length;
+            if (len) {
+                // Init search position flag
+                var i = fromIndex ? fromIndex < 0 ? Math.max(0, len + fromIndex) : fromIndex : 0;
+
+                for (; i < len; i++) {
+                    // Skip accessing in sparse arrays
+                    if (i in this && this[i] === element) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
     }
 
     // The Object.keys() method returns an array of a given object's own enumerable properties.
@@ -1107,38 +1147,41 @@
      * Living dom
      *
      */
-    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
+    // Macro for TPL parse function
     var TPL_MACRO = {
-        'BEGIN': '{{',
-        'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'EXPRESSION': /[\$\/#@!_A-Za-z][^}]*/,
+        'EXPRESSION': /\{\{!?([\$\/#@!_A-Za-z][^}]*)!?\}\}/,
         'SPACE': /[\r\n\f ]/
     };
-
+    // Rules for TPL parse function
+    // Credit: regularjs 0.2.15-alpha (c) leeluolee <http://regularjs.github.io> MIT License
     var TPL_RULES = {
-        //INIT
-        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
+        /* INIT */
+        // Enter JST mode
+        ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
+        // Enter TAG mode
         ENTER_TAG: [/[^\x00<>]*?(?=<)/, function ($) {
             this.enter('TAG');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
+        // Start with TEXT
         TEXT: [/[^\x00]+/, function ($) {
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
 
-        // TAG
+        /* TAG */
+        // TAG open
         TAG_OPEN_START: [/<(%NAME%)\s*/, function ($, one) {
             return {type: 'TAG_OPEN_START', value: one}
         }, 'TAG'],
-        TAG_OPEN_END: [/[>\/&]/, function ($) {
-            if ($ === '>') this.leave();
+        TAG_OPEN_END: [/(\/?>)/, function ($) {
+            this.leave();
             return {type: 'TAG_OPEN_END', value: $}
         }, 'TAG'],
-
+        // Get TAG attribute
         TAG_ATTRIBUTE_NAME: [/(%NAME%)/, function ($, one) {
             return {type: 'TAG_ATTRIBUTE_NAME', value: one}
         }, 'TAG'],
@@ -1147,40 +1190,40 @@
             var value = one || two || "";
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
-
+        // In TAG mode change to JST mode
+        TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
+            this.enter('JST');
+        }, 'TAG'],
+        // TAG SPACE
         TAG_SPACE: [/%SPACE%+/, null, 'TAG'],
+        // TAG COMMENT
+        TAG_COMMENT: [/<!--([^\x00]*?)-->/, null, 'TAG'],
 
         TAG_CLOSE: [/<\/(%NAME%)[\r\n\f ]*>/, function ($, one) {
             this.leave();
             return {type: 'TAG_CLOSE', value: one}
         }, 'TAG'],
 
-        // JST
-        JST_OPEN: [/(%BEGIN%)/, function ($, one) {
-            return {type: 'JST_OPEN', value: one}
-        }, 'JST'],
-        JST_EXPRESSION: [/(%EXPRESSION%)/, function ($, one) {
-            return {type: 'JST_EXPRESSION', value: one}
-        }, 'JST'],
-        JST_CLOSE: [/(%END%)/, function ($, one) {
+        /* JST */
+        JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
             this.leave('JST');
-            return {type: 'JST_CLOSE', value: one}
+            return {type: 'JST_EXPRESSION', value: $.indexOf('!') == 2 ? '' : one}
         }, 'JST']
     };
 
+    // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
     var TPL_ProcessRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
-
+        // replace the rule's macro string to regexp
         var _replaceFn = function ($, one) {
             return $m.$isString(TPL_MACRO[one]) ? $m.$escapeRegExp(TPL_MACRO[one]) : String(TPL_MACRO[one]).slice(1, -1);
         };
-
+        // get the rules retain length
         var _getRetain = function (regStr) {
             var series = 0, ignored = regStr.match(_ignoredReg);
             for (var l = regStr.length; l--;) if ((l === 0 || regStr.charAt(l - 1) !== "\\") && regStr.charAt(l) === "(") series++;
             return ignored ? series - ignored.length : series;
         };
-
         // add map[sign]
         rules.forEach(function (rule) {
             sign = rule[2] || 'INIT';
@@ -1205,6 +1248,7 @@
         return map;
     };
 
+    // TPL_Lexer's map
     var TPL_Dictionary = TPL_ProcessRules([
         // INIT
         TPL_RULES.ENTER_JST,
@@ -1215,17 +1259,18 @@
         TPL_RULES.TAG_ATTRIBUTE_NAME,
         TPL_RULES.TAG_ATTRIBUTE_INT,
         TPL_RULES.TAG_ATTRIBUTE_VALUE,
+        TPL_RULES.TAG_ENTER_JST,
         TPL_RULES.TAG_SPACE,
+        TPL_RULES.TAG_COMMENT,
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
-        TPL_RULES.JST_OPEN,
-        TPL_RULES.JST_EXPRESSION,
-        TPL_RULES.JST_CLOSE
+        TPL_RULES.JST_EXPRESSION
     ]);
 
+    // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
     var TPL_Lexer = function (tpl) {
-        if (!tpl) _ERROR('$tpl: Template not found!');
+        if (tpl == undefined) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state;
         this._pos = 0;
@@ -1235,10 +1280,11 @@
             state = this.state();
             split = this._map[state];
             test = split.MATCH.exec(tpl);
-            mlen = test ? test[0].length : 1;
+            if (!test) _ERROR('$tpl: Unrecognized Token!');
+            mlen = test[0].length;
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
-            if (token) tokens.push(token);
+            if (token && !!token.value.trim()) tokens.push(token);
             this._pos += mlen;
         }
         // end of file
@@ -1247,24 +1293,29 @@
     };
 
     TPL_Lexer.prototype = {
+        // enter state mode
         enter: function (state) {
             this._states.push(state);
             return this;
         },
+        // leave state mode
         leave: function (state) {
             var states = this._states;
             if (!state || states[states.length - 1] === state) states.pop();
         },
+        // get present state
         state: function () {
             var states = this._states;
             return states[states.length - 1];
         },
+        // process 'tpl' to piece
         process: function (args, split, tpl) {
             var links = split.links, token, marched = false;
             for (var len = links.length, i = 0; i < len; i++) {
                 var link = links[i], handler = link[2], index = link[0];
                 if (args && args[index]) {
                     marched = true;
+                    // rule's handler function
                     if (handler) {
                         token = handler.apply(this, args.slice(index, index + link[1]));
                         token.pos = this._pos;
@@ -1272,6 +1323,7 @@
                     break;
                 }
             }
+            // change mode, when no marched
             if (!marched) {
                 if (tpl.charAt(0) == '<') this.enter("TAG");
                 else this.enter("JST");
@@ -1280,56 +1332,220 @@
         }
     };
 
-    var TPL_Parser = function (template) {
-        this.operation = new TPL_Lexer(template);
-        this.length = this.operation.length;
-        this.pos = 0;
-        this.parsed = false;
-        this.statements = [];
-        this.process();
-        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-    };
-    TPL_Parser.prototype = {
-        next: function (k) {
-            k = k || 1;
-            this.pos += k;
-        },
-        poll: function (k) {
-            k = k || 1;
-            if (k < 0) k = k + 1;
-            var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
-            if (criticalFlag && !this.parsed)this.parse();
-            return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
-        },
-        process: function () {
-            var poll = this.poll();
-            while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-                this.statements.push(this.statement());
-                poll = this.poll();
-            }
-        },
-        statement: function () {
-            var poll = this.poll();
-            switch (poll.type) {
-                case 'TEXT':
-                    var text = poll.value;
-                    this.next();
-                    //while (ll = this.eat(['NAME', 'TEXT'])) {
-                    //    text += ll.value;
-                    //}
-                    return {
-                        type: "text",
-                        text: text
-                    };
-                default:
-                    this.error('Unexpected token: ' + this.la())
-            }
-            return 1;
-        },
+    var _voidTag = /area|br|embed|img|input|meta|source/i;
 
-        parse: function (statements) {
-            this.parsed = true;
-            console.log(this.statements);
+    var TPL_Parser = function (template) {
+
+        this.pos = 0;
+        this.seed = 0;
+        this.state = 'TEXT';
+        this.buffer = [];
+        this.operation = new TPL_Lexer(template);
+        console.log(this.operation);
+        this.length = this.operation.length;
+
+        var _fn = [].join(''), prefix = 'var M_DATA = this.data;', init = '', main = '', statements = this.process() || [];
+
+        _fn += '"use strict";';
+        _fn += 'var M_DOM0 = $m.$fragment();';
+        _fn += 'try {<%init%>return function(){<%main%>return M_DOM0;};} catch(e) {throw new Error("$tpl: " + e.message);}';
+
+        statements.forEach(function (statement) {
+            if (statement) {
+                init += statement.fragment;
+                init += 'M_DOM0.appendChild(' + statement.sign + ');';
+                main += statement.handler || '';
+            }
+        });
+
+        this.buffer.forEach(function (variable) {
+            prefix += 'var ' + variable + ' = M_DATA.' + variable + '||"";'
+        });
+        //main += 'console.log(t);';
+        _fn = _fn.replace(/<%init%>/, init);
+        _fn = _fn.replace(/<%main%>/, prefix + main);
+        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+
+        //console.log(_fn);
+        return new Function('$m, init', _fn);
+    };
+
+    var _tp = TPL_Parser.prototype;
+
+    _tp.next = function (k) {
+        k = k || 1;
+        this.pos += k;
+    };
+
+    _tp.poll = function (k) {
+        k = k || 1;
+        if (k < 0) k = k + 1;
+        var pos = this.pos + k - 1, criticalFlag = (pos >= this.length - 1);
+        return criticalFlag ? this.operation[this.length - 1] : this.operation[pos];
+    };
+
+    _tp.verify = function (type, value) {
+        var poll = this.poll();
+        if (!$m.$isString(type)) {
+            for (var len = type.length; len--;) {
+                if (poll.type === type[len]) {
+                    this.next();
+                    return poll;
+                }
+            }
+        } else {
+            if (poll.type === type && (typeof value === 'undefined' || poll.value === value)) {
+                this.next();
+                return poll;
+            }
+        }
+        return false;
+    };
+
+    _tp.match = function (type, value) {
+        var poll;
+        if (!(poll = this.verify(type, value))) {
+            poll = this.poll();
+            _ERROR('expect [' + type + (value == null ? '' : ':' + value) + ']" -> got "[' + poll.type + (value == null ? '' : ':' + poll.value) + ']');
+        } else {
+            return poll;
+        }
+    };
+
+    _tp.process = function () {
+        var statements = [], poll = this.poll();
+        while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
+            statements.push(this.statement());
+            poll = this.poll();
+        }
+        return statements;
+    };
+
+    _tp.statement = function () {
+        var poll = this.poll();
+        //console.log(poll);
+        switch (poll.type) {
+            case 'TEXT':
+                this.state = 'TEXT';
+                var text = poll.value.trim().replace(/\n/g, '');
+                this.next();
+                if (!!text) {
+                    var sign = 'M_DOM' + (++this.seed);
+                    return {
+                        type: 'text',
+                        sign: sign,
+                        handler: '',
+                        fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
+                    };
+                }
+                return null;
+            case 'JST_EXPRESSION':
+                this.next();
+                return this.jst(poll.value);
+            case 'TAG_OPEN_START':
+                this.state = 'TAG';
+                return this.element();
+            default:
+                _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
+        }
+        return 1;
+    };
+
+    _tp.jst = function (elem) {
+        var operation = {
+            'TAG': function () {
+                var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
+                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+                if (reg.test(elem.value)) {
+                    attrVal = elem.value.replace(reg, function ($, one) {
+                        buf = one.split('.')[0];
+                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                        return '" + ' + one + ' + "';
+                    }.bind(this));
+                } else {
+                    buf = elem.value.split('.')[0];
+                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                    attrVal = '" + ' + elem.value + ' + "';
+                }
+                handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
+                return {
+                    handler: handler,
+                    fragment: ''
+                }
+            }.bind(this),
+            'TEXT': function () {
+                var sign = 'M_DOM' + (++this.seed), buf = elem.split('.')[0];
+                // interpolate
+                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                return {
+                    type: 'jst',
+                    sign: sign,
+                    handler: '$m.$text(' + sign + ', ' + elem + ');',
+                    fragment: 'var ' + sign + ' = $m.$text(null, "");'
+                }
+            }.bind(this)
+        };
+        if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
+            console.log(elem.match(/([A-Za-z]+)/))
+        } else {
+            return operation[this.state]();
+        }
+    };
+
+    _tp.attr = function () {
+        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
+        // set Attribute
+        var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
+            if (attr.type === 'TAG_ATTRIBUTE_NAME') {
+                attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
+
+                if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
+                    handler += this.jst({attr: attr.value, value: attrValue.value}).handler;
+                } else {
+                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue.value + '");';
+                }
+            } else {
+                if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
+                console.log(attr);
+            }
+        }
+        return {
+            handler: handler,
+            fragment: fragment
+        }
+    };
+
+    _tp.element = function () {
+        var
+            handler = '', children = [],
+            name = this.match('TAG_OPEN_START').value,
+            sign = 'M_DOM' + (++this.seed),
+            fragment = 'var ' + sign + ' = $m.$create("' + name + '");',
+            attr = this.attr(),
+            selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
+
+        if (!selfClosed && !_voidTag.test(name)) {
+            children = this.process();
+            if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
+        } else {
+            _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
+        }
+        // console.log(children);
+        if (!!children.length) {
+            children.forEach(function (value) {
+                if (value) {
+                    fragment += (value.fragment
+                    + 'if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}');
+                    handler += value.handler || '';
+                }
+            }, this)
+        }
+        return {
+            type: 'element',
+            sign: sign,
+            handler: handler + attr.handler,
+            fragment: fragment + attr.fragment
         }
     };
 
@@ -1353,12 +1569,33 @@
     };
 
     $m.$tpl = $m.$module.$extend({
-        $init: function (data) {
+        $init: function (param) {
+
+            if (param && $m.$isObject(param)) {
+                $m.$forIn(param, function (value, key) {
+                    this[key] = value;
+                }, this);
+            }
+
+            if (!!this['watchHash']) {
+                var _hashFn = function () {
+                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(/(!\/.+\?)/);
+                    if (_path) this.data.iModalJs_URI = _path[0].slice(2, -1);
+                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[1], ''));
+                    $m.$forIn(_hash, function (value, key) {
+                        this.data[key] = value;
+                    }, this);
+                    console.log(this.data);
+                }.bind(this);
+                $m.$watchHash(_hashFn);
+                _hashFn();
+            }
 
             var _fn = this.init;
-            this._node = $m.$create('a');
-            this._node.href = '/';
-            var _node = new TPL_Parser(this.template);
+            var _handler = new TPL_Parser(this.template);
+            this._watchers = [];
+            this.$update = _handler.apply(this, [$m]);
+            console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
@@ -1366,16 +1603,11 @@
             this.$on('update', this.$update);
         },
 
-        $update: function () {
-            console.log('update');
-        },
-
         $inject: function (parentNode) {
-            this.$emit('update');
-            var _target = undefined;
-            if (parentNode) _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
-            if (!_target) _ERROR('$inject: Node is not found!');
-            _target.appendChild(this._node);
+            if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
+            var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
+            if (!_target) _ERROR('$tpl: Inject node is not found!');
+            _target.appendChild(this.$update());
             return this;
         }
     });
