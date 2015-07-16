@@ -441,6 +441,15 @@
         _win.JSON = _json;
     }
 
+    // The Node.insertAfter() method inserts the specified node after a reference node as a child of the current node.
+    if (Element) {
+        Element.prototype.insertAfter = function (elem, target) {
+            if (this.lastChild == target) this.appendChild(elem);
+            else this.insertBefore(elem, target.nextSibling);
+            return elem;
+        };
+    }
+
     // Low version of the browser compatibility without console object.
     if (!_win.console) {
         _win.console = {
@@ -1544,6 +1553,7 @@
         };
         if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
             try {
+                console.log(this.state);
                 var _method = elem.match(/([A-Za-z]+)/)[0];
                 this[_method](elem.replace(_method, ''));
             } catch (e) {
