@@ -1451,47 +1451,6 @@
         return 1;
     };
 
-    _tp.jst = function (elem) {
-        var operation = {
-            'TAG': function () {
-                var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
-                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-                if (reg.test(elem.value)) {
-                    attrVal = elem.value.replace(reg, function ($, one) {
-                        buf = one.split('.')[0];
-                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                        return '" + ' + one + ' + "';
-                    }.bind(this));
-                } else {
-                    buf = elem.value.split('.')[0];
-                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                    attrVal = '" + ' + elem.value + ' + "';
-                }
-                handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
-                return {
-                    handler: handler,
-                    fragment: ''
-                }
-            }.bind(this),
-            'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed), buf = elem.split('.')[0];
-                // interpolate
-                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                return {
-                    type: 'jst',
-                    sign: sign,
-                    handler: '$m.$text(' + sign + ', ' + elem + ');',
-                    fragment: 'var ' + sign + ' = $m.$text(null, "");'
-                }
-            }.bind(this)
-        };
-        if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
-            console.log(elem.match(/([A-Za-z]+)/))
-        } else {
-            return operation[this.state]();
-        }
-    };
-
     _tp.attr = function () {
         var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
         // set Attribute
@@ -1548,6 +1507,57 @@
             fragment: fragment + attr.fragment
         }
     };
+
+    _tp.jst = function (elem) {
+        var operation = {
+            'TAG': function () {
+                var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
+                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+                if (reg.test(elem.value)) {
+                    attrVal = elem.value.replace(reg, function ($, one) {
+                        buf = one.split('.')[0];
+                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                        return '" + ' + one + ' + "';
+                    }.bind(this));
+                } else {
+                    buf = elem.value.split('.')[0];
+                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                    attrVal = '" + ' + elem.value + ' + "';
+                }
+                handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
+                return {
+                    handler: handler,
+                    fragment: ''
+                }
+            }.bind(this),
+            'TEXT': function () {
+                var sign = 'M_DOM' + (++this.seed), buf = elem.split('.')[0];
+                // interpolate
+                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                return {
+                    type: 'jst',
+                    sign: sign,
+                    handler: '$m.$text(' + sign + ', ' + elem + ');',
+                    fragment: 'var ' + sign + ' = $m.$text(null, "");'
+                }
+            }.bind(this)
+        };
+        if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
+            try {
+                var _method = elem.match(/([A-Za-z]+)/)[0];
+                this[_method](elem.replace(_method, ''));
+            } catch (e) {
+                _ERROR('$tpl: Unexpected token ' + elem + '!');
+            }
+        } else {
+            return operation[this.state]();
+        }
+    };
+
+    _tp['if'] = function (t) {
+        console.log(t);
+    };
+
 
     var _watch = function (obj, callback) {
         if (_observe) {
