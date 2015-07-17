@@ -1568,7 +1568,7 @@
     };
 
     _tp['if'] = function (elem) {
-        var handler = '';
+        var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, handler = '';
         if (elem.indexOf('#') == 0) {
             var statements = [], poll = this.poll();
             while (poll.value !== '/if' && poll.type !== 'JST_EXPRESSION') {
@@ -1577,9 +1577,12 @@
             }
             statements.forEach(function (statement) {
                 if (statement) {
-                    console.log(elem)
-                    this.buffer.push('t');
-                    this.buffer.push('x');
+                    var bufs = elem.match(reg);
+                    bufs.forEach(function (value) {
+                        if (value.indexOf('$m') == -1 && this.buffer.indexOf(value) == -1) {
+                            this.buffer.push(value);
+                        }
+                    }, this);
                     handler += 'if(' + elem.substr(2) + '){';
                     handler += statement.fragment;
                     handler += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
