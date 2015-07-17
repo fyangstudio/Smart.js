@@ -1579,8 +1579,9 @@
                 if (statement) {
                     var bufs = elem.match(reg);
                     bufs.forEach(function (value) {
-                        if (value.indexOf('$m') == -1 && this.buffer.indexOf(value) == -1) {
-                            this.buffer.push(value);
+                        var buf = value.split('.')[0];
+                        if (buf !== '$m' && this.buffer.indexOf(buf) == -1) {
+                            this.buffer.push(buf);
                         }
                     }, this);
                     handler += 'if(' + elem.substr(2) + '){';
