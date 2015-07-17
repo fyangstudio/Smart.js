@@ -1478,6 +1478,7 @@
             }
         }
         return {
+            type: 'attribute',
             handler: handler,
             fragment: fragment
         }
@@ -1502,8 +1503,8 @@
         if (!!children.length) {
             children.forEach(function (value) {
                 if (value) {
-                    fragment += (value.fragment
-                    + 'if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}');
+                    fragment += (value.fragment +
+                    (!!value.sign ? ('if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}') : ''));
                     handler += value.handler || '';
                 }
             }, this)
@@ -1534,6 +1535,7 @@
                 }
                 handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
                 return {
+                    type: 'jst',
                     handler: handler,
                     fragment: ''
                 }
@@ -1554,7 +1556,7 @@
             try {
                 console.log(this.state);
                 var _method = elem.match(/([A-Za-z]+)/)[0];
-                this[_method](elem.replace(_method, ''));
+                return this[_method](elem.replace(_method, ''));
             } catch (e) {
                 _ERROR('$tpl: Unexpected token ' + elem + '!');
             }
@@ -1563,8 +1565,15 @@
         }
     };
 
-    _tp['if'] = function (t) {
-        console.log(t);
+    _tp['if'] = function (elem) {
+        if (elem.indexOf('#') == 0) {
+        }
+        return {
+            type: 'jst',
+            handler: '',
+            fragment: ''
+        }
+        console.log(elem);
     };
 
 
