@@ -1421,16 +1421,16 @@
         }
     };
 
-    _tp.process = function () {
+    _tp.process = function (parent) {
         var statements = [], poll = this.poll();
         while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-            statements.push(this.statement());
+            statements.push(this.statement(parent));
             poll = this.poll();
         }
         return statements;
     };
 
-    _tp.statement = function () {
+    _tp.statement = function (parent) {
         var poll = this.poll();
         //console.log(poll);
         switch (poll.type) {
@@ -1450,10 +1450,10 @@
                 return null;
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst({value: poll.value});
+                return this.jst({parent: parent, value: poll.value});
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
-                return this.element();
+                return this.element(parent);
             default:
                 _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
         }
@@ -1485,18 +1485,18 @@
         }
     };
 
-    _tp.element = function () {
+    _tp.element = function (parent) {
         var
             handler = '', children = [],
             name = this.match('TAG_OPEN_START').value,
-            sign = 'M_DOM' + (++this.seed),
+            sign = parent || 'M_DOM' + (++this.seed),
             fragment = 'var ' + sign + ' = $m.$create("' + name + '");',
             attr = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
         if (!selfClosed && !_voidTag.test(name)) {
             this.state = 'TEXT';
-            children = this.process();
+            children = this.process(sign);
             if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
         } else {
             _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
@@ -1558,7 +1558,7 @@
         if (/^[#\/]/.test(value)) {
             //try {
             var _method = value.match(/([A-Za-z]+)/)[0];
-            return this[_method](value.replace(_method, ''));
+            return this[_method](value.replace(_method, ''), elem.parent || '');
             //} catch (e) {
             //    _ERROR('$tpl: Unexpected token ' + elem + '!');
             //}
@@ -1567,7 +1567,7 @@
         }
     };
 
-    _tp['if'] = function (elem) {
+    _tp['if'] = function (elem, parent) {
         var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, handler = '';
         if (elem.indexOf('#') == 0) {
             var statements = [], poll = this.poll();
@@ -1586,7 +1586,7 @@
                     }, this);
                     handler += 'if(' + elem.substr(2) + '){';
                     handler += statement.fragment;
-                    handler += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+                    handler += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
                 }
             }.bind(this));
         } else {
