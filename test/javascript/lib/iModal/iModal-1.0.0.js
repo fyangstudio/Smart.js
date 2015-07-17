@@ -1494,6 +1494,7 @@
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
         if (!selfClosed && !_voidTag.test(name)) {
+            this.state = 'TEXT';
             children = this.process();
             if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
         } else {
