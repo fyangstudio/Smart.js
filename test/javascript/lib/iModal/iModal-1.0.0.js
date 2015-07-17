@@ -1449,7 +1449,7 @@
                 return null;
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst(poll.value);
+                return this.jst({value: poll.value});
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
                 return this.element();
@@ -1518,20 +1518,21 @@
     };
 
     _tp.jst = function (elem) {
+        var value = elem.value || '';
         var operation = {
             'TAG': function () {
                 var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
                     reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-                if (reg.test(elem.value)) {
-                    attrVal = elem.value.replace(reg, function ($, one) {
+                if (reg.test(value)) {
+                    attrVal = value.replace(reg, function ($, one) {
                         buf = one.split('.')[0];
                         if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                         return '" + ' + one + ' + "';
                     }.bind(this));
                 } else {
-                    buf = elem.value.split('.')[0];
+                    buf = value.split('.')[0];
                     if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                    attrVal = '" + ' + elem.value + ' + "';
+                    attrVal = '" + ' + value + ' + "';
                 }
                 handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
                 return {
@@ -1541,25 +1542,25 @@
                 }
             }.bind(this),
             'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed), buf = elem.split('.')[0];
+                var sign = 'M_DOM' + (++this.seed), buf = value.split('.')[0];
                 // interpolate
                 if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                 return {
                     type: 'jst',
                     sign: sign,
-                    handler: '$m.$text(' + sign + ', ' + elem + ');',
+                    handler: '$m.$text(' + sign + ', ' + value + ');',
                     fragment: 'var ' + sign + ' = $m.$text(null, "");'
                 }
             }.bind(this)
         };
-        if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
-            try {
-                console.log(this.state);
-                var _method = elem.match(/([A-Za-z]+)/)[0];
-                return this[_method](elem.replace(_method, ''));
-            } catch (e) {
-                _ERROR('$tpl: Unexpected token ' + elem + '!');
-            }
+        if (value.indexOf('#') == 0 || value.indexOf('/') == 0) {
+            //try {
+            console.log(this.state);
+            var _method = value.match(/([A-Za-z]+)/)[0];
+            return this[_method](value.replace(_method, ''));
+            //} catch (e) {
+            //    _ERROR('$tpl: Unexpected token ' + elem + '!');
+            //}
         } else {
             return operation[this.state]();
         }
@@ -1567,6 +1568,12 @@
 
     _tp['if'] = function (elem) {
         if (elem.indexOf('#') == 0) {
+            var statements = [], poll = this.poll();
+            while (poll.value !== '/if' && poll.type !== 'JST_EXPRESSION') {
+                statements.push(this.statement());
+                poll = this.poll();
+            }
+            console.log(statements)
         }
         return {
             type: 'jst',
