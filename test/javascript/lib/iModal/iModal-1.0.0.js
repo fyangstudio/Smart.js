@@ -1361,10 +1361,11 @@
         statements.forEach(function (statement) {
             if (statement) {
                 init += statement.fragment;
-                init += 'M_DOM0.appendChild(' + statement.sign + ');';
+                init += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
                 main += statement.handler || '';
             }
         });
+        //console.log(statements);
 
         this.buffer.forEach(function (variable) {
             prefix += 'var ' + variable + ' = M_DATA.' + variable + '||"";'
@@ -1554,9 +1555,8 @@
                 }
             }.bind(this)
         };
-        if (value.indexOf('#') == 0 || value.indexOf('/') == 0) {
+        if (/^[#\/]/.test(value)) {
             //try {
-            console.log(this.state);
             var _method = value.match(/([A-Za-z]+)/)[0];
             return this[_method](value.replace(_method, ''));
             //} catch (e) {
@@ -1568,20 +1568,32 @@
     };
 
     _tp['if'] = function (elem) {
+        var handler = '';
         if (elem.indexOf('#') == 0) {
             var statements = [], poll = this.poll();
             while (poll.value !== '/if' && poll.type !== 'JST_EXPRESSION') {
                 statements.push(this.statement());
                 poll = this.poll();
             }
-            console.log(statements)
+            statements.forEach(function (statement) {
+                if (statement) {
+                    console.log(elem)
+                    this.buffer.push('t');
+                    this.buffer.push('x');
+                    handler += 'if(' + elem.substr(2) + '){';
+                    handler += statement.fragment;
+                    handler += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+                }
+            }.bind(this));
+        } else {
+            handler += '}';
         }
+        console.log(handler);
         return {
             type: 'jst',
-            handler: '',
+            handler: handler,
             fragment: ''
-        }
-        console.log(elem);
+        };
     };
 
 
