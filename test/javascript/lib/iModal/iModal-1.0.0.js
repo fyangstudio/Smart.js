@@ -1584,8 +1584,9 @@
                             this.buffer.push(buf);
                         }
                     }, this);
-                    handler += 'if(' + elem.substr(2) + '){';
+                    handler += 'if(' + elem.substr(2) + '){ var placeholder = document.createComment("iModalJs if");';
                     handler += statement.fragment;
+                    handler += (!statement.sign && parent ? '' : parent + '.appendChild(placeholder);');
                     handler += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
                 }
             }.bind(this));
