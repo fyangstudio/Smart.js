@@ -22,7 +22,7 @@
     var test1 = $m.$fragment();
     var test2 = $m.$fragment();
     var testDom = $m.$create('div');
-    testDom.innerText = 'test';
+    $m.$text(testDom, 'test');
     test2.appendChild(testDom);
     test1.appendChild(test2);
     cnt.appendChild(test1);
