@@ -1591,7 +1591,7 @@
                             this.buffer.push(buf);
                         }
                     }, this);
-                    HOLDER += statement.STATIC;
+                    STATIC += statement.STATIC;
                     if (this.state === 'TEXT') {
                         HOLDER += 'M_CNT' + this.seed_fragment + '.appendChild(' + statement.sign + ');';
                     }
@@ -1600,6 +1600,7 @@
             HOLDER += '$m.$insertAfter(M_CNT' + this.seed_fragment + ',M_HOLDER' + this.seed_holder + ');';
         } else {
             HOLDER += '}';
+
         }
         return {
             type: 'jst',
