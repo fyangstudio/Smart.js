@@ -1346,6 +1346,7 @@
 
         this.pos = 0;
         this.seed = 0;
+        this.holder = 0;
         this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
@@ -1575,6 +1576,8 @@
                 statements.push(this.statement());
                 poll = this.poll();
             }
+            handler += 'if(' + elem.substr(2) + '){var M_HOLDER' + (++this.holder) + '=document.createComment("iModalJs if");';
+            handler += ( !parent ? '' : parent + '.appendChild(M_HOLDER' + this.holder + ');');
             statements.forEach(function (statement) {
                 if (statement) {
                     var bufs = elem.match(reg);
@@ -1584,9 +1587,7 @@
                             this.buffer.push(buf);
                         }
                     }, this);
-                    handler += 'if(' + elem.substr(2) + '){var placeholder=document.createComment("iModalJs if");';
                     handler += statement.fragment;
-                    handler += (!statement.sign && parent ? '' : parent + '.appendChild(placeholder);');
                     handler += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
                 }
             }.bind(this));
