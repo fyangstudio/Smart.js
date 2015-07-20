@@ -1345,8 +1345,8 @@
     var TPL_Parser = function (template) {
 
         this.pos = 0;
-        this.seed = 0;
-        this.holder = 0;
+        this.seed_var = 0;
+        this.seed_holder = 0;
         this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
@@ -1439,7 +1439,7 @@
                 var text = poll.value.trim().replace(/\n/g, '');
                 this.next();
                 if (!!text) {
-                    var sign = 'M_DOM' + (++this.seed);
+                    var sign = 'M_DOM' + (++this.seed_var);
                     return {
                         type: 'text',
                         sign: sign,
@@ -1461,7 +1461,7 @@
     };
 
     _tp.attr = function () {
-        var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed;
+        var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed_var;
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
@@ -1489,7 +1489,7 @@
         var
             HOLDER = '', children = [],
             name = this.match('TAG_OPEN_START').value,
-            sign = parent || 'M_DOM' + (++this.seed),
+            sign = parent || 'M_DOM' + (++this.seed_var),
             STATIC = 'var ' + sign + '=$m.$create("' + name + '");',
             attr = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
@@ -1523,7 +1523,7 @@
         var value = elem.value || '';
         var operation = {
             'TAG': function () {
-                var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed,
+                var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
                     reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
                 if (reg.test(value)) {
                     attrVal = value.replace(reg, function ($, one) {
@@ -1544,7 +1544,7 @@
                 }
             }.bind(this),
             'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed), buf = value.split('.')[0];
+                var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
                 // interpolate
                 if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                 return {
@@ -1575,8 +1575,8 @@
                 statements.push(this.statement());
                 poll = this.poll();
             }
-            HOLDER += 'if(' + elem.substr(2) + '){var M_HOLDER' + (++this.holder) + '=document.createComment("iModalJs if");';
-            HOLDER += ( !parent ? '' : parent + '.appendChild(M_HOLDER' + this.holder + ');');
+            HOLDER += 'if(' + elem.substr(2) + '){var M_HOLDER' + (++this.seed_holder) + '=document.createComment("iModalJs if");';
+            HOLDER += ( !parent ? '' : parent + '.appendChild(M_HOLDER' + this.seed_holder + ');');
             statements.forEach(function (statement) {
                 if (statement) {
                     var bufs = elem.match(reg);
