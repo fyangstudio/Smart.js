@@ -1352,11 +1352,11 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA = this.data;', init = '', main = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', init = '', main = '', statements = this.process() || [];
 
         _fn += '"use strict";';
-        _fn += 'var M_DOM0 = $m.$fragment();';
-        _fn += 'try {<%init%>return function(){<%main%>return M_DOM0;};} catch(e) {throw new Error("$tpl: " + e.message);}';
+        _fn += 'var M_DOM0=$m.$fragment();';
+        _fn += 'try{<%init%>return function(){<%main%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
@@ -1368,7 +1368,7 @@
         //console.log(statements);
 
         this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + ' = M_DATA.' + variable + '||"";'
+            prefix += 'var ' + variable + '=M_DATA.' + variable + '||"";'
         });
         //main += 'console.log(t);';
         _fn = _fn.replace(/<%init%>/, init);
@@ -1444,7 +1444,7 @@
                         type: 'text',
                         sign: sign,
                         handler: '',
-                        fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
+                        fragment: 'var ' + sign + '=$m.$text(null, "' + text + '");'
                     };
                 }
                 return null;
@@ -1471,7 +1471,7 @@
                 if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
                     handler += this.jst({attr: attr.value, value: attrValue.value}).handler;
                 } else {
-                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue.value + '");';
+                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
                 }
             } else {
                 if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
@@ -1490,7 +1490,7 @@
             handler = '', children = [],
             name = this.match('TAG_OPEN_START').value,
             sign = parent || 'M_DOM' + (++this.seed),
-            fragment = 'var ' + sign + ' = $m.$create("' + name + '");',
+            fragment = 'var ' + sign + '=$m.$create("' + name + '");',
             attr = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
@@ -1529,14 +1529,14 @@
                     attrVal = value.replace(reg, function ($, one) {
                         buf = one.split('.')[0];
                         if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                        return '" + ' + one + ' + "';
+                        return '"+' + one + '+"';
                     }.bind(this));
                 } else {
                     buf = value.split('.')[0];
                     if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                     attrVal = '" + ' + value + ' + "';
                 }
-                handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
+                handler = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
                 return {
                     type: 'jst',
                     handler: handler,
@@ -1551,7 +1551,7 @@
                     type: 'jst',
                     sign: sign,
                     handler: '$m.$text(' + sign + ', ' + value + ');',
-                    fragment: 'var ' + sign + ' = $m.$text(null, "");'
+                    fragment: 'var ' + sign + '=$m.$text(null, "");'
                 }
             }.bind(this)
         };
@@ -1584,7 +1584,7 @@
                             this.buffer.push(buf);
                         }
                     }, this);
-                    handler += 'if(' + elem.substr(2) + '){ var placeholder = document.createComment("iModalJs if");';
+                    handler += 'if(' + elem.substr(2) + '){var placeholder=document.createComment("iModalJs if");';
                     handler += statement.fragment;
                     handler += (!statement.sign && parent ? '' : parent + '.appendChild(placeholder);');
                     handler += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
