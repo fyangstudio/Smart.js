@@ -34,6 +34,7 @@ define([
     //});
 
     var t = new base({data: {t: 1, x: {t: 1}}}).$inject('#test1');
+    console.log(t);
     //t.data.t = 2;
     //t.$update();
 

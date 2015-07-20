@@ -1353,17 +1353,17 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', INIT = '', HOLDER = '', statements = this.process() || [];
 
         _fn += '"use strict";';
         _fn += 'var M_DOM0=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){if(typeof this._init==="undefined"){console.log(1);this._init=true;}<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        _fn += 'try{<%STATIC%>return function(){if(typeof this._init==="undefined"){<%INIT%>this._init=true;}<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
-                STATIC += statement.fragment;
+                STATIC += statement.STATIC;
                 STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-                HOLDER += statement.handler || '';
+                HOLDER += statement.HOLDER || '';
             }
         });
         //console.log(statements);
@@ -1372,6 +1372,7 @@
             prefix += 'var ' + variable + '=M_DATA.' + variable + '||"";'
         });
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
+        _fn = _fn.replace(/<%INIT%>/, INIT);
         _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
@@ -1442,8 +1443,8 @@
                     return {
                         type: 'text',
                         sign: sign,
-                        handler: '',
-                        fragment: 'var ' + sign + '=$m.$text(null, "' + text + '");'
+                        HOLDER: '',
+                        STATIC: 'var ' + sign + '=$m.$text(null, "' + text + '");'
                     };
                 }
                 return null;
@@ -1460,7 +1461,7 @@
     };
 
     _tp.attr = function () {
-        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
+        var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed;
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
@@ -1468,9 +1469,9 @@
                 attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
 
                 if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
-                    handler += this.jst({attr: attr.value, value: attrValue.value}).handler;
+                    HOLDER += this.jst({attr: attr.value, value: attrValue.value}).HOLDER;
                 } else {
-                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
+                    STATIC += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
                 }
             } else {
                 if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
@@ -1479,17 +1480,17 @@
         }
         return {
             type: 'attribute',
-            handler: handler,
-            fragment: fragment
+            HOLDER: HOLDER,
+            STATIC: STATIC
         }
     };
 
     _tp.element = function (parent) {
         var
-            handler = '', children = [],
+            HOLDER = '', children = [],
             name = this.match('TAG_OPEN_START').value,
             sign = parent || 'M_DOM' + (++this.seed),
-            fragment = 'var ' + sign + '=$m.$create("' + name + '");',
+            STATIC = 'var ' + sign + '=$m.$create("' + name + '");',
             attr = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
@@ -1504,17 +1505,17 @@
         if (!!children.length) {
             children.forEach(function (value) {
                 if (value) {
-                    fragment += (value.fragment +
+                    STATIC += (value.STATIC +
                     (!!value.sign ? ('if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}') : ''));
-                    handler += value.handler || '';
+                    HOLDER += value.HOLDER || '';
                 }
             }, this)
         }
         return {
             type: 'element',
             sign: sign,
-            handler: handler + attr.handler,
-            fragment: fragment + attr.fragment
+            HOLDER: HOLDER + attr.HOLDER,
+            STATIC: STATIC + attr.STATIC
         }
     };
 
@@ -1522,7 +1523,7 @@
         var value = elem.value || '';
         var operation = {
             'TAG': function () {
-                var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
+                var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed,
                     reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
                 if (reg.test(value)) {
                     attrVal = value.replace(reg, function ($, one) {
@@ -1535,11 +1536,11 @@
                     if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
                     attrVal = '" + ' + value + ' + "';
                 }
-                handler = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
+                HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
                 return {
                     type: 'jst',
-                    handler: handler,
-                    fragment: ''
+                    HOLDER: HOLDER,
+                    STATIC: ''
                 }
             }.bind(this),
             'TEXT': function () {
@@ -1549,8 +1550,8 @@
                 return {
                     type: 'jst',
                     sign: sign,
-                    handler: '$m.$text(' + sign + ', ' + value + ');',
-                    fragment: 'var ' + sign + '=$m.$text(null, "");'
+                    HOLDER: '$m.$text(' + sign + ', ' + value + ');',
+                    STATIC: 'var ' + sign + '=$m.$text(null, "");'
                 }
             }.bind(this)
         };
@@ -1567,15 +1568,15 @@
     };
 
     _tp['if'] = function (elem, parent) {
-        var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, handler = '';
+        var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, HOLDER = '';
         if (elem.indexOf('#') == 0) {
             var statements = [], poll = this.poll();
             while (poll.value !== '/if' && poll.type !== 'JST_EXPRESSION') {
                 statements.push(this.statement());
                 poll = this.poll();
             }
-            handler += 'if(' + elem.substr(2) + '){var M_HOLDER' + (++this.holder) + '=document.createComment("iModalJs if");';
-            handler += ( !parent ? '' : parent + '.appendChild(M_HOLDER' + this.holder + ');');
+            HOLDER += 'if(' + elem.substr(2) + '){var M_HOLDER' + (++this.holder) + '=document.createComment("iModalJs if");';
+            HOLDER += ( !parent ? '' : parent + '.appendChild(M_HOLDER' + this.holder + ');');
             statements.forEach(function (statement) {
                 if (statement) {
                     var bufs = elem.match(reg);
@@ -1585,18 +1586,18 @@
                             this.buffer.push(buf);
                         }
                     }, this);
-                    handler += statement.fragment;
-                    handler += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
+                    HOLDER += statement.STATIC;
+                    HOLDER += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
                 }
             }.bind(this));
         } else {
-            handler += '}';
+            HOLDER += '}';
         }
-        console.log(handler);
+        console.log(HOLDER);
         return {
             type: 'jst',
-            handler: handler,
-            fragment: ''
+            HOLDER: HOLDER,
+            STATIC: ''
         };
     };
 
