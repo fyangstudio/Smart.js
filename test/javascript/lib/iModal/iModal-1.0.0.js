@@ -1353,17 +1353,17 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', init = '', main = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
 
         _fn += '"use strict";';
         _fn += 'var M_DOM0=$m.$fragment();';
-        _fn += 'try{<%init%>return function(){<%main%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        _fn += 'try{<%STATIC%>return function(){if(typeof this._init==="undefined"){console.log(1);this._init=true;}<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
-                init += statement.fragment;
-                init += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-                main += statement.handler || '';
+                STATIC += statement.fragment;
+                STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+                HOLDER += statement.handler || '';
             }
         });
         //console.log(statements);
@@ -1371,13 +1371,11 @@
         this.buffer.forEach(function (variable) {
             prefix += 'var ' + variable + '=M_DATA.' + variable + '||"";'
         });
-        //main += 'console.log(t);';
-        _fn = _fn.replace(/<%init%>/, init);
-        _fn = _fn.replace(/<%main%>/, prefix + main);
+        _fn = _fn.replace(/<%STATIC%>/, STATIC);
+        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
-        //console.log(_fn);
-        return new Function('$m, init', _fn);
+        return new Function('$m', _fn);
     };
 
     var _tp = TPL_Parser.prototype;
