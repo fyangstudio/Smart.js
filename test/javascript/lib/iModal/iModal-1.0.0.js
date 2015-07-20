@@ -1347,17 +1347,18 @@
         this.pos = 0;
         this.seed_var = 0;
         this.seed_holder = 0;
+        this.seed_fragment = 0;
         this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', INIT = '', HOLDER = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
 
         _fn += '"use strict";';
         _fn += 'var M_DOM0=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){if(typeof this._init==="undefined"){<%INIT%>this._init=true;}<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
@@ -1372,7 +1373,6 @@
             prefix += 'var ' + variable + '=M_DATA.' + variable + '||"";'
         });
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
-        _fn = _fn.replace(/<%INIT%>/, INIT);
         _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
@@ -1568,15 +1568,20 @@
     };
 
     _tp['if'] = function (elem, parent) {
-        var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, HOLDER = '';
+        var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, STATIC = '', HOLDER = '', parent = parent || 'M_DOM0';
         if (elem.indexOf('#') == 0) {
             var statements = [], poll = this.poll();
             while (poll.value !== '/if' && poll.type !== 'JST_EXPRESSION') {
                 statements.push(this.statement());
                 poll = this.poll();
             }
-            HOLDER += 'if(' + elem.substr(2) + '){var M_HOLDER' + (++this.seed_holder) + '=document.createComment("iModalJs if");';
-            HOLDER += ( !parent ? '' : parent + '.appendChild(M_HOLDER' + this.seed_holder + ');');
+            if (this.state === 'TEXT') {
+                STATIC += 'var M_HOLDER' + (++this.seed_holder) + '=document.createComment("iModalJs if");';
+                STATIC += parent + '.appendChild(M_HOLDER' + this.seed_holder + ');';
+                STATIC += 'var M_CNT' + (++this.seed_fragment) + '=$m.$fragment();';
+
+                HOLDER += 'if(' + elem.substr(2) + '){';
+            }
             statements.forEach(function (statement) {
                 if (statement) {
                     var bufs = elem.match(reg);
@@ -1587,17 +1592,19 @@
                         }
                     }, this);
                     HOLDER += statement.STATIC;
-                    HOLDER += (!statement.sign && parent ? '' : parent + '.appendChild(' + statement.sign + ');');
+                    if (this.state === 'TEXT') {
+                        HOLDER += 'M_CNT' + this.seed_fragment + '.appendChild(' + statement.sign + ');';
+                    }
                 }
             }.bind(this));
+            HOLDER += '$m.$insertAfter(M_CNT' + this.seed_fragment + ',M_HOLDER' + this.seed_holder + ');';
         } else {
             HOLDER += '}';
         }
-        console.log(HOLDER);
         return {
             type: 'jst',
             HOLDER: HOLDER,
-            STATIC: ''
+            STATIC: STATIC
         };
     };
 
