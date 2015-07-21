@@ -1358,7 +1358,7 @@
         var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
 
         _fn += '"use strict";';
-        _fn += 'var M_DOM0=$m.$fragment();';
+        _fn += 'var M_WATCHERS={};var M_DOM0=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
@@ -1596,6 +1596,7 @@
                     STATIC += statement.STATIC;
                     if (this.state === 'TEXT') {
                         HOLDER += 'M_REMOVE' + this.seed_remove + '.push(' + statement.sign + ');';
+                        HOLDER += 'console.log(M_REMOVE' + this.seed_remove + ');';
                         HOLDER += 'M_CNT' + this.seed_fragment + '.appendChild(' + statement.sign + ');';
                     }
                 }
@@ -1609,6 +1610,7 @@
         return {
             type: 'jst',
             HOLDER: HOLDER,
+            REMOVE: 'M_REMOVE' + this.seed_remove,
             STATIC: STATIC
         };
     };

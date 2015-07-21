@@ -34,10 +34,12 @@ define([
     //});
 
     var t = new base({data: {t: 1, x: {t: 1}}}).$inject('#test1');
-    setTimeout(function () {
-        t.data.t = false;
-        t.$update();
-    }, 1000);
+    //t.data.t = 2;
+    //t.$update();
+    //setTimeout(function () {
+    //    t.data.t = 0;
+    //    t.$update();
+    //}, 1000);
     //console.log(json);
     //var parent = m.$extend({
     //    $init: function () {
