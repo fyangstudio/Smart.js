@@ -1556,12 +1556,12 @@
             }.bind(this)
         };
         if (/^[#\/]/.test(value)) {
-            //try {
-            var _method = value.match(/([A-Za-z]+)/)[0];
-            return this[_method](value.replace(_method, ''), elem.parent || '');
-            //} catch (e) {
-            //    _ERROR('$tpl: Unexpected token ' + elem + '!');
-            //}
+            try {
+                var _method = value.match(/([A-Za-z]+)/)[0];
+                return this[_method](value.replace(_method, ''), elem.parent || '');
+            } catch (e) {
+                _ERROR('$tpl: Unexpected token ' + elem.value + '!');
+            }
         } else {
             return operation[this.state]();
         }
@@ -1578,10 +1578,10 @@
             if (this.state === 'TEXT') {
                 STATIC += 'var M_HOLDER' + (++this.seed_holder) + '=document.createComment("iModalJs if");';
                 STATIC += parent + '.appendChild(M_HOLDER' + this.seed_holder + ');';
-                STATIC += 'var M_CNT' + (++this.seed_fragment) + '=$m.$fragment();';
 
                 HOLDER += 'if(' + elem.substr(2) + '){';
             }
+            HOLDER += 'var M_CNT' + (++this.seed_fragment) + '=$m.$fragment();';
             statements.forEach(function (statement) {
                 if (statement) {
                     var bufs = elem.match(reg);
