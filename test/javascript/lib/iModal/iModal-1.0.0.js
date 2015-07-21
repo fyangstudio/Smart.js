@@ -1496,7 +1496,7 @@
 
         if (!selfClosed && !_voidTag.test(name)) {
             this.state = 'TEXT';
-            children = this.process(sign);
+            children = this.process();
             if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
         } else {
             _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
