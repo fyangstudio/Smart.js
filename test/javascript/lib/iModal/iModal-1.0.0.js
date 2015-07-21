@@ -1348,6 +1348,7 @@
         this.seed_var = 0;
         this.seed_holder = 0;
         this.seed_fragment = 0;
+        this.seed_remove = 0;
         this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
@@ -1577,6 +1578,7 @@
             }
             if (this.state === 'TEXT') {
                 STATIC += 'var M_HOLDER' + (++this.seed_holder) + '=document.createComment("iModalJs if");';
+                STATIC += 'var M_REMOVE' + (++this.seed_remove) + '=[];';
                 STATIC += parent + '.appendChild(M_HOLDER' + this.seed_holder + ');';
 
                 HOLDER += 'if(' + elem.substr(2) + '){';
@@ -1593,13 +1595,15 @@
                     }, this);
                     STATIC += statement.STATIC;
                     if (this.state === 'TEXT') {
+                        HOLDER += 'M_REMOVE' + this.seed_remove + '.push(' + statement.sign + ');';
                         HOLDER += 'M_CNT' + this.seed_fragment + '.appendChild(' + statement.sign + ');';
                     }
                 }
             }.bind(this));
             HOLDER += '$m.$insertAfter(M_CNT' + this.seed_fragment + ',M_HOLDER' + this.seed_holder + ');';
         } else {
-            HOLDER += '}';
+            HOLDER += '}else{M_REMOVE' + this.seed_remove + '.forEach(function(elem){';
+            HOLDER += '$m.$remove(elem);});M_REMOVE' + this.seed_remove + '=[];}';
 
         }
         return {
