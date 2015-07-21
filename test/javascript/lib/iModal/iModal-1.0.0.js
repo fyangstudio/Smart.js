@@ -713,7 +713,7 @@
     $m.$same = function (target1, target2, deep) {
         var _deep = !!deep, check = arguments.callee;
         if (target1 === target2) return true;
-        if (target1.constructor !== target2.constructor) return false;
+        if (target1 !== target2 || target1.constructor !== target2.constructor) return false;
 
         // If they are not strictly equal, they both need to be Objects
         if (!( target1 instanceof Object ) || !( target2 instanceof Object )) return false;
@@ -1358,7 +1358,7 @@
         var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
 
         _fn += '"use strict";';
-        _fn += 'var M_WATCHERS={};var M_DOM0=$m.$fragment();';
+        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
@@ -1371,13 +1371,13 @@
         //console.log(statements);
 
         this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + '=M_DATA.' + variable + '||"";'
+            prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
         });
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
         _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
-        return new Function('$m', _fn);
+        return new Function('undefined', _fn);
     };
 
     var _tp = TPL_Parser.prototype;
@@ -1581,7 +1581,9 @@
                 STATIC += 'var M_REMOVE' + (++this.seed_remove) + '=[];';
                 STATIC += parent + '.appendChild(M_HOLDER' + this.seed_holder + ');';
 
-                HOLDER += 'if(' + elem.substr(2) + '){';
+                HOLDER += 'if(' + elem.substr(2) + '&&!$m.$same(M_W.M_HOLDER' + this.seed_holder + ',' + elem.substr(2) + ',true)){';
+                HOLDER += 'M_W.M_HOLDER' + this.seed_holder + '=$m.$clone(' + elem.substr(2) + ',true);';
+                HOLDER += 'console.log(M_W);';
             }
             HOLDER += 'var M_CNT' + (++this.seed_fragment) + '=$m.$fragment();';
             statements.forEach(function (statement) {
@@ -1596,16 +1598,16 @@
                     STATIC += statement.STATIC;
                     if (this.state === 'TEXT') {
                         HOLDER += 'M_REMOVE' + this.seed_remove + '.push(' + statement.sign + ');';
-                        HOLDER += 'console.log(M_REMOVE' + this.seed_remove + ');';
+                        //HOLDER += 'console.log(M_REMOVE' + this.seed_remove + ');';
                         HOLDER += 'M_CNT' + this.seed_fragment + '.appendChild(' + statement.sign + ');';
                     }
                 }
             }.bind(this));
             HOLDER += '$m.$insertAfter(M_CNT' + this.seed_fragment + ',M_HOLDER' + this.seed_holder + ');';
         } else {
-            HOLDER += '}else{M_REMOVE' + this.seed_remove + '.forEach(function(elem){';
-            HOLDER += '$m.$remove(elem);});M_REMOVE' + this.seed_remove + '=[];}';
-
+            HOLDER += '}';
+            //'else{M_REMOVE' + this.seed_remove + '.forEach(function(elem){';
+            //        HOLDER += '$m.$remove(elem);});M_REMOVE' + this.seed_remove + '=[];}';
         }
         return {
             type: 'jst',
@@ -1661,7 +1663,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [$m]);
+            this.$update = _handler.apply(this, [undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
