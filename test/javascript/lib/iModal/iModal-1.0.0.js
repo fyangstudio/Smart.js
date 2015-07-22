@@ -1223,20 +1223,19 @@
             this.leave('JST');
             return {type: 'JST_OPEN_END', value: $}
         }, 'JST'],
-
         JST_CLOSE: [/%BEGIN%\s*\/\s*(%IDENT%)\s*%END%/, function ($, one) {
             this.leave('JST');
             return {type: 'CLOSE', value: one}
         }, 'JST'],
 
-        JST_CONDITION: [/(%EXPRESSION%)/, function ($, one) {
-            return {type: 'JST_CONDITION', value: one}
-        }, 'JST'],
-
-        JST_EXPRESSION: [/%BEGIN%%EXPRESSION%%END%/, function ($, one) {
+        JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
+        }, 'JST'],
+        JST_CONDITION: [/(%EXPRESSION%)/, function ($, one) {
+            return {type: 'JST_CONDITION', value: one}
         }, 'JST']
+
     };
 
     // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
@@ -1296,8 +1295,9 @@
         TPL_RULES.JST_OPEN_START,
         TPL_RULES.JST_OPEN_END,
         TPL_RULES.JST_CLOSE,
-        TPL_RULES.JST_CONDITION,
-        TPL_RULES.JST_EXPRESSION
+        TPL_RULES.JST_EXPRESSION,
+        TPL_RULES.JST_CONDITION
+
     ]);
     console.log(TPL_Dictionary);
 
