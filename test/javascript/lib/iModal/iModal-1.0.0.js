@@ -1157,8 +1157,11 @@
      */
     // Macro for TPL parse function
     var TPL_MACRO = {
+        'BEGIN': '{{',
+        'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'EXPRESSION': /\{\{!?([\$\/#@!_A-Za-z][^}]*)!?\}\}/,
+        'EXPRESSION': /[^\x00\}]*/,
+        'IDENT': /[\$_A-Za-z][_0-9A-Za-z\$]*/,
         'SPACE': /[\r\n\f ]/
     };
     // Rules for TPL parse function
@@ -1166,7 +1169,7 @@
     var TPL_RULES = {
         /* INIT */
         // Enter JST mode
-        ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
+        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
@@ -1199,7 +1202,7 @@
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
         // In TAG mode change to JST mode
-        TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
+        TAG_ENTER_JST: [/(?=%BEGIN%)/, function () {
             this.enter('JST');
         }, 'TAG'],
         // TAG SPACE
@@ -1213,9 +1216,26 @@
         }, 'TAG'],
 
         /* JST */
-        JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
+        JST_OPEN_START: [/%BEGIN%#%SPACE%*(%IDENT%)%SPACE%*/, function ($, name) {
+            return {type: 'JST_OPEN_START', value: name}
+        }, 'JST'],
+        JST_OPEN_END: [/(%END%)/, function ($) {
             this.leave('JST');
-            return {type: 'JST_EXPRESSION', value: $.indexOf('!') == 2 ? '' : one}
+            return {type: 'JST_OPEN_END', value: $}
+        }, 'JST'],
+
+        JST_CLOSE: [/%BEGIN%\s*\/\s*(%IDENT%)\s*%END%/, function ($, one) {
+            this.leave('JST');
+            return {type: 'CLOSE', value: one}
+        }, 'JST'],
+
+        JST_CONDITION: [/(%EXPRESSION%)/, function ($, one) {
+            return {type: 'JST_CONDITION', value: one}
+        }, 'JST'],
+
+        JST_EXPRESSION: [/%BEGIN%%EXPRESSION%%END%/, function ($, one) {
+            this.leave('JST');
+            return {type: 'JST_EXPRESSION', value: one}
         }, 'JST']
     };
 
@@ -1273,8 +1293,13 @@
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
+        TPL_RULES.JST_OPEN_START,
+        TPL_RULES.JST_OPEN_END,
+        TPL_RULES.JST_CLOSE,
+        TPL_RULES.JST_CONDITION,
         TPL_RULES.JST_EXPRESSION
     ]);
+    console.log(TPL_Dictionary);
 
     // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
     var TPL_Lexer = function (tpl) {
@@ -1344,11 +1369,19 @@
 
     // Virtual Dom
     var _iModalJsElem = function () {
-
+        this.children = [];
     };
 
-    _iModalJsElem.createElement = function () {
+    _iModalJsElem.$addChild = function () {
+        console.log(1);
+    };
 
+    _iModalJsElem.$create = function (type) {
+        console.log(type);
+    };
+
+    _iModalJsElem.$fragment = function () {
+        console.log(1);
     };
 
     var TPL_Parser = function (template) {
@@ -1362,31 +1395,32 @@
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
-        this.length = this.operation.length;
+        //this.length = this.operation.length;
+        //
+        //var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
+        //
+        //_fn += '"use strict";';
+        //_fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        //_fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        //
+        //statements.forEach(function (statement) {
+        //    if (statement) {
+        //        STATIC += statement.STATIC;
+        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+        //        HOLDER += statement.HOLDER || '';
+        //    }
+        //});
+        ////console.log(statements);
+        //
+        //this.buffer.forEach(function (variable) {
+        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
+        //});
+        //_fn = _fn.replace(/<%STATIC%>/, STATIC);
+        //_fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+        //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
-
-        _fn += '"use strict";';
-        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
-
-        statements.forEach(function (statement) {
-            if (statement) {
-                STATIC += statement.STATIC;
-                STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-                HOLDER += statement.HOLDER || '';
-            }
-        });
-        //console.log(statements);
-
-        this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
-        });
-        _fn = _fn.replace(/<%STATIC%>/, STATIC);
-        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
-        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-
-        return new Function('$dom, undefined', _fn);
+        //return new Function('$dom, undefined', _fn);
+        return _NOOP;
     };
 
     var _tp = TPL_Parser.prototype;
@@ -1685,7 +1719,7 @@
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            _target.appendChild(this.$update());
+            //_target.appendChild(this.$update());
             return this;
         }
     });
