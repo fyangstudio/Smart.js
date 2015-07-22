@@ -1342,6 +1342,15 @@
 
     var _voidTag = /area|br|embed|img|input|meta|source/i;
 
+    // Virtual Dom
+    var _iModalJsElem = function () {
+
+    };
+
+    _iModalJsElem.createElement = function () {
+
+    };
+
     var TPL_Parser = function (template) {
 
         this.pos = 0;
@@ -1377,7 +1386,7 @@
         _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
-        return new Function('undefined', _fn);
+        return new Function('$dom, undefined', _fn);
     };
 
     var _tp = TPL_Parser.prototype;
@@ -1663,7 +1672,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [undefined]);
+            this.$update = _handler.apply(this, [_iModalJsElem, undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
