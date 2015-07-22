@@ -1225,7 +1225,7 @@
         }, 'JST'],
         JST_CLOSE: [/%BEGIN%\s*\/\s*(%IDENT%)\s*%END%/, function ($, one) {
             this.leave('JST');
-            return {type: 'CLOSE', value: one}
+            return {type: 'JST_CLOSE', value: one}
         }, 'JST'],
 
         JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
@@ -1621,8 +1621,10 @@
 
     _tp['if'] = function (elem, parent) {
         var condition = this.match('JST_CONDITION');
-        var ll, close;
+        var consequent = [], alternate = [];
 
+        var container = consequent;
+        var ll, close;
         this.match('JST_OPEN_END');
 
         while (!(close = this.verify('JST_CLOSE'))) {
@@ -1635,12 +1637,13 @@
                     case 'elseif':
 
                     default:
-                        console.log(ll);
+                        container.push(this.statement());
                 }
             } else {
-                console.log(ll);
+                container.push(this.statement());
             }
         }
+        console.log(container);
         return {
             type: 'jst',
             HOLDER: '',
