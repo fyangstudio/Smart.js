@@ -1644,9 +1644,9 @@
             }
         }
         if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
-        console.log(container);
         return {
             type: 'jst',
+            CHILDREN: container,
             HOLDER: '',
             REMOVE: '',
             STATIC: ''
