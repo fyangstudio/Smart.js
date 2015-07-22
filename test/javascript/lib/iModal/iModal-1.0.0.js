@@ -1409,7 +1409,7 @@
                 HOLDER += statement.HOLDER || '';
             }
         });
-        //console.log(statements);
+        console.log(statements);
 
         this.buffer.forEach(function (variable) {
             prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
