@@ -1160,7 +1160,7 @@
         'BEGIN': '{{',
         'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'EXPRESSION': /[^\x00\}]*/,
+        'EXPRESSION': /[^\x00\{\}]*/,
         'IDENT': /[\$_A-Za-z][_0-9A-Za-z\$]*/,
         'SPACE': /[\r\n\f ]/
     };
