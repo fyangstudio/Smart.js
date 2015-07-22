@@ -1299,7 +1299,6 @@
         TPL_RULES.JST_CONDITION
 
     ]);
-    console.log(TPL_Dictionary);
 
     // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
     var TPL_Lexer = function (tpl) {
@@ -1395,31 +1394,31 @@
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
-        //this.length = this.operation.length;
-        //
-        //var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
-        //
-        //_fn += '"use strict";';
-        //_fn += 'var M_W={};var M_DOM0=$m.$fragment();';
-        //_fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
-        //
-        //statements.forEach(function (statement) {
-        //    if (statement) {
-        //        STATIC += statement.STATIC;
-        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-        //        HOLDER += statement.HOLDER || '';
-        //    }
-        //});
-        ////console.log(statements);
-        //
-        //this.buffer.forEach(function (variable) {
-        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
-        //});
-        //_fn = _fn.replace(/<%STATIC%>/, STATIC);
-        //_fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
-        //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+        this.length = this.operation.length;
 
-        //return new Function('$dom, undefined', _fn);
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
+
+        _fn += '"use strict";';
+        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+
+        statements.forEach(function (statement) {
+            if (statement) {
+                STATIC += statement.STATIC;
+                STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+                HOLDER += statement.HOLDER || '';
+            }
+        });
+        //console.log(statements);
+
+        this.buffer.forEach(function (variable) {
+            prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
+        });
+        _fn = _fn.replace(/<%STATIC%>/, STATIC);
+        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+
+        return new Function('$dom, undefined', _fn);
         return _NOOP;
     };
 
@@ -1492,6 +1491,14 @@
                     };
                 }
                 return null;
+            case 'JST_OPEN_START':
+                var name = poll.value;
+                this.next();
+                if (typeof this[name] === 'function') {
+                    return this[name]()
+                } else {
+                    _ERROR('$tpl: Undefined directive ' + name + '!');
+                }
             case 'JST_EXPRESSION':
                 this.next();
                 return this.jst({parent: parent, value: poll.value});
@@ -1611,52 +1618,34 @@
         }
     };
 
-    _tp['if'] = function (elem, parent) {
-        var reg = /([\$_A-Za-z][_0-9A-Za-z\$\.]*)/g, STATIC = '', HOLDER = '', parent = parent || 'M_DOM0';
-        if (elem.indexOf('#') == 0) {
-            var statements = [], poll = this.poll();
-            while (poll.value !== '/if' && poll.type !== 'JST_EXPRESSION') {
-                statements.push(this.statement());
-                poll = this.poll();
-            }
-            if (this.state === 'TEXT') {
-                STATIC += 'var M_HOLDER' + (++this.seed_holder) + '=document.createComment("iModalJs if");';
-                STATIC += 'var M_REMOVE' + (++this.seed_remove) + '=[];';
-                STATIC += parent + '.appendChild(M_HOLDER' + this.seed_holder + ');';
 
-                HOLDER += 'if(' + elem.substr(2) + '&&!$m.$same(M_W.M_HOLDER' + this.seed_holder + ',' + elem.substr(2) + ',true)){';
-                HOLDER += 'M_W.M_HOLDER' + this.seed_holder + '=$m.$clone(' + elem.substr(2) + ',true);';
-                HOLDER += 'console.log(M_W);';
-            }
-            HOLDER += 'var M_CNT' + (++this.seed_fragment) + '=$m.$fragment();';
-            statements.forEach(function (statement) {
-                if (statement) {
-                    var bufs = elem.match(reg);
-                    bufs.forEach(function (value) {
-                        var buf = value.split('.')[0];
-                        if (buf !== '$m' && this.buffer.indexOf(buf) == -1) {
-                            this.buffer.push(buf);
-                        }
-                    }, this);
-                    STATIC += statement.STATIC;
-                    if (this.state === 'TEXT') {
-                        HOLDER += 'M_REMOVE' + this.seed_remove + '.push(' + statement.sign + ');';
-                        //HOLDER += 'console.log(M_REMOVE' + this.seed_remove + ');';
-                        HOLDER += 'M_CNT' + this.seed_fragment + '.appendChild(' + statement.sign + ');';
-                    }
+    _tp['if'] = function (elem, parent) {
+        var condition = this.match('JST_CONDITION');
+        var ll, close;
+
+        this.match('JST_OPEN_END');
+
+        while (!(close = this.verify('JST_CLOSE'))) {
+            ll = this.poll();
+            if (ll.type === 'JST_OPEN_START') {
+                switch (ll.value) {
+                    case 'else':
+
+                        break;
+                    case 'elseif':
+
+                    default:
+                        console.log(ll);
                 }
-            }.bind(this));
-            HOLDER += '$m.$insertAfter(M_CNT' + this.seed_fragment + ',M_HOLDER' + this.seed_holder + ');';
-        } else {
-            HOLDER += '}';
-            //'else{M_REMOVE' + this.seed_remove + '.forEach(function(elem){';
-            //        HOLDER += '$m.$remove(elem);});M_REMOVE' + this.seed_remove + '=[];}';
+            } else {
+                console.log(ll);
+            }
         }
         return {
             type: 'jst',
-            HOLDER: HOLDER,
-            REMOVE: 'M_REMOVE' + this.seed_remove,
-            STATIC: STATIC
+            HOLDER: '',
+            REMOVE: '',
+            STATIC: ''
         };
     };
 
