@@ -1649,12 +1649,12 @@
             if (!!this['watchHash']) {
                 var _hashFn = function () {
                     var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(/(!\/.+\?)/);
-                    if (_path) this.data.iModalJs_URI = _path[0].slice(2, -1);
-                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[1], ''));
+                    this.data.hash = {};
+                    if (_path) this.data.hash.iModalJs_URI = _path[0].slice(2, -1);
+                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[1], ''), '&');
                     $m.$forIn(_hash, function (value, key) {
-                        this.data[key] = value;
+                        this.data.hash[key.indexOf('?') == 1 ? key.substr(1) : key] = value;
                     }, this);
-                    console.log(this.data);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
                 _hashFn();
