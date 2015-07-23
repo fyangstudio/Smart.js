@@ -1228,6 +1228,10 @@
             return {type: 'JST_CLOSE', value: one}
         }, 'JST'],
 
+        JST_COMMENT: [/%BEGIN%!(%EXPRESSION%)!%END%/, function () {
+            this.leave('JST');
+            return {type: 'JST_COMMENT', value: ''}
+        }, 'JST'],
         JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
@@ -1295,6 +1299,7 @@
         TPL_RULES.JST_OPEN_START,
         TPL_RULES.JST_OPEN_END,
         TPL_RULES.JST_CLOSE,
+        TPL_RULES.JST_COMMENT,
         TPL_RULES.JST_EXPRESSION,
         TPL_RULES.JST_CONDITION
 
