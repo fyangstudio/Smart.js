@@ -280,10 +280,10 @@
         };
     } else {
         $m.$addEvent = function (node, event, fn) {
-            node.attachEvent('on' + event, fn);
+            (node == _win ? document : node).attachEvent('on' + event, fn);
         };
         $m.$removeEvent = function (node, event, fn) {
-            node.detachEvent('on' + event, fn);
+            (node == _win ? document : node).detachEvent('on' + event, fn);
         };
     }
 
