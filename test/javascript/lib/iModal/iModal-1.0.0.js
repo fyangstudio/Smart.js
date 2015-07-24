@@ -1569,6 +1569,7 @@
         return {
             type: 'element',
             sign: sign,
+            CHILDREN: children,
             HOLDER: HOLDER + attr.HOLDER,
             STATIC: STATIC + attr.STATIC
         }
