@@ -28,6 +28,10 @@
     cnt.appendChild(test1);
     console.log(test2);
     console.log(test1);
+
+    $m.$addEvent(cnt,'click',function(){console.log(1);});
+    $m.$addEvent(cnt,'click',function(){console.log(2);});
+    $m.$addEvent(document,'click',function(){console.log(3);});
     //    var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
     //    var t2 = $m.$o2s(t);
     //    $m.$watchHash(function (_hash) {
