@@ -1302,7 +1302,6 @@
         TPL_RULES.JST_COMMENT,
         TPL_RULES.JST_EXPRESSION,
         TPL_RULES.JST_CONDITION
-
     ]);
 
     // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
@@ -1403,27 +1402,27 @@
 
         var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
 
-        _fn += '"use strict";';
-        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
-
-        statements.forEach(function (statement) {
-            if (statement) {
-                STATIC += statement.STATIC;
-                STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-                HOLDER += statement.HOLDER || '';
-            }
-        });
+        //_fn += '"use strict";';
+        //_fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        //_fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        //
+        //statements.forEach(function (statement) {
+        //    if (statement) {
+        //        STATIC += statement.STATIC;
+        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+        //        HOLDER += statement.HOLDER || '';
+        //    }
+        //});
         console.log(statements);
-
-        this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
-        });
-        _fn = _fn.replace(/<%STATIC%>/, STATIC);
-        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
-        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-
-        return new Function('$dom, undefined', _fn);
+        //
+        //this.buffer.forEach(function (variable) {
+        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
+        //});
+        //_fn = _fn.replace(/<%STATIC%>/, STATIC);
+        //_fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+        //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+        //
+        //return new Function('$dom, undefined', _fn);
         return _NOOP;
     };
 
