@@ -1216,6 +1216,7 @@
         }, 'TAG'],
 
         /* JST */
+        // JST EXPRESSION open
         JST_OPEN_START: [/%BEGIN%#%SPACE%*(%IDENT%)%SPACE%*/, function ($, name) {
             return {type: 'JST_OPEN_START', value: name}
         }, 'JST'],
@@ -1223,15 +1224,18 @@
             this.leave('JST');
             return {type: 'JST_OPEN_END', value: $}
         }, 'JST'],
+        // JST EXPRESSION close
         JST_CLOSE: [/%BEGIN%\s*\/\s*(%IDENT%)\s*%END%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_CLOSE', value: one}
         }, 'JST'],
 
+        // JST COMMENT
         JST_COMMENT: [/%BEGIN%!(%EXPRESSION%)!%END%/, function () {
             this.leave('JST');
             return {type: 'JST_COMMENT', value: ''}
         }, 'JST'],
+
         JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
@@ -1239,7 +1243,6 @@
         JST_CONDITION: [/(%EXPRESSION%)/, function ($, one) {
             return {type: 'JST_CONDITION', value: one}
         }, 'JST']
-
     };
 
     // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
