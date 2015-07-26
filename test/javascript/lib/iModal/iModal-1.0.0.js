@@ -1236,10 +1236,12 @@
             return {type: 'JST_COMMENT', value: ''}
         }, 'JST'],
 
+        // JST INTERPOSITION EXPRESSION
         JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
             this.leave('JST');
             return {type: 'JST_EXPRESSION', value: one}
         }, 'JST'],
+        // JST EXPRESSION CONDITION
         JST_CONDITION: [/(%EXPRESSION%)/, function ($, one) {
             return {type: 'JST_CONDITION', value: one}
         }, 'JST']
