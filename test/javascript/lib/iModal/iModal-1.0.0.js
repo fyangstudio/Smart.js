@@ -1395,10 +1395,6 @@
     var TPL_Parser = function (template) {
 
         this.pos = 0;
-        this.seed_var = 0;
-        this.seed_holder = 0;
-        this.seed_fragment = 0;
-        this.seed_remove = 0;
         this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Pretreatment(template);
@@ -1515,36 +1511,50 @@
         }
     };
 
-    _tp.attr = function () {
+    _tp.attrs = function () {
         var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed_var;
+
+        //while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
+        //    if (attr.type === 'TAG_ATTRIBUTE_NAME') {
+        //        attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
+        //
+        //        if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
+        //            HOLDER += this.jst({attr: attr.value, value: attrValue.value}).HOLDER;
+        //        } else {
+        //            STATIC += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
+        //        }
+        //    } else {
+        //        if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
+        //        console.log(attr);
+        //    }
+        //}
+
+        var attr, attrValue, attrs = [];
         // set Attribute
-        var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+        var reg = /[\{\}]+/g;
+
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
                 attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
-
-                if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
-                    HOLDER += this.jst({attr: attr.value, value: attrValue.value}).HOLDER;
-                } else {
-                    STATIC += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
-                }
+                attrs.push({
+                    TYPE: attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value) ? 'expression' : 'attribute',
+                    NAME: attr.value,
+                    VALUE: attrValue.value
+                });
             } else {
                 if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
                 console.log(attr);
             }
+
         }
-        return {
-            TYPE: 'attribute',
-            HOLDER: HOLDER,
-            STATIC: STATIC
-        }
+        return attrs;
     };
 
     _tp.element = function () {
         var
             children = [],
             name = this.match('TAG_OPEN_START').value,
-            attrs = this.attr(),
+            attrs = this.attrs(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
         if (!selfClosed && !_voidTag.test(name)) {
@@ -1563,7 +1573,40 @@
     };
 
     _tp.jst = function (elem) {
-
+        //var operation = {
+        //    'TAG': function () {
+        //        var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
+        //            reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+        //        if (reg.test(value)) {
+        //            attrVal = value.replace(reg, function ($, one) {
+        //                buf = one.split('.')[0];
+        //                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+        //                return '"+' + one + '+"';
+        //            }.bind(this));
+        //        } else {
+        //            buf = value.split('.')[0];
+        //            if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+        //            attrVal = '" + ' + value + ' + "';
+        //        }
+        //        HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
+        //        return {
+        //            type: 'jst',
+        //            HOLDER: HOLDER,
+        //            STATIC: ''
+        //        }
+        //    }.bind(this),
+        //    'TEXT': function () {
+        //        var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
+        //        // interpolate
+        //        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+        //        return {
+        //            type: 'jst',
+        //            sign: sign,
+        //            HOLDER: '$m.$text(' + sign + ', ' + value + ');',
+        //            STATIC: 'var ' + sign + '=$m.$text(null, "");'
+        //        }
+        //    }.bind(this)
+        //}
     };
 
     _tp['if'] = function (elem, parent) {
