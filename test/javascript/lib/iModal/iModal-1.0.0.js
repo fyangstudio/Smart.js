@@ -1155,6 +1155,25 @@
      * Living dom
      *
      */
+    var _voidTag = /area|br|embed|img|input|meta|source/i;
+
+    // Virtual Dom
+    var _iModalJsElem = function () {
+        this.children = [];
+    };
+
+    _iModalJsElem.$addChild = function () {
+        console.log(1);
+    };
+
+    _iModalJsElem.$create = function (type) {
+        console.log(type);
+    };
+
+    _iModalJsElem.$fragment = function () {
+        console.log(1);
+    };
+
     // Macro for TPL parse function
     var TPL_MACRO = {
         'BEGIN': '{{',
@@ -1371,25 +1390,6 @@
             }
             return token;
         }
-    };
-
-    var _voidTag = /area|br|embed|img|input|meta|source/i;
-
-    // Virtual Dom
-    var _iModalJsElem = function () {
-        this.children = [];
-    };
-
-    _iModalJsElem.$addChild = function () {
-        console.log(1);
-    };
-
-    _iModalJsElem.$create = function (type) {
-        console.log(type);
-    };
-
-    _iModalJsElem.$fragment = function () {
-        console.log(1);
     };
 
     var TPL_Parser = function (template) {
