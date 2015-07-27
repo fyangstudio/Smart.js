@@ -1655,7 +1655,8 @@
         }
         if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
         return {
-            type: 'jst',
+            type: 'if',
+            ALTERNATE: [],
             CHILDREN: container,
             HOLDER: '',
             REMOVE: '',
