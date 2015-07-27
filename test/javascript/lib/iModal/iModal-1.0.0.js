@@ -26,7 +26,7 @@
     // Object.observe
     var _observe = Object.observe || undefined;
     // Define.samd config
-    var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
+    var _config = {sites: {}, paths: {}, charset: 'utf-8', hashPath: "!/", delay: 500};
     /*!
      * iModalJs Data Structure Component
      *
@@ -1695,12 +1695,13 @@
 
             if (!!this['watchHash']) {
                 var _hashFn = function () {
-                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(/(!\/.+\?)/);
                     this.data.hash = {};
-                    if (_path) this.data.hash.iModalJs_URI = _path[0].slice(2, -1);
-                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[1], ''), '&');
+                    var _reg = new RegExp('(' + $m.$escapeRegExp(_config.hashPath) + '[^\\?]+)');
+                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(_reg);
+                    if (_path) this.data.hash.iModalJs_URI = _path[0].slice(_config.hashPath.length);
+                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[0], ''), '&');
                     $m.$forIn(_hash, function (value, key) {
-                        this.data.hash[key.indexOf('?') == 1 ? key.substr(1) : key] = value;
+                        this.data.hash[key.indexOf('?') == 0 ? key.substr(1) : key] = value;
                     }, this);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
