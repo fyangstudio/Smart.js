@@ -1498,14 +1498,15 @@
             case 'JST_OPEN_START':
                 var name = poll.value;
                 this.next();
-                if (typeof this[name] === 'function') {
+
+                if ($m.$isFunction(this[name])) {
                     return this[name]()
                 } else {
                     _ERROR('$tpl: Undefined directive ' + name + '!');
                 }
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst({value: poll.value});
+                return {TYPE: 'expression', VALUE: poll.value};
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
                 return this.element();
@@ -1565,7 +1566,6 @@
 
     };
 
-
     _tp['if'] = function (elem, parent) {
         var condition = this.match('JST_CONDITION').value;
         var children = [], alternate = [];
@@ -1606,6 +1606,14 @@
     };
 
     var _tc = TPL_Compiling.prototype;
+
+    _tc['element'] = function (statement) {
+        console.log(statement)
+    };
+
+    _tc['expression'] = function (statement) {
+        console.log(statement)
+    };
 
     _tc['if'] = function (statement) {
         console.log(statement)
