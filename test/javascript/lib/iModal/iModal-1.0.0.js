@@ -1247,7 +1247,7 @@
         }, 'JST']
     };
 
-    // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
+    // TPL_ProcessRules() method can process the TPL_RULES for TPL_Pretreatment.
     var TPL_ProcessRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
         // replace the rule's macro string to regexp
@@ -1284,7 +1284,7 @@
         return map;
     };
 
-    // TPL_Lexer's map
+    // TPL_Pretreatment's map
     var TPL_Dictionary = TPL_ProcessRules([
         // INIT
         TPL_RULES.ENTER_JST,
@@ -1309,8 +1309,8 @@
         TPL_RULES.JST_CONDITION
     ]);
 
-    // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
-    var TPL_Lexer = function (tpl) {
+    // The TPL_Pretreatment() method according to the rules change 'tpl' to the element fragment.
+    var TPL_Pretreatment = function (tpl) {
         if (tpl == undefined) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state;
@@ -1333,7 +1333,7 @@
         return tokens;
     };
 
-    TPL_Lexer.prototype = {
+    TPL_Pretreatment.prototype = {
         // enter state mode
         enter: function (state) {
             this._states.push(state);
@@ -1401,7 +1401,7 @@
         this.seed_remove = 0;
         this.state = 'TEXT';
         this.buffer = [];
-        this.operation = new TPL_Lexer(template);
+        this.operation = new TPL_Pretreatment(template);
         console.log(this.operation);
         this.length = this.operation.length;
 
@@ -1418,7 +1418,7 @@
         //        HOLDER += statement.HOLDER || '';
         //    }
         //});
-        console.log(statements);
+        new TPL_Compiling(statements);
         //
         //this.buffer.forEach(function (variable) {
         //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
@@ -1662,6 +1662,19 @@
             REMOVE: '',
             STATIC: ''
         };
+    };
+
+    var TPL_Compiling = function (statements) {
+        var ret = '';
+        statements.forEach(function (statement) {
+            ret += this[statement.type](statement);
+        }, this);
+    };
+
+    var _tc = TPL_Compiling.prototype;
+
+    _tc['if'] = function (statement) {
+        console.log(statement)
     };
 
 
