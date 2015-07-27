@@ -1473,16 +1473,16 @@
         }
     };
 
-    _tp.process = function (parent) {
+    _tp.process = function () {
         var statements = [], poll = this.poll();
         while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-            statements.push(this.statement(parent));
+            statements.push(this.statement());
             poll = this.poll();
         }
         return statements;
     };
 
-    _tp.statement = function (parent) {
+    _tp.statement = function () {
         var poll = this.poll();
         switch (poll.type) {
             case 'TEXT':
@@ -1505,12 +1505,12 @@
                 }
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst({parent: parent, value: poll.value});
+                return this.jst({value: poll.value});
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
-                return this.element(parent);
+                return this.element();
             default:
-                _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
+                _ERROR('$tpl: Unexpected token ' + poll.type + '!');
         }
     };
 
@@ -1539,7 +1539,7 @@
         }
     };
 
-    _tp.element = function (parent) {
+    _tp.element = function () {
         var
             children = [],
             name = this.match('TAG_OPEN_START').value,
@@ -1562,13 +1562,7 @@
     };
 
     _tp.jst = function (elem) {
-        var value = elem.value || '';
-        try {
-            var _method = value.match(/([A-Za-z]+)/)[0];
-            return this[_method](value.replace(_method, ''), elem.parent || '');
-        } catch (e) {
-            _ERROR('$tpl: Unexpected token ' + elem.value + '!');
-        }
+
     };
 
 
