@@ -1630,37 +1630,34 @@
 
 
     _tp['if'] = function (elem, parent) {
-        var condition = this.match('JST_CONDITION');
-        var consequent = [], alternate = [];
+        var condition = this.match('JST_CONDITION').value;
+        var children = [], alternate = [];
 
-        var container = consequent;
-        var ll, close;
+        var poll, close;
         this.match('JST_OPEN_END');
 
         while (!(close = this.verify('JST_CLOSE'))) {
-            ll = this.poll();
-            if (ll.type === 'JST_OPEN_START') {
-                switch (ll.value) {
+            poll = this.poll();
+            if (poll.type === 'JST_OPEN_START') {
+                switch (poll.value) {
                     case 'else':
 
                         break;
                     case 'elseif':
 
                     default:
-                        container.push(this.statement());
+                        children.push(this.statement());
                 }
             } else {
-                container.push(this.statement());
+                children.push(this.statement());
             }
         }
         if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
         return {
             type: 'if',
             ALTERNATE: [],
-            CHILDREN: container,
-            HOLDER: '',
-            REMOVE: '',
-            STATIC: ''
+            CHILDREN: children,
+            CONDITION: condition
         };
     };
 
