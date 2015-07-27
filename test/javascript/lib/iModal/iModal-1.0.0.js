@@ -1484,21 +1484,16 @@
 
     _tp.statement = function (parent) {
         var poll = this.poll();
-        //console.log(poll);
         switch (poll.type) {
             case 'TEXT':
                 this.state = 'TEXT';
                 var text = poll.value.trim().replace(/\n/g, '');
                 this.next();
-                if (!!text) {
-                    var sign = 'M_DOM' + (++this.seed_var);
+                if (!!text)
                     return {
-                        type: 'text',
-                        sign: sign,
-                        HOLDER: '',
-                        STATIC: 'var ' + sign + '=$m.$text(null, "' + text + '");'
+                        TYPE: 'text',
+                        text: text
                     };
-                }
                 return null;
             case 'JST_OPEN_START':
                 var name = poll.value;
@@ -1517,7 +1512,6 @@
             default:
                 _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
         }
-        return 1;
     };
 
     _tp.attr = function () {
@@ -1539,7 +1533,7 @@
             }
         }
         return {
-            type: 'attribute',
+            TYPE: 'attribute',
             HOLDER: HOLDER,
             STATIC: STATIC
         }
@@ -1547,11 +1541,9 @@
 
     _tp.element = function (parent) {
         var
-            HOLDER = '', children = [],
+            children = [],
             name = this.match('TAG_OPEN_START').value,
-            sign = parent || 'M_DOM' + (++this.seed_var),
-            STATIC = 'var ' + sign + '=$m.$create("' + name + '");',
-            attr = this.attr(),
+            attrs = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
         if (!selfClosed && !_voidTag.test(name)) {
@@ -1561,70 +1553,21 @@
         } else {
             _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
         }
-        // console.log(children);
-        if (!!children.length) {
-            children.forEach(function (value) {
-                if (value) {
-                    STATIC += (value.STATIC +
-                    (!!value.sign ? ('if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}') : ''));
-                    HOLDER += value.HOLDER || '';
-                }
-            }, this)
-        }
         return {
-            type: 'element',
-            sign: sign,
-            CHILDREN: children,
-            HOLDER: HOLDER + attr.HOLDER,
-            STATIC: STATIC + attr.STATIC
+            TYPE: 'element',
+            NAME: name,
+            ATTRS: attrs,
+            CHILDREN: children
         }
     };
 
     _tp.jst = function (elem) {
         var value = elem.value || '';
-        var operation = {
-            'TAG': function () {
-                var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
-                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-                if (reg.test(value)) {
-                    attrVal = value.replace(reg, function ($, one) {
-                        buf = one.split('.')[0];
-                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                        return '"+' + one + '+"';
-                    }.bind(this));
-                } else {
-                    buf = value.split('.')[0];
-                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                    attrVal = '" + ' + value + ' + "';
-                }
-                HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
-                return {
-                    type: 'jst',
-                    HOLDER: HOLDER,
-                    STATIC: ''
-                }
-            }.bind(this),
-            'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
-                // interpolate
-                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                return {
-                    type: 'jst',
-                    sign: sign,
-                    HOLDER: '$m.$text(' + sign + ', ' + value + ');',
-                    STATIC: 'var ' + sign + '=$m.$text(null, "");'
-                }
-            }.bind(this)
-        };
-        if (/^[#\/]/.test(value)) {
-            try {
-                var _method = value.match(/([A-Za-z]+)/)[0];
-                return this[_method](value.replace(_method, ''), elem.parent || '');
-            } catch (e) {
-                _ERROR('$tpl: Unexpected token ' + elem.value + '!');
-            }
-        } else {
-            return operation[this.state]();
+        try {
+            var _method = value.match(/([A-Za-z]+)/)[0];
+            return this[_method](value.replace(_method, ''), elem.parent || '');
+        } catch (e) {
+            _ERROR('$tpl: Unexpected token ' + elem.value + '!');
         }
     };
 
@@ -1654,7 +1597,7 @@
         }
         if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
         return {
-            type: 'if',
+            TYPE: 'if',
             ALTERNATE: [],
             CHILDREN: children,
             CONDITION: condition
@@ -1664,7 +1607,7 @@
     var TPL_Compiling = function (statements) {
         var ret = '';
         statements.forEach(function (statement) {
-            ret += this[statement.type](statement);
+            ret += this[statement.TYPE](statement);
         }, this);
     };
 
