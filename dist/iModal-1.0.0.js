@@ -26,7 +26,7 @@
     // Object.observe
     var _observe = Object.observe || undefined;
     // Define.samd config
-    var _config = {sites: {}, paths: {}, charset: 'utf-8', delay: 500};
+    var _config = {sites: {}, paths: {}, charset: 'utf-8', hashPath: "!/", delay: 500};
     /*!
      * iModalJs Data Structure Component
      *
@@ -199,16 +199,6 @@
         return !namespace ? _doc.createElement(type) : _doc.createElementNS(namespace, type);
     };
 
-    // The $m.$replace() method replaces one child node of the specified element with another.
-    $m.$replace = function (elem, replaced) {
-        if (replaced.parentNode) replaced.parentNode.replaceChild(elem, replaced);
-    };
-
-    // The $m.$remove () method removes a child node from the it's parentNode.
-    $m.$remove = function (elem) {
-        if (elem.parentNode) elem.parentNode.removeChild(elem);
-    };
-
     // Create an empty DocumentFragment object.
     $m.$fragment = function () {
         return _doc.createDocumentFragment();
@@ -222,6 +212,30 @@
             else if (child && child.nodeType) return child.parentNode == parent;
         }
         return false;
+    };
+
+    // The Node.insertAfter() method inserts the specified node after a reference node as a child of the current node.
+    $m.$insertAfter = function (elem, target) {
+        var parent = target.parentNode;
+        if (parent.lastChild == target) parent.appendChild(elem);
+        else parent.insertBefore(elem, target.nextSibling);
+        return elem;
+    };
+
+    // The $m.$replace() method replaces one child node of the specified element with another.
+    $m.$replace = function (elem, replaced) {
+        if (replaced.parentNode) replaced.parentNode.replaceChild(elem, replaced);
+    };
+
+    // The $m.$remove () method removes a child node from the it's parentNode.
+    $m.$remove = function (elem) {
+        if (elem.parentNode) elem.parentNode.removeChild(elem);
+    };
+
+    // The $m.$style() method specifies the style sheet language for the given document fragment.
+    $m.$style = function (elem, name) {
+        if (elem.currentStyle) return elem.currentStyle[name];
+        return getComputedStyle(elem, null)[name];
     };
 
     // $m.$text() sets or gets all of the markup and content within a given element.
@@ -240,12 +254,6 @@
             return elem;
         }
     })();
-
-    // The $m.$style() method specifies the style sheet language for the given document fragment.
-    $m.$style = function (elem, name) {
-        if (elem.currentStyle) return elem.currentStyle[name];
-        return getComputedStyle(elem, null)[name];
-    };
 
     // The $m.$width() method can get element's width in pixels.
     $m.$width = function (elem, inner) {
@@ -272,10 +280,10 @@
         };
     } else {
         $m.$addEvent = function (node, event, fn) {
-            node.attachEvent('on' + event, fn);
+            (node == _win ? document : node).attachEvent('on' + event, fn);
         };
         $m.$removeEvent = function (node, event, fn) {
-            node.detachEvent('on' + event, fn);
+            (node == _win ? document : node).detachEvent('on' + event, fn);
         };
     }
 
@@ -705,7 +713,7 @@
     $m.$same = function (target1, target2, deep) {
         var _deep = !!deep, check = arguments.callee;
         if (target1 === target2) return true;
-        if (target1.constructor !== target2.constructor) return false;
+        if (target1 !== target2 || target1.constructor !== target2.constructor) return false;
 
         // If they are not strictly equal, they both need to be Objects
         if (!( target1 instanceof Object ) || !( target2 instanceof Object )) return false;
@@ -1149,8 +1157,11 @@
      */
     // Macro for TPL parse function
     var TPL_MACRO = {
+        'BEGIN': '{{',
+        'END': '}}',
         'NAME': /(?:[:_A-Za-z][-\.:_0-9A-Za-z]*)/,
-        'EXPRESSION': /\{\{!?([\$\/#@!_A-Za-z][^}]*)!?\}\}/,
+        'EXPRESSION': /[^\x00\{\}]*/,
+        'IDENT': /[\$_A-Za-z][_0-9A-Za-z\$]*/,
         'SPACE': /[\r\n\f ]/
     };
     // Rules for TPL parse function
@@ -1158,7 +1169,7 @@
     var TPL_RULES = {
         /* INIT */
         // Enter JST mode
-        ENTER_JST: [/[^\x00<]*?(?=%EXPRESSION%)/, function ($) {
+        ENTER_JST: [/[^\x00<]*?(?=%BEGIN%)/, function ($) {
             this.enter('JST');
             if ($) return {type: 'TEXT', value: $}
         }, 'INIT'],
@@ -1191,7 +1202,7 @@
             return {type: 'TAG_ATTRIBUTE_VALUE', value: value}
         }, 'TAG'],
         // In TAG mode change to JST mode
-        TAG_ENTER_JST: [/(?=%EXPRESSION%)/, function () {
+        TAG_ENTER_JST: [/(?=%BEGIN%)/, function () {
             this.enter('JST');
         }, 'TAG'],
         // TAG SPACE
@@ -1205,9 +1216,34 @@
         }, 'TAG'],
 
         /* JST */
-        JST_EXPRESSION: [/%EXPRESSION%/, function ($, one) {
+        // JST EXPRESSION open
+        JST_OPEN_START: [/%BEGIN%#%SPACE%*(%IDENT%)%SPACE%*/, function ($, name) {
+            return {type: 'JST_OPEN_START', value: name}
+        }, 'JST'],
+        JST_OPEN_END: [/(%END%)/, function ($) {
             this.leave('JST');
-            return {type: 'JST_EXPRESSION', value: $.indexOf('!') == 2 ? '' : one}
+            return {type: 'JST_OPEN_END', value: $}
+        }, 'JST'],
+        // JST EXPRESSION close
+        JST_CLOSE: [/%BEGIN%\s*\/\s*(%IDENT%)\s*%END%/, function ($, one) {
+            this.leave('JST');
+            return {type: 'JST_CLOSE', value: one}
+        }, 'JST'],
+
+        // JST COMMENT
+        JST_COMMENT: [/%BEGIN%!(%EXPRESSION%)!%END%/, function () {
+            this.leave('JST');
+            return {type: 'JST_COMMENT', value: ''}
+        }, 'JST'],
+
+        // JST INTERPOSITION EXPRESSION
+        JST_EXPRESSION: [/%BEGIN%(%EXPRESSION%)%END%/, function ($, one) {
+            this.leave('JST');
+            return {type: 'JST_EXPRESSION', value: one}
+        }, 'JST'],
+        // JST EXPRESSION CONDITION
+        JST_CONDITION: [/(%EXPRESSION%)/, function ($, one) {
+            return {type: 'JST_CONDITION', value: one}
         }, 'JST']
     };
 
@@ -1265,7 +1301,12 @@
         TPL_RULES.TAG_OPEN_END,
         TPL_RULES.TAG_CLOSE,
         // JST
-        TPL_RULES.JST_EXPRESSION
+        TPL_RULES.JST_OPEN_START,
+        TPL_RULES.JST_OPEN_END,
+        TPL_RULES.JST_CLOSE,
+        TPL_RULES.JST_COMMENT,
+        TPL_RULES.JST_EXPRESSION,
+        TPL_RULES.JST_CONDITION
     ]);
 
     // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
@@ -1334,40 +1375,60 @@
 
     var _voidTag = /area|br|embed|img|input|meta|source/i;
 
+    // Virtual Dom
+    var _iModalJsElem = function () {
+        this.children = [];
+    };
+
+    _iModalJsElem.$addChild = function () {
+        console.log(1);
+    };
+
+    _iModalJsElem.$create = function (type) {
+        console.log(type);
+    };
+
+    _iModalJsElem.$fragment = function () {
+        console.log(1);
+    };
+
     var TPL_Parser = function (template) {
 
         this.pos = 0;
-        this.seed = 0;
+        this.seed_var = 0;
+        this.seed_holder = 0;
+        this.seed_fragment = 0;
+        this.seed_remove = 0;
         this.state = 'TEXT';
         this.buffer = [];
         this.operation = new TPL_Lexer(template);
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA = this.data;', init = '', main = '', statements = this.process() || [];
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
 
-        _fn += '"use strict";';
-        _fn += 'var M_DOM0 = $m.$fragment();';
-        _fn += 'try {<%init%>return function(){<%main%>return M_DOM0;};} catch(e) {throw new Error("$tpl: " + e.message);}';
-
-        statements.forEach(function (statement) {
-            if (statement) {
-                init += statement.fragment;
-                init += 'M_DOM0.appendChild(' + statement.sign + ');';
-                main += statement.handler || '';
-            }
-        });
-
-        this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + ' = M_DATA.' + variable + '||"";'
-        });
-        //main += 'console.log(t);';
-        _fn = _fn.replace(/<%init%>/, init);
-        _fn = _fn.replace(/<%main%>/, prefix + main);
-        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-
-        //console.log(_fn);
-        return new Function('$m, init', _fn);
+        //_fn += '"use strict";';
+        //_fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        //_fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        //
+        //statements.forEach(function (statement) {
+        //    if (statement) {
+        //        STATIC += statement.STATIC;
+        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+        //        HOLDER += statement.HOLDER || '';
+        //    }
+        //});
+        console.log(statements);
+        //
+        //this.buffer.forEach(function (variable) {
+        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
+        //});
+        //_fn = _fn.replace(/<%STATIC%>/, STATIC);
+        //_fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+        //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+        //
+        //return new Function('$dom, undefined', _fn);
+        return _NOOP;
     };
 
     var _tp = TPL_Parser.prototype;
@@ -1412,16 +1473,16 @@
         }
     };
 
-    _tp.process = function () {
+    _tp.process = function (parent) {
         var statements = [], poll = this.poll();
         while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-            statements.push(this.statement());
+            statements.push(this.statement(parent));
             poll = this.poll();
         }
         return statements;
     };
 
-    _tp.statement = function () {
+    _tp.statement = function (parent) {
         var poll = this.poll();
         //console.log(poll);
         switch (poll.type) {
@@ -1430,70 +1491,37 @@
                 var text = poll.value.trim().replace(/\n/g, '');
                 this.next();
                 if (!!text) {
-                    var sign = 'M_DOM' + (++this.seed);
+                    var sign = 'M_DOM' + (++this.seed_var);
                     return {
                         type: 'text',
                         sign: sign,
-                        handler: '',
-                        fragment: 'var ' + sign + ' = $m.$text(null, "' + text + '");'
+                        HOLDER: '',
+                        STATIC: 'var ' + sign + '=$m.$text(null, "' + text + '");'
                     };
                 }
                 return null;
+            case 'JST_OPEN_START':
+                var name = poll.value;
+                this.next();
+                if (typeof this[name] === 'function') {
+                    return this[name]()
+                } else {
+                    _ERROR('$tpl: Undefined directive ' + name + '!');
+                }
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst(poll.value);
+                return this.jst({parent: parent, value: poll.value});
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
-                return this.element();
+                return this.element(parent);
             default:
                 _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
         }
         return 1;
     };
 
-    _tp.jst = function (elem) {
-        var operation = {
-            'TAG': function () {
-                var attrVal, buf, handler, sign = 'M_DOM' + this.seed,
-                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-                if (reg.test(elem.value)) {
-                    attrVal = elem.value.replace(reg, function ($, one) {
-                        buf = one.split('.')[0];
-                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                        return '" + ' + one + ' + "';
-                    }.bind(this));
-                } else {
-                    buf = elem.value.split('.')[0];
-                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                    attrVal = '" + ' + elem.value + ' + "';
-                }
-                handler = '$m.$attr(' + sign + ', "' + elem.attr + '", "' + attrVal + '");';
-                return {
-                    handler: handler,
-                    fragment: ''
-                }
-            }.bind(this),
-            'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed), buf = elem.split('.')[0];
-                // interpolate
-                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                return {
-                    type: 'jst',
-                    sign: sign,
-                    handler: '$m.$text(' + sign + ', ' + elem + ');',
-                    fragment: 'var ' + sign + ' = $m.$text(null, "");'
-                }
-            }.bind(this)
-        };
-        if (elem.indexOf('#') == 0 || elem.indexOf('/') == 0) {
-            console.log(elem.match(/([A-Za-z]+)/))
-        } else {
-            return operation[this.state]();
-        }
-    };
-
     _tp.attr = function () {
-        var attr, attrValue, fragment = '', handler = '', sign = 'M_DOM' + this.seed;
+        var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed_var;
         // set Attribute
         var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
@@ -1501,9 +1529,9 @@
                 attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
 
                 if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
-                    handler += this.jst({attr: attr.value, value: attrValue.value}).handler;
+                    HOLDER += this.jst({attr: attr.value, value: attrValue.value}).HOLDER;
                 } else {
-                    fragment += '$m.$attr(' + sign + ', "' + attr.value + '", "' + attrValue.value + '");';
+                    STATIC += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
                 }
             } else {
                 if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
@@ -1511,21 +1539,23 @@
             }
         }
         return {
-            handler: handler,
-            fragment: fragment
+            type: 'attribute',
+            HOLDER: HOLDER,
+            STATIC: STATIC
         }
     };
 
-    _tp.element = function () {
+    _tp.element = function (parent) {
         var
-            handler = '', children = [],
+            HOLDER = '', children = [],
             name = this.match('TAG_OPEN_START').value,
-            sign = 'M_DOM' + (++this.seed),
-            fragment = 'var ' + sign + ' = $m.$create("' + name + '");',
+            sign = parent || 'M_DOM' + (++this.seed_var),
+            STATIC = 'var ' + sign + '=$m.$create("' + name + '");',
             attr = this.attr(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
         if (!selfClosed && !_voidTag.test(name)) {
+            this.state = 'TEXT';
             children = this.process();
             if (!this.verify('TAG_CLOSE', name)) _ERROR('$tpl: Expect </' + name + '> got no matched closeTag!');
         } else {
@@ -1535,19 +1565,105 @@
         if (!!children.length) {
             children.forEach(function (value) {
                 if (value) {
-                    fragment += (value.fragment
-                    + 'if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}');
-                    handler += value.handler || '';
+                    STATIC += (value.STATIC +
+                    (!!value.sign ? ('if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}') : ''));
+                    HOLDER += value.HOLDER || '';
                 }
             }, this)
         }
         return {
             type: 'element',
             sign: sign,
-            handler: handler + attr.handler,
-            fragment: fragment + attr.fragment
+            CHILDREN: children,
+            HOLDER: HOLDER + attr.HOLDER,
+            STATIC: STATIC + attr.STATIC
         }
     };
+
+    _tp.jst = function (elem) {
+        var value = elem.value || '';
+        var operation = {
+            'TAG': function () {
+                var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
+                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+                if (reg.test(value)) {
+                    attrVal = value.replace(reg, function ($, one) {
+                        buf = one.split('.')[0];
+                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                        return '"+' + one + '+"';
+                    }.bind(this));
+                } else {
+                    buf = value.split('.')[0];
+                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                    attrVal = '" + ' + value + ' + "';
+                }
+                HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
+                return {
+                    type: 'jst',
+                    HOLDER: HOLDER,
+                    STATIC: ''
+                }
+            }.bind(this),
+            'TEXT': function () {
+                var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
+                // interpolate
+                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+                return {
+                    type: 'jst',
+                    sign: sign,
+                    HOLDER: '$m.$text(' + sign + ', ' + value + ');',
+                    STATIC: 'var ' + sign + '=$m.$text(null, "");'
+                }
+            }.bind(this)
+        };
+        if (/^[#\/]/.test(value)) {
+            try {
+                var _method = value.match(/([A-Za-z]+)/)[0];
+                return this[_method](value.replace(_method, ''), elem.parent || '');
+            } catch (e) {
+                _ERROR('$tpl: Unexpected token ' + elem.value + '!');
+            }
+        } else {
+            return operation[this.state]();
+        }
+    };
+
+
+    _tp['if'] = function (elem, parent) {
+        var condition = this.match('JST_CONDITION');
+        var consequent = [], alternate = [];
+
+        var container = consequent;
+        var ll, close;
+        this.match('JST_OPEN_END');
+
+        while (!(close = this.verify('JST_CLOSE'))) {
+            ll = this.poll();
+            if (ll.type === 'JST_OPEN_START') {
+                switch (ll.value) {
+                    case 'else':
+
+                        break;
+                    case 'elseif':
+
+                    default:
+                        container.push(this.statement());
+                }
+            } else {
+                container.push(this.statement());
+            }
+        }
+        if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
+        return {
+            type: 'if',
+            ALTERNATE: [],
+            CHILDREN: container,
+            HOLDER: '',
+            REMOVE: '',
+            STATIC: ''
+        };
+    };
+
 
     var _watch = function (obj, callback) {
         if (_observe) {
@@ -1579,13 +1695,14 @@
 
             if (!!this['watchHash']) {
                 var _hashFn = function () {
-                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(/(!\/.+\?)/);
-                    if (_path) this.data.iModalJs_URI = _path[0].slice(2, -1);
-                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[1], ''));
+                    this.data.hash = {};
+                    var _reg = new RegExp('(' + $m.$escapeRegExp(_config.hashPath) + '[^\\?]+)');
+                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(_reg);
+                    if (_path) this.data.hash.iModalJs_URI = _path[0].slice(_config.hashPath.length);
+                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[0], ''), '&');
                     $m.$forIn(_hash, function (value, key) {
-                        this.data[key] = value;
+                        this.data.hash[key.indexOf('?') == 0 ? key.substr(1) : key] = value;
                     }, this);
-                    console.log(this.data);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
                 _hashFn();
@@ -1594,7 +1711,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [$m]);
+            this.$update = _handler.apply(this, [_iModalJsElem, undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
@@ -1607,7 +1724,7 @@
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            _target.appendChild(this.$update());
+            //_target.appendChild(this.$update());
             return this;
         }
     });
