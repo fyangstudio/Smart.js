@@ -1432,7 +1432,6 @@
         //        HOLDER += statement.HOLDER || '';
         //    }
         //});
-        new TPL_Compiling(statements);
         //
         //this.buffer.forEach(function (variable) {
         //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
@@ -1443,6 +1442,7 @@
         //
         //return new Function('$dom, undefined', _fn);
         if (tag) return statements;
+        else new TPL_Compiling(statements);
         return _NOOP;
     };
 
@@ -1539,11 +1539,12 @@
                 switch (poll.type) {
                     case "TAG_ATTRIBUTE_VALUE":
                     case "JST_EXPRESSION":
+                        var isJST = poll.type === 'JST_EXPRESSION' || ~poll.value.indexOf('{{');
                         this.next();
                         attrs.push({
-                            TYPE: poll.type === 'JST_EXPRESSION' || ~poll.value.indexOf('{{') ? 'expression' : 'attribute',
+                            TYPE: isJST ? 'expression' : 'attribute',
                             NAME: attr.value,
-                            VALUE: poll.value,
+                            VALUE: isJST ? '' : poll.value,
                             HOLDER: new TPL_Parser(poll.value, true)
                         });
                         break;
@@ -1553,6 +1554,7 @@
                         attrs.push({
                             TYPE: 'expression',
                             NAME: attr.value,
+                            VALUE: '',
                             HOLDER: this['if'](true)
                         });
                         break;
