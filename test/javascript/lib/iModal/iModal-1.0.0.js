@@ -761,8 +761,26 @@
     // The $m.$hash()method property returns a DOMString not containing a '#' followed by the fragment identifier of the URL.
     // The hash is not percent encoded.
     $m.$hash = function (value) {
-        if (value != undefined) _win.location.hash = value.replace(/#/g, '');
-        return _win.location.hash.replace('#', '');
+        var _hash, _path, _h = '', _ret = {}, _reg = new RegExp('(' + $m.$escapeRegExp(_config.hashPath) + '[^\\?]+)');
+        if (value != undefined) {
+            if ($m.$isObject(value)) {
+                if (value.iModalJs_URI) {
+                    _h += ( _config.hashPath + value.iModalJs_URI );
+                    delete value.iModalJs_URI;
+                }
+                _h += ('?' + $m.$o2s(value, '&'));
+                _win.location.hash = _h;
+            } else if ($m.$isString(value)) {
+                _win.location.hash = value.replace(/#/g, '');
+            } else {
+                _ERROR('$m.$hash: Unexpected hash value!');
+            }
+        }
+        _hash = $m.$unescape(_win.location.hash.replace('#', ''), true);
+        _path = _hash.match(_reg);
+        _ret = $m.$s2o((!_path ? _hash : _hash.replace(_path[0], '')).replace(/(^\?)/, ''), '&');
+        if (_path) _ret.iModalJs_URI = _path[0].slice(_config.hashPath.length);
+        return _ret;
     };
 
     // Watch location.hash
@@ -781,7 +799,7 @@
             setInterval(function () {
                 var _h = _win.location.hash.replace('#', '');
                 if (_h != _hash) {
-                    _hash = this.$hash();
+                    _hash = _h;
                     handles.forEach(function (_fn) {
                         _fn.call(this, _h);
                     })
@@ -1693,14 +1711,8 @@
 
             if (!!this['watchHash']) {
                 var _hashFn = function () {
-                    this.data.hash = {};
-                    var _reg = new RegExp('(' + $m.$escapeRegExp(_config.hashPath) + '[^\\?]+)');
-                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(_reg);
-                    if (_path) this.data.hash.iModalJs_URI = _path[0].slice(_config.hashPath.length);
-                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[0], ''), '&');
-                    $m.$forIn(_hash, function (value, key) {
-                        this.data.hash[key.indexOf('?') == 0 ? key.substr(1) : key] = value;
-                    }, this);
+                    this.data.hash = $m.$hash();
+                    console.log(this.data.hash);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
                 _hashFn();
