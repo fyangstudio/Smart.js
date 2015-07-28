@@ -1410,7 +1410,7 @@
         }
     };
 
-    var TPL_Parser = function (template) {
+    var TPL_Parser = function (template, tag) {
 
         this.pos = 0;
         this.state = 'TEXT';
@@ -1442,6 +1442,7 @@
         //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
         //
         //return new Function('$dom, undefined', _fn);
+        if (tag) return statements;
         return _NOOP;
     };
 
@@ -1530,24 +1531,7 @@
     };
 
     _tp.attrs = function () {
-        var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed_var;
-
-        //while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
-        //    if (attr.type === 'TAG_ATTRIBUTE_NAME') {
-        //        attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
-        //
-        //        if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
-        //            HOLDER += this.jst({attr: attr.value, value: attrValue.value}).HOLDER;
-        //        } else {
-        //            STATIC += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
-        //        }
-        //    } else {
-        //        if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
-        //        console.log(attr);
-        //    }
-        //}
-
-        var attr, attrValue, poll, attrs = [];
+        var attr, poll, attrs = [];
         // set Attribute
         while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'JST_OPEN_START', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
@@ -1555,11 +1539,12 @@
                 switch (poll.type) {
                     case "TAG_ATTRIBUTE_VALUE":
                     case "JST_EXPRESSION":
-                        attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
+                        this.next();
                         attrs.push({
-                            TYPE: attrValue.type === 'JST_EXPRESSION' || ~attrValue.value.indexOf('{{')? 'expression' : 'attribute',
+                            TYPE: poll.type === 'JST_EXPRESSION' || ~poll.value.indexOf('{{') ? 'expression' : 'attribute',
                             NAME: attr.value,
-                            VALUE: attrValue.value
+                            VALUE: poll.value,
+                            HOLDER: new TPL_Parser(poll.value, true)
                         });
                         break;
                     case "JST_OPEN_START":
@@ -1577,7 +1562,6 @@
             } else {
                 _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
             }
-
         }
         return attrs;
     };
@@ -1686,6 +1670,10 @@
     };
 
     var _tc = TPL_Compiling.prototype;
+
+    _tc['text'] = function (statement) {
+        console.log(statement)
+    };
 
     _tc['element'] = function (statement) {
         console.log(statement)
