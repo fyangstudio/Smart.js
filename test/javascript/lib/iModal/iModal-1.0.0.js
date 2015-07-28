@@ -1547,21 +1547,35 @@
         //    }
         //}
 
-        var attr, attrValue, attrs = [];
+        var attr, attrValue, poll, attrs = [];
         // set Attribute
-        var reg = /[\{\}]+/g;
-
-        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
+        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'JST_OPEN_START', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
-                attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
-                attrs.push({
-                    TYPE: attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value) ? 'expression' : 'attribute',
-                    NAME: attr.value,
-                    VALUE: attrValue.value
-                });
+                poll = this.poll();
+                switch (poll.type) {
+                    case "TAG_ATTRIBUTE_VALUE":
+                    case "JST_EXPRESSION":
+                        attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
+                        attrs.push({
+                            TYPE: attrValue.type === 'JST_EXPRESSION' || ~attrValue.value.indexOf('{{')? 'expression' : 'attribute',
+                            NAME: attr.value,
+                            VALUE: attrValue.value
+                        });
+                        break;
+                    case "JST_OPEN_START":
+                        if (poll.value !== 'if') _ERROR("$tpl: ONLY RULE #if #else #elseif is valid in tag, the rule #" + poll.value + ' is invalid');
+                        this.next();
+                        attrs.push({
+                            TYPE: 'expression',
+                            NAME: attr.value,
+                            HOLDER: this['if'](true)
+                        });
+                        break;
+                    default:
+                        _ERROR('$tpl: Unexpected token: ' + poll.value + '!');
+                }
             } else {
-                if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
-                console.log(attr);
+                _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
             }
 
         }
@@ -1627,7 +1641,7 @@
         //}
     };
 
-    _tp['if'] = function (elem, parent) {
+    _tp['if'] = function (tag) {
         var condition = this.match('JST_CONDITION').value;
         var children = [], alternate = [];
 
@@ -1647,13 +1661,18 @@
                         children.push(this.statement());
                 }
             } else {
-                children.push(this.statement());
+                if (tag && poll.type === 'TAG_ATTRIBUTE_VALUE') {
+                    this.next();
+                    children.push(poll);
+                } else {
+                    children.push(this.statement());
+                }
             }
         }
         if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
         return {
             TYPE: 'if',
-            ALTERNATE: [],
+            ALTERNATE: alternate,
             CHILDREN: children,
             CONDITION: condition
         };
