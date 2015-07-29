@@ -1665,7 +1665,10 @@
     };
 
     var TPL_Compiling = function (statements) {
-        var ret = '';
+        var ret = '', _fn = [].join('');
+
+        _fn += '"use strict";';
+        
         statements.forEach(function (statement) {
             ret += this[statement.TYPE](statement);
         }, this);
