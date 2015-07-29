@@ -23,7 +23,7 @@ SAMD
 define([
   '$chrome!dep1',             //chrome dependency   
   '6<=$ie<9!dep2',            //IE6~IE9 dependency
-  '^$ie!dep3',                //except IE dependency ('^' means not) 
+  '^6<=$ie<9!dep3',           //except IE6~IE9 dependency ('^' means not) 
   '$pixel>1!dep4'             //retina and retina HD dependency 
 ], function (chrome_dep, oldIE_dep, notIE_dep, retina_dep) {
     //[macbook pro's chrome], Don't load the dep3 and the oldIE_dep will be an empty object.
