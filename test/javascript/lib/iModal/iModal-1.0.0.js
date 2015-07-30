@@ -1668,6 +1668,7 @@
         var ret = '', _fn = [].join('');
 
         _fn += '"use strict";';
+        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
         
         statements.forEach(function (statement) {
             ret += this[statement.TYPE](statement);
