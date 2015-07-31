@@ -64,3 +64,4 @@ define([
     return new page_index({name: 'yangfan'});
 });
 
+###Example 2: templating
