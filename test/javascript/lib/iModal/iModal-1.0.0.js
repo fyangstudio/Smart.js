@@ -1669,6 +1669,7 @@
 
         _fn += '"use strict";';
         _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
         
         statements.forEach(function (statement) {
             ret += this[statement.TYPE](statement);
