@@ -317,18 +317,24 @@
 
     /* Syntax fix
      ---------------------------------------------------------------------- */
-    // The trim() method removes whitespace from both ends of a string.
-    if (!String.prototype.trim) {
-        String.prototype.trim = function () {
-            return this.replace(/^\s+|\s+$/g, '');
-        };
+    function _expand(o1, o2) {
+        for (var i in o2) if (o1[i] === undefined) {
+            o1[i] = o2[i]
+        }
     }
 
-    // The bind() method creates a new function that,
-    // when called, has its this keyword set to the provided value,
-    // with a given sequence of arguments preceding any provided when the new function is called.
-    if (!Function.prototype.bind) {
-        Function.prototype.bind = function (oThis) {
+    _expand(String.prototype, {
+        // The trim() method removes whitespace from both ends of a string.
+        trim: function () {
+            return this.replace(/^\s+|\s+$/g, '');
+        }
+    });
+
+    _expand(Function.prototype, {
+        // The bind() method creates a new function that,
+        // when called, has its this keyword set to the provided value,
+        // with a given sequence of arguments preceding any provided when the new function is called.
+        bind: function (oThis) {
             if (!$m.$isFunction(this)) return;
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
@@ -339,12 +345,12 @@
             _NOOP.prototype = this.prototype;
             fBound.prototype = new _NOOP();
             return fBound;
-        };
-    }
+        }
+    });
 
-    // The forEach() method executes a provided function once per array element.
-    if (!Array.prototype.forEach) {
-        Array.prototype.forEach = function forEach(callback, thisArg) {
+    _expand(Array.prototype, {
+        // The forEach() method executes a provided function once per array element.
+        forEach: function forEach(callback, thisArg) {
             var T, k = 0;
             if (this == null || !$m.$isFunction(callback)) return;
 
@@ -360,12 +366,9 @@
                 }
                 k++;
             }
-        };
-    }
-
-    // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
-    if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (element, fromIndex) {
+        },
+        // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+        indexOf: function (element, fromIndex) {
             var len = this.length;
             if (len) {
                 // Init search position flag
@@ -380,7 +383,7 @@
             }
             return -1;
         }
-    }
+    });
 
     // The Object.keys() method returns an array of a given object's own enumerable properties.
     if (!Object.keys) {
@@ -1668,9 +1671,7 @@
         var ret = '', _fn = [].join('');
 
         _fn += '"use strict";';
-        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
-        
+
         statements.forEach(function (statement) {
             ret += this[statement.TYPE](statement);
         }, this);
