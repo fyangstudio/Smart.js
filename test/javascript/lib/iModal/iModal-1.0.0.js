@@ -1674,6 +1674,9 @@
 
         statements.forEach(function (statement) {
             ret += this[statement.TYPE](statement);
+            if (statement.CHILDREN) {
+                TPL_Compiling.call(this, statement.CHILDREN);
+            }
         }, this);
     };
 
