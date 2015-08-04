@@ -1668,26 +1668,36 @@
     };
 
     var TPL_Compiling = function (statements) {
-        var ret = '', _fn = [].join('');
-
-        _fn += '"use strict";';
-
-        statements.forEach(function (statement) {
-            ret += this[statement.TYPE](statement);
-            if (statement.CHILDREN) {
-                TPL_Compiling.call(this, statement.CHILDREN);
-            }
-        }, this);
+        this.sign = 0;
+        console.log(this.process(statements));
     };
 
     var _tc = TPL_Compiling.prototype;
+
+    _tc.process = function (statements) {
+        var ret = [];
+        statements.forEach(function (statement) {
+            ret.push(this[statement.TYPE](statement));
+        }, this);
+        return ret;
+    };
 
     _tc['text'] = function (statement) {
         console.log(statement)
     };
 
     _tc['element'] = function (statement) {
-        console.log(statement)
+        var sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create(' + statement.NAME + ');', body;
+        if (statement.CHILDREN.length) {
+            body = this.process(statement.CHILDREN);
+            body.forEach(function (value) {
+                ret += (value.piece + sign + '.appendChild(' + value.sign + ');');
+            });
+        }
+        return {
+            sign: sign,
+            piece: ret
+        };
     };
 
     _tc['expression'] = function (statement) {
