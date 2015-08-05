@@ -1422,30 +1422,16 @@
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
+        var statements = this.process() || [];
 
-        //_fn += '"use strict";';
-        //_fn += 'var M_W={};var M_DOM0=$m.$fragment();';
-        //_fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
-        //
-        //statements.forEach(function (statement) {
-        //    if (statement) {
-        //        STATIC += statement.STATIC;
-        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-        //        HOLDER += statement.HOLDER || '';
-        //    }
-        //});
-        //
-        //this.buffer.forEach(function (variable) {
-        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
-        //});
-        //_fn = _fn.replace(/<%STATIC%>/, STATIC);
-        //_fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
-        //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-        //
-        //return new Function('$dom, undefined', _fn);
+        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+
         if (tag) return statements;
-        else new TPL_Compiling(statements);
+        else {
+            var fn = new TPL_Compiling(statements);
+            var r = fn();
+            console.log(r);
+        }
         return _NOOP;
     };
 
@@ -1672,18 +1658,24 @@
 
         var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements) || [];
         _fn += '"use strict";';
-        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        _fn += 'var M_W={};var M_DOM=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
-        //statements.forEach(function (statement) {
-        //    if (statement) {
-        //        STATIC += statement.STATIC;
-        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-        //        HOLDER += statement.HOLDER || '';
-        //    }
+        statements.forEach(function (statement) {
+            if (statement) {
+                STATIC += statement.piece;
+                STATIC += (!statement.sign ? '' : 'M_DOM.appendChild(' + statement.sign + ');');
+                HOLDER += statement.HOLDER || '';
+            }
+        });
+
+        //this.buffer.forEach(function (variable) {
+        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
         //});
-        
-        console.log();
+        _fn = _fn.replace(/<%STATIC%>/, STATIC);
+        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+
+        return new Function('$dom, undefined', _fn);
     };
 
     var _tc = TPL_Compiling.prototype;
@@ -1705,7 +1697,7 @@
     };
 
     _tc['element'] = function (statement) {
-        var sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create(' + statement.NAME + ');', body;
+        var sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create("' + statement.NAME + '");', body;
         if (statement.CHILDREN.length) {
             body = this.process(statement.CHILDREN);
             body.forEach(function (value) {
