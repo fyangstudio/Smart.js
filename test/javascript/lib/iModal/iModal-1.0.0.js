@@ -1683,7 +1683,11 @@
     };
 
     _tc['text'] = function (statement) {
-        console.log(statement)
+        var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,' + statement.text + ');';
+        return {
+            sign: sign,
+            piece: ret
+        };
     };
 
     _tc['element'] = function (statement) {
