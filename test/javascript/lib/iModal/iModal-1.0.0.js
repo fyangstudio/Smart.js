@@ -1430,7 +1430,7 @@
         else {
             var fn = new TPL_Compiling(statements);
             var r = fn();
-            console.log(r);
+            console.log(r());
         }
         return _NOOP;
     };
@@ -1659,7 +1659,7 @@
         var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements) || [];
         _fn += '"use strict";';
         _fn += 'var M_W={};var M_DOM=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         statements.forEach(function (statement) {
             if (statement) {
@@ -1673,7 +1673,7 @@
         //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
         //});
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
-        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+        _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
 
         return new Function('$dom, undefined', _fn);
     };
