@@ -1669,7 +1669,21 @@
 
     var TPL_Compiling = function (statements) {
         this.sign = 0;
-        console.log(this.process(statements));
+
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements) || [];
+        _fn += '"use strict";';
+        _fn += 'var M_W={};var M_DOM0=$m.$fragment();';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
+
+        //statements.forEach(function (statement) {
+        //    if (statement) {
+        //        STATIC += statement.STATIC;
+        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
+        //        HOLDER += statement.HOLDER || '';
+        //    }
+        //});
+        
+        console.log();
     };
 
     var _tc = TPL_Compiling.prototype;
