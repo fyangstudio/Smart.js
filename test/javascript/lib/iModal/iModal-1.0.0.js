@@ -1179,20 +1179,14 @@
     var _voidTag = /area|br|embed|img|input|meta|source/i;
 
     // Virtual Dom
-    var _iModalJsElem = function () {
-        this.children = [];
-    };
+    var _fragment_ = function () {
 
-    _iModalJsElem.$addChild = function () {
-        console.log(1);
     };
+    _fragment_.prototype.$addChild = function () {
 
-    _iModalJsElem.$create = function (type) {
-        console.log(type);
     };
+    _fragment_.prototype.$removeChild = function () {
 
-    _iModalJsElem.$fragment = function () {
-        console.log(1);
     };
 
     // Macro for TPL parse function
@@ -1759,7 +1753,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [_iModalJsElem, undefined]);
+            this.$update = _handler.apply(this, [_fragment_, undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
