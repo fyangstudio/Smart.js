@@ -1427,12 +1427,7 @@
         if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
 
         if (tag) return statements;
-        else {
-            var fn = new TPL_Compiling(statements);
-            var r = fn();
-            console.log(r());
-        }
-        return _NOOP;
+        else return new TPL_Compiling(statements);
     };
 
     var _tp = TPL_Parser.prototype;
@@ -1772,7 +1767,7 @@
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            //_target.appendChild(this.$update());
+            _target.appendChild(this.$update());
             return this;
         }
     });
