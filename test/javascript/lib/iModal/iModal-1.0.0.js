@@ -1692,10 +1692,12 @@
     };
 
     _tc['element'] = function (statement) {
-        var sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create("' + statement.NAME + '");', body;
-        statement.ATTRS.forEach(function (value) {
-            ret += ('$m.$attr(' + sign + ',"' + value.NAME + '","' + value.VALUE + '");');
-        });
+        var attrs = statement.ATTRS, sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create("' + statement.NAME + '");', body;
+        if (attrs.length) {
+            attrs.forEach(function (value) {
+                ret += ('$m.$attr(' + sign + ',"' + value.NAME + '","' + value.VALUE + '");');
+            });
+        }
         if (statement.CHILDREN.length) {
             body = this.process(statement.CHILDREN);
             body.forEach(function (value) {
