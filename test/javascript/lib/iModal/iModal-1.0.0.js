@@ -1523,13 +1523,13 @@
                 switch (poll.type) {
                     case "TAG_ATTRIBUTE_VALUE":
                     case "JST_EXPRESSION":
-                        var isJST = poll.type === 'JST_EXPRESSION' || ~poll.value.indexOf('{{');
+                        var isJST = ( poll.type === 'JST_EXPRESSION' || ~poll.value.indexOf('{{'));
                         this.next();
                         attrs.push({
                             TYPE: isJST ? 'expression' : 'attribute',
                             NAME: attr.value,
                             VALUE: isJST ? '' : poll.value,
-                            HOLDER: new TPL_Parser(poll.value, true)
+                            HOLDER: isJST ? new TPL_Parser(poll.value, true) : null
                         });
                         break;
                     case "JST_OPEN_START":
@@ -1693,6 +1693,9 @@
 
     _tc['element'] = function (statement) {
         var sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create("' + statement.NAME + '");', body;
+        statement.ATTRS.forEach(function (value) {
+            ret += ('$m.$attr(' + sign + ',"' + value.NAME + '","' + value.VALUE + '");');
+        });
         if (statement.CHILDREN.length) {
             body = this.process(statement.CHILDREN);
             body.forEach(function (value) {
