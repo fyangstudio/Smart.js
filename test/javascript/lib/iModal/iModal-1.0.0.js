@@ -25,6 +25,12 @@
     };
     // Object.observe
     var _observe = Object.observe || undefined;
+
+    var _delegate = function (client, clientMethod) {
+        return function () {
+            return clientMethod.apply(client, arguments);
+        }
+    };
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', hashPath: "!/", delay: 500};
     /*!
