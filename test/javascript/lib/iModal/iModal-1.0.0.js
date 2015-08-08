@@ -31,6 +31,18 @@
             return clientMethod.apply(client, arguments);
         }
     };
+
+    var _v1_ = function () {
+        var _data = {t: 1};
+        return {
+            get: function () {
+                //todo
+            },
+            set: function (data) {
+                _data = data;
+            }
+        };
+    };
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', hashPath: "!/", delay: 500};
     /*!
