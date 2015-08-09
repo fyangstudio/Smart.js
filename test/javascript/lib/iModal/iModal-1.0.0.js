@@ -26,6 +26,24 @@
     // Object.observe
     var _observe = Object.observe || undefined;
 
+    var _observerManager = {
+        observers: [],
+
+        add: function (item) {
+            this.Observers.push(item);
+        },
+
+        Change: function (obj) {
+            for (var item in obj) {
+                ObserverObj[item] = obj[item];
+            }
+            for (var i = 0, len = this.Observers.length; i < len; i++) {
+                var item = this.Observers[i];
+                item.Display();
+            }
+        }
+    };
+
     var _delegate = function (client, clientMethod) {
         return function () {
             return clientMethod.apply(client, arguments);
