@@ -26,24 +26,6 @@
     // Object.observe
     var _observe = Object.observe || undefined;
 
-    var _observerManager = {
-        observers: [],
-
-        add: function (item) {
-            this.Observers.push(item);
-        },
-
-        Change: function (obj) {
-            for (var item in obj) {
-                ObserverObj[item] = obj[item];
-            }
-            for (var i = 0, len = this.Observers.length; i < len; i++) {
-                var item = this.Observers[i];
-                item.Display();
-            }
-        }
-    };
-
     var _delegate = function (client, clientMethod) {
         return function () {
             return clientMethod.apply(client, arguments);
@@ -506,9 +488,9 @@
         context.$on = function (event, fn) {
             if (typeof event === 'object') {
                 var _on = arguments.callee;
-                $m._$forEach(function (key, value) {
+                $m.$forIn(event, function (key, value) {
                     _on(key, value);
-                });
+                })
             } else {
                 var _handles = context._handles || (context._handles = {}),
                     _calls = _handles[event] || (_handles[event] = []);
@@ -1224,6 +1206,25 @@
     _fragment_.prototype.$removeChild = function () {
 
     };
+
+    var _observer_ = function (deep) {
+        this.deep = !!deep;
+        this.observers = [];
+        this.observerObj = {};
+    };
+
+    _observer_.prototype.add = function (item) {
+        this.observers.push(item);
+    };
+    _observer_.prototype.check = function (obj) {
+        if (!$m.$same(obj, this.observerObj, this.deep)) {
+            this.observerObj = $m.$clone(obj, this.deep);
+            this.observers.forEach(function (item) {
+                item.check();
+            }, this);
+        }
+    };
+
 
     // Macro for TPL parse function
     var TPL_MACRO = {
