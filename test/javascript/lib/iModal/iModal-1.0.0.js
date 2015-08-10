@@ -1701,7 +1701,7 @@
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
         _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
 
-        return new Function('$dom, undefined', _fn);
+        return new Function('_f_,_o_,undefined', _fn);
     };
 
     var _tc = TPL_Compiling.prototype;
@@ -1790,7 +1790,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [_fragment_, undefined]);
+            this.$update = _handler.apply(this, [_fragment_, _observer_, undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
