@@ -1200,10 +1200,10 @@
     var _fragment_ = function () {
 
     };
-    _fragment_.prototype.$addChild = function () {
+    _fragment_.prototype.$add = function () {
 
     };
-    _fragment_.prototype.$removeChild = function () {
+    _fragment_.prototype.$remove = function () {
 
     };
 
@@ -1213,10 +1213,10 @@
         this.observerObj = {};
     };
 
-    _observer_.prototype.add = function (item) {
+    _observer_.prototype.$add = function (item) {
         this.observers.push(item);
     };
-    _observer_.prototype.check = function (obj) {
+    _observer_.prototype.$check = function (obj) {
         if (!$m.$same(obj, this.observerObj, this.deep)) {
             this.observerObj = $m.$clone(obj, this.deep);
             this.observers.forEach(function (item) {
@@ -1753,13 +1753,13 @@
     var _watch = function (obj, callback) {
         if (_observe) {
             _observe(obj, function (changes) {
-                console.log(obj);
+                console.log(changes);
             });
         }
     };
     var _testObj = {s: 1, t: 2};
     _watch(_testObj);
-    _testObj.s = 2;
+    _testObj.j = 2;
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
