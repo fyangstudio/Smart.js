@@ -1198,7 +1198,7 @@
 
     // Virtual Dom
     var _fragment_ = function () {
-
+        this.children = [];
     };
     _fragment_.prototype.$add = function () {
 
@@ -1207,25 +1207,18 @@
 
     };
 
-    var _observer_ = function (deep) {
-        this.deep = !!deep;
+    var _observer_ = function () {
         this.observers = [];
-        this.observerObj = {};
     };
-
     _observer_.prototype.$add = function (item) {
         this.observers.push(item);
     };
     _observer_.prototype.$check = function (obj) {
-        if (!$m.$same(obj, this.observerObj, this.deep)) {
-            this.observerObj = $m.$clone(obj, this.deep);
-            this.observers.forEach(function (item) {
-                item.check();
-            }, this);
-        }
+        this.observers.forEach(function (item) {
+            item.check();
+        }, this);
     };
-
-
+    
     // Macro for TPL parse function
     var TPL_MACRO = {
         'BEGIN': '{{',
