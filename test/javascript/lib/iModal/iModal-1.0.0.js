@@ -1190,12 +1190,11 @@
         return this.children;
     };
     _fragment_.prototype.$remove = function (elem) {
-        if ($m.$isArray(elem)) {
-
-        } else {
-            var number = this.children.indexOf(elem);
-            this.children.splice(number, 1);
-        }
+        elem = $m.$isArray(elem) ? elem : [elem];
+        elem.forEach(function (item) {
+            var number = this.children.indexOf(item);
+            if (~number) this.children.splice(number, 1);
+        }, this)
     };
 
     var _f1_ = new _fragment_();
