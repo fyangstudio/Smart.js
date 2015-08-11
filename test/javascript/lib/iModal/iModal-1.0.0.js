@@ -1207,36 +1207,35 @@
     _observer_.prototype.$add = function (item) {
         this.observers.push(item);
     };
-    _observer_.prototype.$check = function (obj) {
+    _observer_.prototype.$check = function () {
         this.observers.forEach(function (item) {
             item.check();
         }, this);
     };
 
-    var data = {t: 1, s: 2};
-    var t = data.t;
-
-    var _delegate_ = function (client, clientMethod) {
-        return function () {
-            return clientMethod.apply(client, arguments);
-        }
-    };
-
     var _jst1_ = function () {
-        var _dom1_ = document.createElement('p');
         var _data = t;
+        var _dom1_ = $m.$text(null, _data);
         var _cache = $m.$clone(_data, true);
+        console.log($m.$text(_dom1_));
         return {
             check: function () {
-                return $m.$same(_data, _cache, true);
+                if (!$m.$same(t, _cache, true)) this.set();
             },
             set: function (data) {
                 $m.$text(_dom1_, data);
+                console.log($m.$text(_dom1_));
             }
         };
     };
-
+    var data = {t: 1, s: 2};
+    var t = data.t;
     var _j1_ = new _jst1_();
+    var _o_ = new _observer_();
+    _o_.$add(_j1_);
+    data = {t: 2, s: 2};
+    _o_.$check();
+
 
     // Macro for TPL parse function
     var TPL_MACRO = {
