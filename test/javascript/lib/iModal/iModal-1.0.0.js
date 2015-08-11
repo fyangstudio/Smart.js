@@ -1215,13 +1215,13 @@
 
     var data = {t: 1, s: 2};
     var _jst1_ = function () {
-        var _data = data.t;
-        var _dom1_ = $m.$text(null, _data);
-        console.log($m.$text(_dom1_));
+        var _data_ = data.t;
+        var _dom_ = $m.$text(null, _data_);
+        console.log($m.$text(_dom_));
         return {
-            dom: _dom1_,
-            _data: _data,
-            _cache: $m.$clone(_data, true),
+            dom: _dom_,
+            _data: _data_,
+            _cache: $m.$clone(_data_, true),
             check: function () {
                 this._data = data.t;
                 if (!$m.$same(this._data, this._cache, true)) {
@@ -1230,8 +1230,8 @@
                 }
             },
             set: function (data) {
-                $m.$text(_dom1_, data);
-                console.log($m.$text(_dom1_));
+                $m.$text(_dom_, data);
+                console.log($m.$text(_dom_));
             }
         };
     };
