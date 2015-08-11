@@ -1200,9 +1200,11 @@
     var _f1_ = new _fragment_();
     var _d1_ = $m.$create('p');
     var _d2_ = $m.$create('div');
-    _f1_.$add(_d1_);
-    _f1_.$add(_d2_);
-    _f1_.$remove(_d2_);
+    var _d3_ = $m.$create('span');
+    var _d4_ = $m.$create('div');
+    var _d5_ = $m.$create('i');
+    _f1_.$add([_d1_, _d2_, _d3_, _d4_, _d5_]);
+    _f1_.$remove([_d2_, _d5_, _d1_]);
     console.log(_f1_.$get());
 
     var _observer_ = function () {
