@@ -1183,15 +1183,28 @@
         this.children = [];
     };
     _fragment_.prototype.$add = function (elem) {
-        this.children.push(elem);
+        if ($m.$isArray(elem)) Array.prototype.push.apply(this.children, elem);
+        else this.children.push(elem);
     };
     _fragment_.prototype.$get = function () {
         return this.children;
     };
     _fragment_.prototype.$remove = function (elem) {
-        var i = this.children.indexOf(elem);
-        this.children.splice(i, 1);
+        if ($m.$isArray(elem)) {
+
+        } else {
+            var number = this.children.indexOf(elem);
+            this.children.splice(number, 1);
+        }
     };
+
+    var _f1_ = new _fragment_();
+    var _d1_ = $m.$create('p');
+    var _d2_ = $m.$create('div');
+    _f1_.$add(_d1_);
+    _f1_.$add(_d2_);
+    _f1_.$remove(_d2_);
+    console.log(_f1_.$get());
 
     var _observer_ = function () {
         this.observers = [];
