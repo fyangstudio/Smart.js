@@ -1182,11 +1182,15 @@
     var _fragment_ = function () {
         this.children = [];
     };
-    _fragment_.prototype.$add = function () {
-
+    _fragment_.prototype.$add = function (elem) {
+        this.children.push(elem);
     };
-    _fragment_.prototype.$remove = function () {
-
+    _fragment_.prototype.$get = function () {
+        return this.children;
+    };
+    _fragment_.prototype.$remove = function (elem) {
+        var i = this.children.indexOf(elem);
+        this.children.splice(i, 1);
     };
 
     var _observer_ = function () {
