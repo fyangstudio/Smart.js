@@ -25,24 +25,6 @@
     };
     // Object.observe
     var _observe = Object.observe || undefined;
-
-    var _delegate = function (client, clientMethod) {
-        return function () {
-            return clientMethod.apply(client, arguments);
-        }
-    };
-
-    var _v1_ = function () {
-        var _data = {t: 1};
-        return {
-            get: function () {
-                //todo
-            },
-            set: function (data) {
-                _data = data;
-            }
-        };
-    };
     // Define.samd config
     var _config = {sites: {}, paths: {}, charset: 'utf-8', hashPath: "!/", delay: 500};
     /*!
@@ -1218,7 +1200,32 @@
             item.check();
         }, this);
     };
-    
+
+    var data = {t: 1, s: 2};
+    var t = data.t;
+
+    var _delegate_ = function (client, clientMethod) {
+        return function () {
+            return clientMethod.apply(client, arguments);
+        }
+    };
+
+    var _jst1_ = function () {
+        var _dom1_ = document.createElement('p');
+        var _data = t;
+        var _cache = $m.$clone(_data, true);
+        return {
+            check: function () {
+                return $m.$same(_data, _cache, true);
+            },
+            set: function (data) {
+                $m.$text(_dom1_, data);
+            }
+        };
+    };
+
+    var _j1_ = new _jst1_();
+
     // Macro for TPL parse function
     var TPL_MACRO = {
         'BEGIN': '{{',
