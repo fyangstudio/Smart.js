@@ -1181,10 +1181,20 @@
     // Virtual Dom
     var _fragment_ = function () {
         this.children = [];
+        this.body = $m.$fragment();
     };
     _fragment_.prototype.$add = function (elem) {
-        if ($m.$isArray(elem)) Array.prototype.push.apply(this.children, elem);
-        else this.children.push(elem);
+        if ($m.$isArray(elem)) {
+            elem.forEach(function (item) {
+                console.log(item);
+                this.body.appendChild(item);
+            }, this);
+            Array.prototype.push.apply(this.children, elem);
+        }
+        else {
+            this.children.push(elem);
+            this.body.appendChild(elem);
+        }
     };
     _fragment_.prototype.$get = function () {
         return this.children;
@@ -1196,9 +1206,21 @@
         elem = $m.$isArray(elem) ? elem : [elem];
         elem.forEach(function (item) {
             var number = this.children.indexOf(item);
-            if (~number) this.children.splice(number, 1);
+            if (~number) {
+                $m.$remove(item);
+                this.children.splice(number, 1);
+            }
         }, this)
     };
+
+    var test = new _fragment_();
+    var d1 = $m.$create('p');
+    var d2 = $m.$create('ul');
+    var d3 = $m.$create('li');
+    var d4 = $m.$create('ol');
+    test.$add([d1, d2, d3, d4]);
+    //test.$remove(d3);
+    console.log(test.body);
 
     // JST object observer
     var _observer_ = function () {
