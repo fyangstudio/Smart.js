@@ -16,22 +16,22 @@
 <script src="javascript/lib/iModal/iModal.config.js"></script>
 <script src="javascript/pages/index/index.js"></script>
 <script>
-    var cnt = document.getElementById('test1');
-    var td = $m.$get('.test2')[0];
-    console.log($m.$hasChild(cnt, td));
-    var test1 = $m.$fragment();
-    var test2 = $m.$fragment();
-    var testDom = $m.$create('div');
-    $m.$text(testDom, 'test');
-    test2.appendChild(testDom);
-    test1.appendChild(test2);
-    cnt.appendChild(test1);
-    console.log(test2);
-    console.log(test1);
-
-    $m.$addEvent(cnt,'click',function(){console.log(1);});
-    $m.$addEvent(cnt,'click',function(){console.log(2);});
-    $m.$addEvent(window,'click',function(){console.log(3);});
+    //    var cnt = document.getElementById('test1');
+    //    var td = $m.$get('.test2')[0];
+    //    console.log($m.$hasChild(cnt, td));
+    //    var test1 = $m.$fragment();
+    //    var test2 = $m.$fragment();
+    //    var testDom = $m.$create('div');
+    //    $m.$text(testDom, 'test');
+    //    test2.appendChild(testDom);
+    //    test1.appendChild(test2);
+    //    cnt.appendChild(test1);
+    //    console.log(test2);
+    //    console.log(test1);
+    //
+    //    $m.$addEvent(cnt,'click',function(){console.log(1);});
+    //    $m.$addEvent(cnt,'click',function(){console.log(2);});
+    //    $m.$addEvent(window,'click',function(){console.log(3);});
     //    var t = {1: 1, 2: 2, 3: [1, 2], 4: {5: 5}};
     //    var t2 = $m.$o2s(t);
     //    $m.$watchHash(function (_hash) {
