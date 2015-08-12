@@ -1186,7 +1186,6 @@
     _fragment_.prototype.$add = function (elem) {
         if ($m.$isArray(elem)) {
             elem.forEach(function (item) {
-                console.log(item);
                 this.body.appendChild(item);
             }, this);
             Array.prototype.push.apply(this.children, elem);
