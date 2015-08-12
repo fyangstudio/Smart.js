@@ -1213,14 +1213,7 @@
         }, this)
     };
 
-    var test = new _fragment_();
-    var d1 = $m.$create('p');
-    var d2 = $m.$create('ul');
-    var d3 = $m.$create('li');
-    var d4 = $m.$create('ol');
-    test.$add([d1, d2, d3, d4]);
-    //test.$remove(d3);
-    console.log(test.body);
+    $m._f = _fragment_;
 
     // JST object observer
     var _observer_ = function () {
