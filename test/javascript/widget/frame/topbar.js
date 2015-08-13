@@ -40,8 +40,7 @@ define([
     var d3 = $m.$create('li');
     var d4 = $m.$create('ol');
     test.$add([d1, d2, d3, d4]);
-    console.log(test.body);
-    cnt.appendChild(test.body);
+    cnt.appendChild(test.$get());
     test.$remove(d3);
 
 

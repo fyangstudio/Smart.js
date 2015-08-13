@@ -1181,22 +1181,17 @@
     // Virtual Dom
     var _fragment_ = function () {
         this.children = [];
-        this.body = $m.$fragment();
     };
     _fragment_.prototype.$add = function (elem) {
-        if ($m.$isArray(elem)) {
-            elem.forEach(function (item) {
-                this.body.appendChild(item);
-            }, this);
-            Array.prototype.push.apply(this.children, elem);
-        }
-        else {
-            this.children.push(elem);
-            this.body.appendChild(elem);
-        }
+        if ($m.$isArray(elem)) Array.prototype.push.apply(this.children, elem);
+        else this.children.push(elem);
     };
     _fragment_.prototype.$get = function () {
-        return this.children;
+        var _cnt = $m.$fragment();
+        this.children.forEach(function (item) {
+            _cnt.appendChild(item);
+        }, this);
+        return _cnt;
     };
     _fragment_.prototype.$set = function (list) {
         if ($m.$isArray(list)) this.children = list;
@@ -1205,10 +1200,7 @@
         elem = $m.$isArray(elem) ? elem : [elem];
         elem.forEach(function (item) {
             var number = this.children.indexOf(item);
-            if (~number) {
-                $m.$remove(item);
-                this.children.splice(number, 1);
-            }
+            if (~number) this.children.splice(number, 1);
         }, this)
     };
 
