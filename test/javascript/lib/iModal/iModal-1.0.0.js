@@ -1200,8 +1200,16 @@
         elem = $m.$isArray(elem) ? elem : [elem];
         elem.forEach(function (item) {
             var number = this.children.indexOf(item);
-            if (~number) this.children.splice(number, 1);
+            if (~number) {
+                $m.$remove(item);
+                this.children.splice(number, 1);
+            }
         }, this)
+    };
+    _fragment_.prototype.$clean = function (list) {
+        this.children.forEach(function (item) {
+            $m.$remove(item);
+        })
     };
 
     $m._f = _fragment_;
