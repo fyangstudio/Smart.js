@@ -1182,9 +1182,18 @@
     var _fragment_ = function () {
         this.children = [];
     };
+    _fragment_.prototype._getParent = function () {
+        return (this.children[0] && this.children[0].parentNode) ? this.children[0].parentNode : null;
+    };
     _fragment_.prototype.$add = function (elem) {
-        if ($m.$isArray(elem)) Array.prototype.push.apply(this.children, elem);
-        else this.children.push(elem);
+        var _parent = this._getParent();
+        elem = $m.$isArray(elem) ? elem : [elem];
+        Array.prototype.push.apply(this.children, elem);
+        if (_parent) {
+            elem.forEach(function (item) {
+                _parent.appendChild(item);
+            }, this)
+        }
     };
     _fragment_.prototype.$get = function () {
         var _cnt = $m.$fragment();
