@@ -42,7 +42,8 @@ define([
     test.$add([d1, d2, d3, d4]);
     cnt.appendChild(test.$get());
     test.$remove(d3);
-    test.$clean();
+    test.$add(d3);
+    console.log(test)
 
 
     var t = new base({data: {t: 1, x: {t: 1}}}).$inject('#test1');

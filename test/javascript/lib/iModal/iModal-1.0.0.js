@@ -1203,18 +1203,17 @@
         return _cnt;
     };
     _fragment_.prototype.$set = function (list) {
-        if ($m.$isArray(list)) {
-            var _parent = this._getParent();
-            this.children = list;
-            if (_parent) {
-                var _display = $m.$style(_parent, 'display') || 'block';
-                _parent.style.display = 'none';
-                _parent.innerHTML = '';
-                this.children.forEach(function (item) {
-                    _parent.appendChild(item);
-                }, this);
-                _parent.style.display = _display;
-            }
+        list = $m.$isArray(list) ? list : [list];
+        var _parent = this._getParent();
+        this.children = list;
+        if (_parent) {
+            var _display = $m.$style(_parent, 'display') || 'block';
+            _parent.style.display = 'none';
+            _parent.innerHTML = '';
+            this.children.forEach(function (item) {
+                _parent.appendChild(item);
+            }, this);
+            _parent.style.display = _display;
         }
     };
     _fragment_.prototype.$remove = function (elem) {
@@ -1231,6 +1230,7 @@
         this.children.forEach(function (item) {
             $m.$remove(item);
         })
+        this.children = [];
     };
 
     $m._f = _fragment_;
