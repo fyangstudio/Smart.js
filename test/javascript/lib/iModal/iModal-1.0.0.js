@@ -1206,7 +1206,7 @@
             }
         }, this)
     };
-    _fragment_.prototype.$clean = function (list) {
+    _fragment_.prototype.$clean = function () {
         this.children.forEach(function (item) {
             $m.$remove(item);
         })
