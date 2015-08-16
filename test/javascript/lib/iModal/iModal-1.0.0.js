@@ -1226,11 +1226,11 @@
             }
         }, this)
     };
-    _fragment_.prototype.$clean = function () {
+    _fragment_.prototype.$clean = function (reset) {
         this.children.forEach(function (item) {
             $m.$remove(item);
         })
-        this.children = [];
+        if (reset) this.children = [];
     };
 
     $m._f = _fragment_;
