@@ -1246,10 +1246,10 @@
         }, this);
     };
 
-    var M_DATA = {};
     var _jst_ = {
-        'text': function (key) {
-            var _data_ = M_DATA[key];
+        'text': function (key, data) {
+            data = data || {};
+            var _data_ = data[key];
             var _dom_ = $m.$text(null, _data_);
             return {
                 dom: _dom_,
@@ -1259,7 +1259,7 @@
                     $m.$text(_dom_, data);
                 },
                 check: function () {
-                    this._data = data.t;
+                    this._data = data[key];
                     if (!$m.$same(this._data, this._cache, true)) {
                         this.set(this._data);
                         this._cache = $m.$clone(this._data, true);
