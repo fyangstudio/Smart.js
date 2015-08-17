@@ -317,18 +317,24 @@
 
     /* Syntax fix
      ---------------------------------------------------------------------- */
-    // The trim() method removes whitespace from both ends of a string.
-    if (!String.prototype.trim) {
-        String.prototype.trim = function () {
-            return this.replace(/^\s+|\s+$/g, '');
-        };
+    function _expand(o1, o2) {
+        for (var i in o2) if (o1[i] === undefined) {
+            o1[i] = o2[i]
+        }
     }
 
-    // The bind() method creates a new function that,
-    // when called, has its this keyword set to the provided value,
-    // with a given sequence of arguments preceding any provided when the new function is called.
-    if (!Function.prototype.bind) {
-        Function.prototype.bind = function (oThis) {
+    _expand(String.prototype, {
+        // The trim() method removes whitespace from both ends of a string.
+        trim: function () {
+            return this.replace(/^\s+|\s+$/g, '');
+        }
+    });
+
+    _expand(Function.prototype, {
+        // The bind() method creates a new function that,
+        // when called, has its this keyword set to the provided value,
+        // with a given sequence of arguments preceding any provided when the new function is called.
+        bind: function (oThis) {
             if (!$m.$isFunction(this)) return;
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
@@ -339,12 +345,12 @@
             _NOOP.prototype = this.prototype;
             fBound.prototype = new _NOOP();
             return fBound;
-        };
-    }
+        }
+    });
 
-    // The forEach() method executes a provided function once per array element.
-    if (!Array.prototype.forEach) {
-        Array.prototype.forEach = function forEach(callback, thisArg) {
+    _expand(Array.prototype, {
+        // The forEach() method executes a provided function once per array element.
+        forEach: function forEach(callback, thisArg) {
             var T, k = 0;
             if (this == null || !$m.$isFunction(callback)) return;
 
@@ -360,12 +366,9 @@
                 }
                 k++;
             }
-        };
-    }
-
-    // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
-    if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (element, fromIndex) {
+        },
+        // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+        indexOf: function (element, fromIndex) {
             var len = this.length;
             if (len) {
                 // Init search position flag
@@ -380,7 +383,7 @@
             }
             return -1;
         }
-    }
+    });
 
     // The Object.keys() method returns an array of a given object's own enumerable properties.
     if (!Object.keys) {
@@ -467,9 +470,9 @@
         context.$on = function (event, fn) {
             if (typeof event === 'object') {
                 var _on = arguments.callee;
-                $m._$forEach(function (key, value) {
+                $m.$forIn(event, function (key, value) {
                     _on(key, value);
-                });
+                })
             } else {
                 var _handles = context._handles || (context._handles = {}),
                     _calls = _handles[event] || (_handles[event] = []);
@@ -761,8 +764,26 @@
     // The $m.$hash()method property returns a DOMString not containing a '#' followed by the fragment identifier of the URL.
     // The hash is not percent encoded.
     $m.$hash = function (value) {
-        if (value != undefined) _win.location.hash = value.replace(/#/g, '');
-        return _win.location.hash.replace('#', '');
+        var _hash, _path, _h = '', _ret = {}, _reg = new RegExp('(' + $m.$escapeRegExp(_config.hashPath) + '[^\\?]+)');
+        if (value != undefined) {
+            if ($m.$isObject(value)) {
+                if (value.iModalJs_URI) {
+                    _h += ( _config.hashPath + value.iModalJs_URI );
+                    delete value.iModalJs_URI;
+                }
+                _h += ('?' + $m.$o2s(value, '&'));
+                _win.location.hash = _h;
+            } else if ($m.$isString(value)) {
+                _win.location.hash = value.replace(/#/g, '');
+            } else {
+                _ERROR('$m.$hash: Unexpected hash value!');
+            }
+        }
+        _hash = $m.$unescape(_win.location.hash.replace('#', ''), true);
+        _path = _hash.match(_reg);
+        _ret = $m.$s2o((!_path ? _hash : _hash.replace(_path[0], '')).replace(/(^\?)/, ''), '&');
+        if (_path) _ret.iModalJs_URI = _path[0].slice(_config.hashPath.length);
+        return _ret;
     };
 
     // Watch location.hash
@@ -781,7 +802,7 @@
             setInterval(function () {
                 var _h = _win.location.hash.replace('#', '');
                 if (_h != _hash) {
-                    _hash = this.$hash();
+                    _hash = _h;
                     handles.forEach(function (_fn) {
                         _fn.call(this, _h);
                     })
@@ -1155,6 +1176,106 @@
      * Living dom
      *
      */
+    var _voidTag = /area|br|embed|img|input|meta|source/i;
+
+    // Virtual Dom
+    var _fragment_ = function () {
+        this.children = [];
+    };
+    _fragment_.prototype._getParent = function () {
+        return (this.children[0] && this.children[0].parentNode) ? this.children[0].parentNode : null;
+    };
+    _fragment_.prototype.$add = function (elem) {
+        var _parent = this._getParent();
+        elem = $m.$isArray(elem) ? elem : [elem];
+        Array.prototype.push.apply(this.children, elem);
+        if (_parent) {
+            elem.forEach(function (item) {
+                _parent.appendChild(item);
+            }, this)
+        }
+    };
+    _fragment_.prototype.$get = function () {
+        var _cnt = $m.$fragment();
+        this.children.forEach(function (item) {
+            _cnt.appendChild(item);
+        }, this);
+        return _cnt;
+    };
+    _fragment_.prototype.$set = function (list) {
+        list = $m.$isArray(list) ? list : [list];
+        var _parent = this._getParent();
+        this.children = list;
+        if (_parent) {
+            var _display = $m.$style(_parent, 'display') || 'block';
+            _parent.style.display = 'none';
+            _parent.innerHTML = '';
+            this.children.forEach(function (item) {
+                _parent.appendChild(item);
+            }, this);
+            _parent.style.display = _display;
+        }
+    };
+    _fragment_.prototype.$remove = function (elem) {
+        elem = $m.$isArray(elem) ? elem : [elem];
+        elem.forEach(function (item) {
+            var number = this.children.indexOf(item);
+            if (~number) {
+                $m.$remove(item);
+                this.children.splice(number, 1);
+            }
+        }, this)
+    };
+    _fragment_.prototype.$clean = function (reset) {
+        this.children.forEach(function (item) {
+            $m.$remove(item);
+        })
+        if (reset) this.children = [];
+    };
+
+    // JST object observer
+    var _observer_ = function () {
+        this.observers = [];
+    };
+    _observer_.prototype.$add = function (item) {
+        this.observers.push(item);
+    };
+    _observer_.prototype.$check = function () {
+        this.observers.forEach(function (item) {
+            item.check();
+        }, this);
+    };
+
+    var data = {t: 1, s: 2};
+    var _jst1_ = function () {
+        var _data_ = data.t;
+        var _dom_ = $m.$text(null, _data_);
+        console.log($m.$text(_dom_));
+        return {
+            dom: _dom_,
+            _data: _data_,
+            _cache: $m.$clone(_data_, true),
+            check: function () {
+                this._data = data.t;
+                if (!$m.$same(this._data, this._cache, true)) {
+                    this.set(this._data);
+                    this._cache = $m.$clone(this._data, true);
+                }
+            },
+            set: function (data) {
+                $m.$text(_dom_, data);
+                console.log($m.$text(_dom_));
+            }
+        };
+    };
+
+    var _j1_ = new _jst1_();
+    var _o_ = new _observer_();
+    _o_.$add(_j1_);
+    data = {t: 2, s: 2};
+    _o_.$check();
+
+
     // Macro for TPL parse function
     var TPL_MACRO = {
         'BEGIN': '{{',
@@ -1247,7 +1368,7 @@
         }, 'JST']
     };
 
-    // TPL_ProcessRules() method can process the TPL_RULES for TPL_Lexer.
+    // TPL_ProcessRules() method can process the TPL_RULES for TPL_Pretreatment.
     var TPL_ProcessRules = function (rules) {
         var map = {}, sign, _rules, _matchs, _reg, _retain, _ignoredReg = /\((\?\!|\?\:|\?\=)/g;
         // replace the rule's macro string to regexp
@@ -1284,7 +1405,7 @@
         return map;
     };
 
-    // TPL_Lexer's map
+    // TPL_Pretreatment's map
     var TPL_Dictionary = TPL_ProcessRules([
         // INIT
         TPL_RULES.ENTER_JST,
@@ -1309,8 +1430,8 @@
         TPL_RULES.JST_CONDITION
     ]);
 
-    // The TPL_Lexer() method according to the rules change 'tpl' to the element fragment.
-    var TPL_Lexer = function (tpl) {
+    // The TPL_Pretreatment() method according to the rules change 'tpl' to the element fragment.
+    var TPL_Pretreatment = function (tpl) {
         if (tpl == undefined) _ERROR('$tpl: Template not found!');
         tpl = tpl.trim();
         var tokens = [], split, test, mlen, token, state;
@@ -1333,7 +1454,7 @@
         return tokens;
     };
 
-    TPL_Lexer.prototype = {
+    TPL_Pretreatment.prototype = {
         // enter state mode
         enter: function (state) {
             this._states.push(state);
@@ -1373,62 +1494,21 @@
         }
     };
 
-    var _voidTag = /area|br|embed|img|input|meta|source/i;
-
-    // Virtual Dom
-    var _iModalJsElem = function () {
-        this.children = [];
-    };
-
-    _iModalJsElem.$addChild = function () {
-        console.log(1);
-    };
-
-    _iModalJsElem.$create = function (type) {
-        console.log(type);
-    };
-
-    _iModalJsElem.$fragment = function () {
-        console.log(1);
-    };
-
-    var TPL_Parser = function (template) {
+    var TPL_Parser = function (template, tag) {
 
         this.pos = 0;
-        this.seed_var = 0;
-        this.seed_holder = 0;
-        this.seed_fragment = 0;
-        this.seed_remove = 0;
         this.state = 'TEXT';
         this.buffer = [];
-        this.operation = new TPL_Lexer(template);
+        this.operation = new TPL_Pretreatment(template);
         console.log(this.operation);
         this.length = this.operation.length;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process() || [];
+        var statements = this.process() || [];
 
-        //_fn += '"use strict";';
-        //_fn += 'var M_W={};var M_DOM0=$m.$fragment();';
-        //_fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM0;};}catch(e){throw new Error("$tpl: "+e.message);}';
-        //
-        //statements.forEach(function (statement) {
-        //    if (statement) {
-        //        STATIC += statement.STATIC;
-        //        STATIC += (!statement.sign ? '' : 'M_DOM0.appendChild(' + statement.sign + ');');
-        //        HOLDER += statement.HOLDER || '';
-        //    }
-        //});
-        console.log(statements);
-        //
-        //this.buffer.forEach(function (variable) {
-        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
-        //});
-        //_fn = _fn.replace(/<%STATIC%>/, STATIC);
-        //_fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
-        //if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
-        //
-        //return new Function('$dom, undefined', _fn);
-        return _NOOP;
+        if (this.poll().type === 'TAG_CLOSE') _ERROR('$tpl: Unclosed Tag!');
+
+        if (tag) return statements;
+        else return new TPL_Compiling(statements);
     };
 
     var _tp = TPL_Parser.prototype;
@@ -1473,85 +1553,91 @@
         }
     };
 
-    _tp.process = function (parent) {
+    _tp.process = function () {
         var statements = [], poll = this.poll();
         while (poll.type !== 'EOF' && poll.type !== 'TAG_CLOSE') {
-            statements.push(this.statement(parent));
+            statements.push(this.statement());
             poll = this.poll();
         }
         return statements;
     };
 
-    _tp.statement = function (parent) {
+    _tp.statement = function () {
         var poll = this.poll();
-        //console.log(poll);
         switch (poll.type) {
             case 'TEXT':
                 this.state = 'TEXT';
                 var text = poll.value.trim().replace(/\n/g, '');
                 this.next();
-                if (!!text) {
-                    var sign = 'M_DOM' + (++this.seed_var);
+                if (!!text)
                     return {
-                        type: 'text',
-                        sign: sign,
-                        HOLDER: '',
-                        STATIC: 'var ' + sign + '=$m.$text(null, "' + text + '");'
+                        TYPE: 'text',
+                        text: text
                     };
-                }
                 return null;
             case 'JST_OPEN_START':
                 var name = poll.value;
                 this.next();
-                if (typeof this[name] === 'function') {
+
+                if ($m.$isFunction(this[name])) {
                     return this[name]()
                 } else {
                     _ERROR('$tpl: Undefined directive ' + name + '!');
                 }
             case 'JST_EXPRESSION':
                 this.next();
-                return this.jst({parent: parent, value: poll.value});
+                return {TYPE: 'expression', VALUE: poll.value};
             case 'TAG_OPEN_START':
                 this.state = 'TAG';
-                return this.element(parent);
+                return this.element();
             default:
-                _ERROR('$tpl: Unexpected token ' + (poll || '').type + '!');
+                _ERROR('$tpl: Unexpected token ' + poll.type + '!');
         }
-        return 1;
     };
 
-    _tp.attr = function () {
-        var attr, attrValue, STATIC = '', HOLDER = '', sign = 'M_DOM' + this.seed_var;
+    _tp.attrs = function () {
+        var attr, poll, attrs = [];
         // set Attribute
-        var reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'TAG_ATTRIBUTE_VALUE'])) {
+        while (attr = this.verify(['TAG_ATTRIBUTE_NAME', 'JST_EXPRESSION', 'JST_OPEN_START', 'TAG_ATTRIBUTE_VALUE'])) {
             if (attr.type === 'TAG_ATTRIBUTE_NAME') {
-                attrValue = this.verify(['TAG_ATTRIBUTE_VALUE', 'JST_EXPRESSION']);
-
-                if (attrValue.type === 'JST_EXPRESSION' || reg.test(attrValue.value)) {
-                    HOLDER += this.jst({attr: attr.value, value: attrValue.value}).HOLDER;
-                } else {
-                    STATIC += '$m.$attr(' + sign + ', "' + attr.value + '","' + attrValue.value + '");';
+                poll = this.poll();
+                switch (poll.type) {
+                    case "TAG_ATTRIBUTE_VALUE":
+                    case "JST_EXPRESSION":
+                        var isJST = ( poll.type === 'JST_EXPRESSION' || ~poll.value.indexOf('{{'));
+                        this.next();
+                        attrs.push({
+                            TYPE: isJST ? 'expression' : 'attribute',
+                            NAME: attr.value,
+                            VALUE: isJST ? '' : poll.value,
+                            HOLDER: isJST ? new TPL_Parser(poll.value, true) : null
+                        });
+                        break;
+                    case "JST_OPEN_START":
+                        if (poll.value !== 'if') _ERROR("$tpl: ONLY RULE #if #else #elseif is valid in tag, the rule #" + poll.value + ' is invalid');
+                        this.next();
+                        attrs.push({
+                            TYPE: 'expression',
+                            NAME: attr.value,
+                            VALUE: '',
+                            HOLDER: this['if'](true)
+                        });
+                        break;
+                    default:
+                        _ERROR('$tpl: Unexpected token: ' + poll.value + '!');
                 }
             } else {
-                if (attr.type === 'TAG_ATTRIBUTE_VALUE') _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
-                console.log(attr);
+                _ERROR('$tpl: Unexpected attribute ' + attr.value + '!');
             }
         }
-        return {
-            type: 'attribute',
-            HOLDER: HOLDER,
-            STATIC: STATIC
-        }
+        return attrs;
     };
 
-    _tp.element = function (parent) {
+    _tp.element = function () {
         var
-            HOLDER = '', children = [],
+            children = [],
             name = this.match('TAG_OPEN_START').value,
-            sign = parent || 'M_DOM' + (++this.seed_var),
-            STATIC = 'var ' + sign + '=$m.$create("' + name + '");',
-            attr = this.attr(),
+            attrs = this.attrs(),
             selfClosed = (this.match('TAG_OPEN_END').value.indexOf('/') > -1);
 
         if (!selfClosed && !_voidTag.test(name)) {
@@ -1561,120 +1647,169 @@
         } else {
             _ERROR('$tpl: ' + name + ' is not a self-closing tag!');
         }
-        // console.log(children);
-        if (!!children.length) {
-            children.forEach(function (value) {
-                if (value) {
-                    STATIC += (value.STATIC +
-                    (!!value.sign ? ('if(!!' + value.sign + '.nodeType) {' + sign + '.appendChild(' + value.sign + ');}') : ''));
-                    HOLDER += value.HOLDER || '';
-                }
-            }, this)
-        }
         return {
-            type: 'element',
-            sign: sign,
-            CHILDREN: children,
-            HOLDER: HOLDER + attr.HOLDER,
-            STATIC: STATIC + attr.STATIC
+            TYPE: 'element',
+            NAME: name,
+            ATTRS: attrs,
+            CHILDREN: children
         }
     };
 
     _tp.jst = function (elem) {
-        var value = elem.value || '';
-        var operation = {
-            'TAG': function () {
-                var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
-                    reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-                if (reg.test(value)) {
-                    attrVal = value.replace(reg, function ($, one) {
-                        buf = one.split('.')[0];
-                        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                        return '"+' + one + '+"';
-                    }.bind(this));
-                } else {
-                    buf = value.split('.')[0];
-                    if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                    attrVal = '" + ' + value + ' + "';
-                }
-                HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
-                return {
-                    type: 'jst',
-                    HOLDER: HOLDER,
-                    STATIC: ''
-                }
-            }.bind(this),
-            'TEXT': function () {
-                var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
-                // interpolate
-                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-                return {
-                    type: 'jst',
-                    sign: sign,
-                    HOLDER: '$m.$text(' + sign + ', ' + value + ');',
-                    STATIC: 'var ' + sign + '=$m.$text(null, "");'
-                }
-            }.bind(this)
-        };
-        if (/^[#\/]/.test(value)) {
-            try {
-                var _method = value.match(/([A-Za-z]+)/)[0];
-                return this[_method](value.replace(_method, ''), elem.parent || '');
-            } catch (e) {
-                _ERROR('$tpl: Unexpected token ' + elem.value + '!');
-            }
-        } else {
-            return operation[this.state]();
-        }
+        //var operation = {
+        //    'TAG': function () {
+        //        var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
+        //            reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
+        //        if (reg.test(value)) {
+        //            attrVal = value.replace(reg, function ($, one) {
+        //                buf = one.split('.')[0];
+        //                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+        //                return '"+' + one + '+"';
+        //            }.bind(this));
+        //        } else {
+        //            buf = value.split('.')[0];
+        //            if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+        //            attrVal = '" + ' + value + ' + "';
+        //        }
+        //        HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
+        //        return {
+        //            type: 'jst',
+        //            HOLDER: HOLDER,
+        //            STATIC: ''
+        //        }
+        //    }.bind(this),
+        //    'TEXT': function () {
+        //        var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
+        //        // interpolate
+        //        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
+        //        return {
+        //            type: 'jst',
+        //            sign: sign,
+        //            HOLDER: '$m.$text(' + sign + ', ' + value + ');',
+        //            STATIC: 'var ' + sign + '=$m.$text(null, "");'
+        //        }
+        //    }.bind(this)
+        //}
     };
 
+    _tp['if'] = function (tag) {
+        var condition = this.match('JST_CONDITION').value;
+        var children = [], alternate = [];
 
-    _tp['if'] = function (elem, parent) {
-        var condition = this.match('JST_CONDITION');
-        var consequent = [], alternate = [];
-
-        var container = consequent;
-        var ll, close;
+        var poll, close;
         this.match('JST_OPEN_END');
 
         while (!(close = this.verify('JST_CLOSE'))) {
-            ll = this.poll();
-            if (ll.type === 'JST_OPEN_START') {
-                switch (ll.value) {
+            poll = this.poll();
+            if (poll.type === 'JST_OPEN_START') {
+                switch (poll.value) {
                     case 'else':
 
                         break;
                     case 'elseif':
 
                     default:
-                        container.push(this.statement());
+                        children.push(this.statement());
                 }
             } else {
-                container.push(this.statement());
+                if (tag && poll.type === 'TAG_ATTRIBUTE_VALUE') {
+                    this.next();
+                    children.push(poll);
+                } else {
+                    children.push(this.statement());
+                }
             }
         }
         if (close.value !== "if") _ERROR('$tpl: Unmatched if close!');
         return {
-            type: 'if',
-            ALTERNATE: [],
-            CHILDREN: container,
-            HOLDER: '',
-            REMOVE: '',
-            STATIC: ''
+            TYPE: 'if',
+            ALTERNATE: alternate,
+            CHILDREN: children,
+            CONDITION: condition
         };
+    };
+
+    var TPL_Compiling = function (statements) {
+        this.sign = 0;
+
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements) || [];
+        _fn += '"use strict";';
+        _fn += 'var M_W={};var M_DOM=$m.$fragment();';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
+
+        statements.forEach(function (statement) {
+            if (statement) {
+                STATIC += statement.piece;
+                STATIC += (!statement.sign ? '' : 'M_DOM.appendChild(' + statement.sign + ');');
+                HOLDER += statement.HOLDER || '';
+            }
+        });
+
+        //this.buffer.forEach(function (variable) {
+        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
+        //});
+        _fn = _fn.replace(/<%STATIC%>/, STATIC);
+        _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
+
+        return new Function('_f_,_o_,undefined', _fn);
+    };
+
+    var _tc = TPL_Compiling.prototype;
+
+    _tc.process = function (statements) {
+        var ret = [];
+        statements.forEach(function (statement) {
+            ret.push(this[statement.TYPE](statement));
+        }, this);
+        return ret;
+    };
+
+    _tc['text'] = function (statement) {
+        var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,' + statement.text + ');';
+        return {
+            sign: sign,
+            piece: ret
+        };
+    };
+
+    _tc['element'] = function (statement) {
+        var attrs = statement.ATTRS, sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create("' + statement.NAME + '");', body;
+        if (attrs.length) {
+            attrs.forEach(function (value) {
+                ret += ('$m.$attr(' + sign + ',"' + value.NAME + '","' + value.VALUE + '");');
+            });
+        }
+        if (statement.CHILDREN.length) {
+            body = this.process(statement.CHILDREN);
+            body.forEach(function (value) {
+                ret += (value.piece + sign + '.appendChild(' + value.sign + ');');
+            });
+        }
+        return {
+            sign: sign,
+            piece: ret
+        };
+    };
+
+    _tc['expression'] = function (statement) {
+        console.log(statement)
+    };
+
+    _tc['if'] = function (statement) {
+        console.log(statement)
     };
 
 
     var _watch = function (obj, callback) {
         if (_observe) {
             _observe(obj, function (changes) {
-                console.log(obj);
+                console.log(changes);
             });
         }
     };
     var _testObj = {s: 1, t: 2};
     _watch(_testObj);
-    _testObj.s = 2;
+    _testObj.j = 2;
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
@@ -1695,14 +1830,8 @@
 
             if (!!this['watchHash']) {
                 var _hashFn = function () {
-                    this.data.hash = {};
-                    var _reg = new RegExp('(' + $m.$escapeRegExp(_config.hashPath) + '[^\\?]+)');
-                    var _hash = $m.$unescape($m.$hash(), true), _path = _hash.match(_reg);
-                    if (_path) this.data.hash.iModalJs_URI = _path[0].slice(_config.hashPath.length);
-                    _hash = $m.$s2o(!_path ? _hash : _hash.replace(_path[0], ''), '&');
-                    $m.$forIn(_hash, function (value, key) {
-                        this.data.hash[key.indexOf('?') == 0 ? key.substr(1) : key] = value;
-                    }, this);
+                    this.data.hash = $m.$hash();
+                    console.log(this.data.hash);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
                 _hashFn();
@@ -1711,7 +1840,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [_iModalJsElem, undefined]);
+            this.$update = _handler.apply(this, [_fragment_, _observer_, undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
@@ -1724,7 +1853,7 @@
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            //_target.appendChild(this.$update());
+            _target.appendChild(this.$update());
             return this;
         }
     });
