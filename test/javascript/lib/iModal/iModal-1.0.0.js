@@ -1246,30 +1246,31 @@
         }, this);
     };
 
-    var data = {t: 1, s: 2};
-    var _jst1_ = function () {
-        var _data_ = data.t;
-        var _dom_ = $m.$text(null, _data_);
-        console.log($m.$text(_dom_));
-        return {
-            dom: _dom_,
-            _data: _data_,
-            _cache: $m.$clone(_data_, true),
-            check: function () {
-                this._data = data.t;
-                if (!$m.$same(this._data, this._cache, true)) {
-                    this.set(this._data);
-                    this._cache = $m.$clone(this._data, true);
+    var _jst_ = {
+        'text': function (key) {
+            var _data_ = data[key];
+            var _dom_ = $m.$text(null, _data_);
+            return {
+                dom: _dom_,
+                _data: _data_,
+                _cache: $m.$clone(_data_, true),
+                set: function (data) {
+                    $m.$text(_dom_, data);
+                },
+                check: function () {
+                    this._data = data.t;
+                    if (!$m.$same(this._data, this._cache, true)) {
+                        this.set(this._data);
+                        this._cache = $m.$clone(this._data, true);
+                    }
                 }
-            },
-            set: function (data) {
-                $m.$text(_dom_, data);
-                console.log($m.$text(_dom_));
             }
-        };
+        }
     };
 
-    var _j1_ = new _jst1_();
+
+    var data = {t: 1, s: 2};
+    var _j1_ = new _jst_.text('t');
     var _o_ = new _observer_();
     _o_.$add(_j1_);
     data = {t: 2, s: 2};
