@@ -1730,9 +1730,10 @@
     };
 
     var TPL_Compiling = function (statements) {
+
         this.sign = 0;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements, 'M_DOM') || {};
+        var _fn = '', STATIC = '', HOLDER = 'var M_DATA=this.data;', statements = this.process(statements, 'M_DOM') || {};
         _fn += '"use strict";';
         _fn += 'var M_W={};var M_DOM=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
@@ -1741,9 +1742,6 @@
         STATIC += statements.sign || '';
         HOLDER += statements.holder || '';
 
-        //this.buffer.forEach(function (variable) {
-        //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
-        //});
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
         _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
 
@@ -1795,9 +1793,9 @@
 
     _tc['expression'] = function (statement) {
         console.log(statement)
-        var sign = '_jst' + (this.sign++) + '_', ret = 'var ' + sign + '=' + 'new _j_.text(' + statement.VALUE + ',M_DATA);';
+        var sign = '_jst' + (this.sign++) + '_', ret = 'var ' + sign + '=' + 'new _j_.text("' + statement.VALUE + '",M_DATA);';
         return {
-            sign: sign,
+            sign: '',
             piece: '',
             holder: ret
         };
