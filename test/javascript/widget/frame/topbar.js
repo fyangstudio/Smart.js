@@ -32,19 +32,19 @@ define([
     //        console.log('!!' + this.v);
     //    }
     //});
-    var _fragment_ = $m._f;
-    var cnt = $m.$get('#test1')[0];
-    var test = new _fragment_();
-    var d1 = $m.$create('p');
-    var d2 = $m.$create('ul');
-    var d3 = $m.$create('li');
-    var d4 = $m.$create('ol');
-    test.$add([d1, d2, d3, d4]);
-    cnt.appendChild(test.$get());
-    test.$remove(d3);
-    test.$add(d3);
-    console.log(test)
 
+    //var _fragment_ = $m._f;
+    //var cnt = $m.$get('#test1')[0];
+    //var test = new _fragment_();
+    //var d1 = $m.$create('p');
+    //var d2 = $m.$create('ul');
+    //var d3 = $m.$create('li');
+    //var d4 = $m.$create('ol');
+    //test.$add([d1, d2, d3, d4]);
+    //cnt.appendChild(test.$get());
+    //test.$remove(d3);
+    //test.$add(d3);
+    //console.log(test)
 
     var t = new base({data: {t: 1, x: {t: 1}}}).$inject('#test1');
     //console.log(json);

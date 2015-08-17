@@ -1233,8 +1233,6 @@
         if (reset) this.children = [];
     };
 
-    $m._f = _fragment_;
-
     // JST object observer
     var _observer_ = function () {
         this.observers = [];
