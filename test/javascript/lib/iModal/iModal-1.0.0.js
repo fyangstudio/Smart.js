@@ -1732,18 +1732,14 @@
     var TPL_Compiling = function (statements) {
         this.sign = 0;
 
-        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements) || [];
+        var _fn = [].join(''), prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements, 'M_DOM') || {};
         _fn += '"use strict";';
         _fn += 'var M_W={};var M_DOM=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
-        statements.forEach(function (statement) {
-            if (statement) {
-                STATIC += statement.piece;
-                STATIC += (!statement.sign ? '' : 'M_DOM.appendChild(' + statement.sign + ');');
-                HOLDER += statement.HOLDER || '';
-            }
-        });
+        STATIC += statements.piece || '';
+        STATIC += statements.sign || '';
+        HOLDER += statements.HOLDER || '';
 
         //this.buffer.forEach(function (variable) {
         //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
@@ -1756,12 +1752,19 @@
 
     var _tc = TPL_Compiling.prototype;
 
-    _tc.process = function (statements) {
-        var ret = [];
+    _tc.process = function (statements, parent) {
+        var sign = '', piece = '', holder = '';
         statements.forEach(function (statement) {
-            ret.push(this[statement.TYPE](statement));
+            var item = this[statement.TYPE](statement);
+            piece += item.piece;
+            sign += (!item.sign ? '' : parent + '.appendChild(' + item.sign + ');');
+            holder += item.holder || '';
         }, this);
-        return ret;
+        return {
+            sign: sign,
+            piece: piece,
+            holder: holder
+        };
     };
 
     _tc['text'] = function (statement) {
@@ -1780,11 +1783,9 @@
             });
         }
         if (statement.CHILDREN.length) {
-            body = this.process(statement.CHILDREN);
-            body.forEach(function (value) {
-                ret += value.piece;
-                ret += (!value.sign ? '' : sign + '.appendChild(' + value.sign + ');');
-            });
+            body = this.process(statement.CHILDREN, sign);
+            ret += body.piece;
+            ret += body.sign;
         }
         return {
             sign: sign,
