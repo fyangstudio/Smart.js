@@ -1246,9 +1246,10 @@
         }, this);
     };
 
+    var M_DATA = {};
     var _jst_ = {
         'text': function (key) {
-            var _data_ = data[key];
+            var _data_ = M_DATA[key];
             var _dom_ = $m.$text(null, _data_);
             return {
                 dom: _dom_,
@@ -1268,14 +1269,12 @@
         }
     };
 
-
-    var data = {t: 1, s: 2};
-    var _j1_ = new _jst_.text('t');
-    var _o_ = new _observer_();
-    _o_.$add(_j1_);
-    data = {t: 2, s: 2};
-    _o_.$check();
-
+    //var data = {t: 1, s: 2};
+    //var _j1_ = new _jst_.text('t');
+    //var _o_ = new _observer_();
+    //_o_.$add(_j1_);
+    //data = {t: 2, s: 2};
+    //_o_.$check();
 
     // Macro for TPL parse function
     var TPL_MACRO = {
@@ -1752,7 +1751,7 @@
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
         _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
 
-        return new Function('_f_,_o_,undefined', _fn);
+        return new Function('_f_,_o_,_j_,undefined', _fn);
     };
 
     var _tc = TPL_Compiling.prototype;
@@ -1841,7 +1840,7 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             this._watchers = [];
-            this.$update = _handler.apply(this, [_fragment_, _observer_, undefined]);
+            this.$update = _handler.apply(this, [_fragment_, _observer_, _jst_, undefined]);
             console.log(_handler);
 
             if (!!this['responsive']) _addResponsive.call(this);
