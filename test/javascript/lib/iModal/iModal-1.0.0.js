@@ -1739,7 +1739,7 @@
 
         STATIC += statements.piece || '';
         STATIC += statements.sign || '';
-        HOLDER += statements.HOLDER || '';
+        HOLDER += statements.holder || '';
 
         //this.buffer.forEach(function (variable) {
         //    prefix += 'var ' + variable + '=M_DATA.' + variable + ';'
@@ -1799,7 +1799,7 @@
         return {
             sign: sign,
             piece: '',
-            HOLDER: ret
+            holder: ret
         };
     };
 
