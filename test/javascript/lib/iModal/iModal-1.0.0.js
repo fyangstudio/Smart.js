@@ -1782,7 +1782,8 @@
         if (statement.CHILDREN.length) {
             body = this.process(statement.CHILDREN);
             body.forEach(function (value) {
-                ret += (value.piece + sign + '.appendChild(' + value.sign + ');');
+                ret += value.piece;
+                ret += (!value.sign ? '' : sign + '.appendChild(' + value.sign + ');');
             });
         }
         return {
@@ -1793,6 +1794,12 @@
 
     _tc['expression'] = function (statement) {
         console.log(statement)
+        var sign = '_jst' + (this.sign++) + '_', ret = 'var ' + sign + '=' + 'new _j_.text(' + statement.VALUE + ',M_DATA);';
+        return {
+            sign: sign,
+            piece: '',
+            HOLDER: ret
+        };
     };
 
     _tc['if'] = function (statement) {
