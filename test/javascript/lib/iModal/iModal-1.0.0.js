@@ -1739,8 +1739,9 @@
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         STATIC += statements.piece || '';
-        STATIC += statements.sign || '';
+        STATIC += statements.sign1 || '';
         HOLDER += statements.holder || '';
+        HOLDER += statements.sign2 || '';
 
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
         _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
@@ -1751,15 +1752,17 @@
     var _tc = TPL_Compiling.prototype;
 
     _tc.process = function (statements, parent) {
-        var sign = '', piece = '', holder = '';
+        var sign1 = '', sign2 = '', piece = '', holder = '';
         statements.forEach(function (statement) {
             var item = this[statement.TYPE](statement);
             piece += item.piece;
-            sign += (!item.sign ? '' : parent + '.appendChild(' + item.sign + ');');
+            sign1 += (!item.sign1 ? '' : parent + '.appendChild(' + item.sign1 + ');');
+            sign2 += (!item.sign2 ? '' : parent + '.appendChild(' + item.sign2 + ');');
             holder += item.holder || '';
         }, this);
         return {
-            sign: sign,
+            sign1: sign1,
+            sign2: sign2,
             piece: piece,
             holder: holder
         };
@@ -1768,34 +1771,42 @@
     _tc['text'] = function (statement) {
         var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,' + statement.text + ');';
         return {
-            sign: sign,
+            sign1: sign,
             piece: ret
         };
     };
 
     _tc['element'] = function (statement) {
-        var attrs = statement.ATTRS, sign = '_dom' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$create("' + statement.NAME + '");', body;
+        var body,
+            attrs = statement.ATTRS,
+            sign1 = '_dom' + (this.sign++) + '_',
+            ret = 'var ' + sign1 + '=' + '$m.$create("' + statement.NAME + '");';
         if (attrs.length) {
             attrs.forEach(function (value) {
-                ret += ('$m.$attr(' + sign + ',"' + value.NAME + '","' + value.VALUE + '");');
+                ret += ('$m.$attr(' + sign1 + ',"' + value.NAME + '","' + value.VALUE + '");');
             });
         }
         if (statement.CHILDREN.length) {
-            body = this.process(statement.CHILDREN, sign);
+            body = this.process(statement.CHILDREN, sign1);
             ret += body.piece;
-            ret += body.sign;
+            ret += body.sign1;
         }
         return {
-            sign: sign,
-            piece: ret
+            sign1: sign1,
+            sign2: '',
+            piece: ret,
+            holder: ''
         };
     };
 
     _tc['expression'] = function (statement) {
         console.log(statement)
-        var sign = '_jst' + (this.sign++) + '_', ret = 'var ' + sign + '=' + 'new _j_.text("' + statement.VALUE + '",M_DATA);';
+        var sign1 = '',
+            sign2 = '_jst' + (this.sign++) + '_',
+            ret = 'var ' + sign2 + '=' + 'new _j_.text("' + statement.VALUE + '",M_DATA).dom;';
         return {
-            sign: '',
+            sign1: sign1,
+            sign2: sign2,
             piece: '',
             holder: ret
         };
