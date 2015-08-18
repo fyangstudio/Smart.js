@@ -1444,6 +1444,7 @@
             test = split.MATCH.exec(tpl);
             if (!test) _ERROR('$tpl: Unrecognized Token!');
             mlen = test[0].length;
+            if (mlen == 0 && state == 'JST') _ERROR('$tpl: Unclosed JST expression!');
             tpl = tpl.slice(mlen);
             token = this.process(test, split, tpl);
             if (token && !!token.value.trim()) tokens.push(token);
@@ -1736,7 +1737,7 @@
         var _fn = '', STATIC = '', HOLDER = 'var M_DATA=this.data;', statements = this.process(statements, 'M_DOM') || {};
         _fn += '"use strict";';
         _fn += 'var M_O=new _o_();var M_DOM=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;}}catch(e){throw new Error("$tpl: "+e.message);}';
 
         STATIC += statements.piece || '';
         STATIC += statements.sign1 || '';
