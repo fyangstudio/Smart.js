@@ -1229,7 +1229,7 @@
     _fragment_.prototype.$clean = function (reset) {
         this.children.forEach(function (item) {
             $m.$remove(item);
-        })
+        });
         if (reset) this.children = [];
     };
 
@@ -1735,7 +1735,7 @@
 
         var _fn = '', STATIC = '', HOLDER = 'var M_DATA=this.data;', statements = this.process(statements, 'M_DOM') || {};
         _fn += '"use strict";';
-        _fn += 'var M_W={};var M_DOM=$m.$fragment();';
+        _fn += 'var M_O=new _o_();var M_DOM=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;};}catch(e){throw new Error("$tpl: "+e.message);}';
 
         STATIC += statements.piece || '';
@@ -1757,7 +1757,7 @@
             var item = this[statement.TYPE](statement);
             piece += item.piece;
             sign1 += (!item.sign1 ? '' : parent + '.appendChild(' + item.sign1 + ');');
-            sign2 += (!item.sign2 ? '' : parent + '.appendChild(' + item.sign2 + ');');
+            sign2 += (!item.sign2 ? '' : parent + '.appendChild(' + item.sign2 + '.dom);');
             holder += item.holder || '';
         }, this);
         return {
@@ -1800,10 +1800,11 @@
     };
 
     _tc['expression'] = function (statement) {
-        console.log(statement)
-        var sign1 = '',
-            sign2 = '_jst' + (this.sign++) + '_',
-            ret = 'var ' + sign2 + '=' + 'new _j_.text("' + statement.VALUE + '",M_DATA).dom;';
+        var ret = '',
+            sign1 = '',
+            sign2 = '_jst' + (this.sign++) + '_';
+        ret += ('var ' + sign2 + '=' + 'new _j_.text("' + statement.VALUE + '",M_DATA);');
+        ret += ('M_O.$add(' + sign2 + ');');
         return {
             sign1: sign1,
             sign2: sign2,
