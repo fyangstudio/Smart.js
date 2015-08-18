@@ -1249,7 +1249,7 @@
     var _jst_ = {
         'text': function (key, data) {
             data = data || {};
-            var _data_ = data.key;
+            var _data_ = data[key];
             var _dom_ = $m.$text(null, _data_);
             return {
                 dom: _dom_,
@@ -1259,7 +1259,7 @@
                     $m.$text(_dom_, data);
                 },
                 check: function () {
-                    this._data = data.key;
+                    this._data = data[key];
                     if (!$m.$same(this._data, this._cache, true)) {
                         this.set(this._data);
                         this._cache = $m.$clone(this._data, true);
@@ -1804,7 +1804,7 @@
         var ret = '',
             sign1 = '',
             sign2 = '_jst' + (this.sign++) + '_';
-        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ',M_DATA);');
+        ret += ('var ' + sign2 + '=' + 'new _j_.text("' + statement.VALUE + '",M_DATA);');
         ret += ('M_O.$add(' + sign2 + ');');
         return {
             sign1: sign1,
