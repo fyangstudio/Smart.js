@@ -46,7 +46,7 @@ define([
     //test.$add(d3);
     //console.log(test)
 
-    var t = new base({data: {t: 1, x: {t: 1}}}).$inject('#test1');
+    var t = new base({data: {t: 1, s: 2, x: {t: 1}}}).$inject('#test1');
     //console.log(json);
     //var parent = m.$extend({
     //    $init: function () {
