@@ -1259,6 +1259,7 @@
                     $m.$text(_dom_, data);
                 },
                 check: function () {
+                    console.log(datax);
                     this._data = data[key];
                     if (!$m.$same(this._data, this._cache, true)) {
                         this.set(this._data);
@@ -1269,8 +1270,11 @@
         }
     };
 
-    //var data = {t: 1, s: 2};
-    //var _j1_ = new _jst_.text('t');
+    var datax = {t: 1};
+    var _j1_ = new _jst_.text('t', datax);
+    datax = {t: 2};
+    _j1_.check();
+    console.log(_j1_);
     //var _o_ = new _observer_();
     //_o_.$add(_j1_);
     //data = {t: 2, s: 2};
