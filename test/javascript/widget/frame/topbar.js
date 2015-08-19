@@ -11,10 +11,9 @@ define([
         responsive: true,
         watchHash: true,
         init: function () {
-            this.$on('ok1', this.test1);
+            this.$on('inject', this.test1);
         },
         test1: function () {
-            this.$update();
             console.log(1);
         }
     });

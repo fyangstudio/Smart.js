@@ -1887,6 +1887,7 @@
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
             _target.appendChild(this.$update());
+            this.$emit('inject');
             return this;
         }
     });
