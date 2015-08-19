@@ -1759,7 +1759,7 @@
     var _tc = TPL_Compiling.prototype;
 
     _tc.process = function (statements, parent) {
-        var sign1 = '', sign2 = '', piece = '', holder = '';
+        var sign1 = '', piece = '', holder = '';
         statements.forEach(function (statement) {
             var item = this[statement.TYPE](statement);
             piece += item.piece;
@@ -1769,7 +1769,7 @@
         }, this);
         return {
             sign1: sign1,
-            sign2: sign2,
+            sign2: '',
             piece: piece,
             holder: holder
         };
@@ -1787,7 +1787,6 @@
         var body,
             attrs = statement.ATTRS,
             sign1 = '_dom' + (this.sign++) + '_',
-            sign2 = '',
             holder = '',
             ret = 'var ' + sign1 + '=' + '$m.$create("' + statement.NAME + '");';
         if (attrs.length) {
@@ -1799,12 +1798,11 @@
             body = this.process(statement.CHILDREN, sign1);
             ret += body.piece;
             ret += body.sign1;
-            sign2 += body.sign2;
             holder += body.holder;
         }
         return {
             sign1: sign1,
-            sign2: sign2,
+            sign2: '',
             piece: ret,
             holder: holder
         };
