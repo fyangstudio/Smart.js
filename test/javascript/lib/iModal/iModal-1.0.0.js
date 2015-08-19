@@ -1745,7 +1745,6 @@
         STATIC += statements.piece || '';
         STATIC += statements.sign1 || '';
         HOLDER += statements.holder || '';
-        HOLDER += statements.sign2 || '';
 
         this.buffer.forEach(function (variable) {
             prefix += 'var ' + variable + '=M_DATA.' + variable + '||{};'
@@ -1765,8 +1764,8 @@
             var item = this[statement.TYPE](statement);
             piece += item.piece;
             sign1 += (!item.sign1 ? '' : parent + '.appendChild(' + item.sign1 + ');');
-            sign2 += (!item.sign2 ? '' : parent + '.appendChild(' + item.sign2 + '.dom);');
             holder += item.holder || '';
+            holder += (!item.sign2 ? '' : parent + '.appendChild(' + item.sign2 + '.dom);');
         }, this);
         return {
             sign1: sign1,
