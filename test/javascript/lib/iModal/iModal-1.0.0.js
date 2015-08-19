@@ -1246,7 +1246,6 @@
         }, this);
     };
 
-    var M_DATA = {};
     var _jst_ = {
         'text': function (key, data) {
             var _data_ = data[key] || key;
@@ -1789,6 +1788,8 @@
         var body,
             attrs = statement.ATTRS,
             sign1 = '_dom' + (this.sign++) + '_',
+            sign2 = '',
+            holder = '',
             ret = 'var ' + sign1 + '=' + '$m.$create("' + statement.NAME + '");';
         if (attrs.length) {
             attrs.forEach(function (value) {
@@ -1799,12 +1800,14 @@
             body = this.process(statement.CHILDREN, sign1);
             ret += body.piece;
             ret += body.sign1;
+            sign2 += body.sign2;
+            holder += body.holder;
         }
         return {
             sign1: sign1,
-            sign2: '',
+            sign2: sign2,
             piece: ret,
-            holder: ''
+            holder: holder
         };
     };
 
