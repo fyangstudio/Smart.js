@@ -1257,7 +1257,7 @@
                     $m.$text(_dom_, data);
                 },
                 check: function (data) {
-                    this._data = data[key] || key;
+                    // this._data = data[key] || key;
                     if (!$m.$same(this._data, this._cache, true)) {
                         this.set(this._data);
                         this._cache = $m.$clone(this._data, true);
@@ -1266,6 +1266,15 @@
             }
         }
     };
+
+    //var data = {t: 1};
+    //var x = new _jst_.text(data.t);
+    //data = {t: 2};
+    //x.check();
+
+    var test = 'this.data.t.sdsd.list';
+    console.log(test.replace(/\.([^\x00\.]*)/g, '["$1"]'));
+
 
     // Macro for TPL parse function
     var TPL_MACRO = {
