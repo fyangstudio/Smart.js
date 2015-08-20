@@ -1247,7 +1247,7 @@
     };
 
     var _jst_ = {
-        'text': function (data) {
+        'text': function (data, key) {
             var _dom_ = $m.$text(null, data);
             return {
                 dom: _dom_,
@@ -1255,6 +1255,10 @@
                 _cache: $m.$clone(data, true),
                 set: function (data) {
                     $m.$text(_dom_, data);
+                },
+                get: function (context) {
+                    var reg = /\.([^\x00\.]*)/g;
+                    return new Function('_c_', 'return ' + test.replace(/\.([^\x00\.]*)/g, '["$1"]') + ';');
                 },
                 check: function (data) {
                     // this._data = data[key] || key;
