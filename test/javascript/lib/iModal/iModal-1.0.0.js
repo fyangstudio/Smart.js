@@ -1247,13 +1247,12 @@
     };
 
     var _jst_ = {
-        'text': function (key, data) {
-            var _data_ = data[key] || key;
-            var _dom_ = $m.$text(null, _data_);
+        'text': function (data) {
+            var _dom_ = $m.$text(null, data);
             return {
                 dom: _dom_,
-                _data: _data_,
-                _cache: $m.$clone(_data_, true),
+                _data: data,
+                _cache: $m.$clone(data, true),
                 set: function (data) {
                     $m.$text(_dom_, data);
                 },
@@ -1727,7 +1726,7 @@
         this.sign = 0;
         this.buffer = [];
 
-        var _fn = '', prefix = 'var M_DATA=this.data;', STATIC = '', HOLDER = '', statements = this.process(statements, 'M_DOM') || {};
+        var _fn = '', STATIC = '', HOLDER = '', statements = this.process(statements, 'M_DOM') || {};
         _fn += '"use strict";';
         _fn += 'var M_O=new _o_();var M_DOM=$m.$fragment();';
         _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;}}catch(e){throw new Error("$tpl: "+e.message);}';
@@ -1736,12 +1735,8 @@
         STATIC += statements.sign1 || '';
         HOLDER += statements.holder || '';
 
-        this.buffer.forEach(function (variable) {
-            prefix += 'var ' + variable + '=M_DATA.' + variable + '||{};'
-        });
-
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
-        _fn = _fn.replace(/<%HOLDER%>/, prefix + HOLDER);
+        _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
 
         return new Function('_f_,_o_,_j_,undefined', _fn);
     };
@@ -1807,7 +1802,7 @@
             if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
             //return '"+' + one + '+"';
         }.bind(this));
-        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ',M_DATA);');
+        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ');');
         ret += ('M_O.$add(' + sign2 + ');');
         return {
             sign1: sign1,
