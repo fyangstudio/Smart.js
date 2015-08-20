@@ -1256,9 +1256,9 @@
                 set: function (data) {
                     $m.$text(_dom_, data);
                 },
-                get: function (context) {
+                get: function (context, key) {
                     var reg = /\.([^\x00\.]*)/g;
-                    return new Function('_c_', 'return ' + test.replace(/\.([^\x00\.]*)/g, '["$1"]') + ';');
+                    return new Function('data', 'return ' + key.replace(/\.([^\x00\.]*)/g, '["$1"]') + ';');
                 },
                 check: function (data) {
                     // this._data = data[key] || key;
@@ -1271,10 +1271,11 @@
         }
     };
 
-    //var data = {t: 1};
-    //var x = new _jst_.text(data.t);
-    //data = {t: 2};
-    //x.check();
+    var data = {t: 1};
+    var x = new _jst_.text(data.t);
+    data = {t: 2};
+    var s = x.get(data, 'data.t');
+    console.log(s(data));
 
     var test = 'this.data.t.sdsd.list';
     console.log(test.replace(/\.([^\x00\.]*)/g, '["$1"]'));
