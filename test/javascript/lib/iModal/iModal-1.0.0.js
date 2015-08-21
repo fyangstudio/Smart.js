@@ -1257,8 +1257,10 @@
                     $m.$text(_dom_, data);
                 },
                 get: function (context, key) {
-                    var reg = /\.([^\x00\.]*)/g;
-                    return new Function('data', 'return ' + key.replace(/\.([^\x00\.]*)/g, '["$1"]') + ';');
+                    var reg1 = /([^\x00\.]*)/g;
+                    var reg2 = /\.([^\x00\.]*)/g;
+                    var varName = key.match(reg1)[0];
+                    return new Function(varName, 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
                     // this._data = data[key] || key;
