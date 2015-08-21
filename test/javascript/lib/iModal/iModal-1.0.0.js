@@ -1257,18 +1257,18 @@
                     $m.$text(_dom_, data);
                 },
                 get: function (key) {
-                    var reg1 = /([^\x00\[\]\.]*)/g;
+                    var reg1 = /([^\x00\[\]\.=]*)/g;
                     var reg2 = /\.([^\x00\.]*)/g;
                     var varName = key.match(reg1)[0];
                     return new Function(varName, 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
                     console.log(this._cache);
-                    var _get = this.get(key);
-                    this._data = _get(data) || key;
-                    if (!$m.$same(this._data, this._cache, true)) {
+                    //var _get = this.get(key);
+                    if (!$m.$same(data, this._cache, true)) {
                         this.set(this._data);
-                        this._cache = $m.$clone(this._data, true);
+                        this._data = data;
+                        this._cache = $m.$clone(data, true);
                     }
                     console.log(this._cache);
                 }
