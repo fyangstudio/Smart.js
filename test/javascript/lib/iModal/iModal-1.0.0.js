@@ -1256,7 +1256,7 @@
                 set: function (data) {
                     $m.$text(_dom_, data);
                 },
-                get: function (context, key) {
+                get: function (key) {
                     var reg1 = /([^\x00\.]*)/g;
                     var reg2 = /\.([^\x00\.]*)/g;
                     var varName = key.match(reg1)[0];
@@ -1276,11 +1276,8 @@
     var data = {t: 1};
     var x = new _jst_.text(data.t);
     data = {t: 2};
-    var s = x.get(data, 'data.t');
-    console.log(s(data));
-
-    var test = 'this.data.t.sdsd.list';
-    console.log(test.replace(/\.([^\x00\.]*)/g, '["$1"]'));
+    var s = x.get('$m.$create');
+    console.log(s([1,2,3]));
 
 
     // Macro for TPL parse function
