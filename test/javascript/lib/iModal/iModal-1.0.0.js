@@ -1264,20 +1264,20 @@
                 },
                 check: function (data) {
                     console.log(this._cache);
-                    //var _get = this.get(key);
-                    if (!$m.$same(data, this._cache, true)) {
-                        this.set(this._data);
-                        this._data = data;
-                        this._cache = $m.$clone(data, true);
+                    var _data = this.get(key)(data);
+                    if (!$m.$same(_data, this._cache, true)) {
+                        this.set(_data);
+                        this._data = _data;
+                        this._cache = $m.$clone(_data, true);
                     }
-                    console.log(this._cache);
+                    console.log(this.dom);
                 }
             }
         }
     };
 
     var data = {t: 1};
-    var x = new _jst_.text(data, 'data.t');
+    var x = new _jst_.text(1, 'data.t');
     data = {t: 2};
     x.check(data);
 
