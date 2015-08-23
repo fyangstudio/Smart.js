@@ -1248,7 +1248,10 @@
 
     var _jst_ = {
         'text': function (data, key) {
+            var reg1 = /([^\x00\[\]\.=]*)/g;
+            var reg2 = /\.([^\x00\.]*)/g;
             var _dom_ = $m.$text(null, data);
+            var varName = key.match(reg1)[0];
             return {
                 dom: _dom_,
                 _data: data,
@@ -1257,9 +1260,6 @@
                     $m.$text(_dom_, data);
                 },
                 get: function (key) {
-                    var reg1 = /([^\x00\[\]\.=]*)/g;
-                    var reg2 = /\.([^\x00\.]*)/g;
-                    var varName = key.match(reg1)[0];
                     return new Function(varName, 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
@@ -1269,15 +1269,15 @@
                         this.set(_data);
                         this._data = _data;
                         this._cache = $m.$clone(_data, true);
+                        console.log(this.dom);
                     }
-                    console.log(this.dom);
                 }
             }
         }
     };
 
     var data = {t: 1};
-    var x = new _jst_.text(1, 'data.t');
+    var x = new _jst_.text(data, 'data');
     data = {t: 2};
     x.check(data);
 
