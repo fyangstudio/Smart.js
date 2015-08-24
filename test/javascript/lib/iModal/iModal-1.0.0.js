@@ -1252,6 +1252,7 @@
             var reg2 = /\.([^\x00\.]*)/g;
             var _dom_ = $m.$text(null, data);
             var varName = key.match(reg1)[0];
+            var changeable = reg2.test(key);
             return {
                 dom: _dom_,
                 _data: data,
@@ -1263,7 +1264,7 @@
                     return new Function(varName, 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
-                    console.log(this._cache);
+                    if (!changeable) return;
                     var _data = this.get(key)(data);
                     if (!$m.$same(_data, this._cache, true)) {
                         this.set(_data);
@@ -1277,7 +1278,7 @@
     };
 
     var data = {t: 1};
-    var x = new _jst_.text(data, 'data');
+    var x = new _jst_.text(1, '1');
     data = {t: 2};
     x.check(data);
 
