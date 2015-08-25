@@ -1745,7 +1745,7 @@
         var _fn = '', STATIC = '', HOLDER = '', statements = this.process(statements, 'M_DOM') || {};
         _fn += '"use strict";';
         _fn += 'var M_O=new _o_();var M_DOM=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return M_DOM;}}catch(e){throw new Error("$tpl: "+e.message);}';
+        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return {dom:M_DOM,watch:M_O};}}catch(e){throw new Error("$tpl: "+e.message);}';
 
         STATIC += statements.piece || '';
         STATIC += statements.sign1 || '';
@@ -1818,7 +1818,7 @@
             if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
             //return '"+' + one + '+"';
         }.bind(this));
-        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ');');
+        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ',"' + statement.VALUE + '");');
         ret += ('M_O.$add(' + sign2 + ');');
         return {
             sign1: sign1,
@@ -1872,12 +1872,15 @@
 
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
+            var _bridge = _handler(_fragment_, _observer_, _jst_, undefined);
             this._watchers = [];
-            this.$update = _handler.apply(this, [_fragment_, _observer_, _jst_, undefined]);
-            console.log(_handler);
-            console.log(this.data);
-
-            if (!!this['responsive']) _addResponsive.call(this);
+            this._ret = _bridge.call(this);
+            console.log(this._ret.watch);
+            this.$update = function () {
+                this._ret.watch.$check();
+            }.bind(this);
+            this.$update();
+            //if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
 
             this.$on('update', this.$update);
@@ -1887,7 +1890,7 @@
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            _target.appendChild(this.$update());
+            _target.appendChild(this._ret.dom);
             this.$emit('inject');
             return this;
         }
