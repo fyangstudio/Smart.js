@@ -1261,11 +1261,11 @@
                     $m.$text(_dom_, data);
                 },
                 get: function (key) {
-                    return new Function(varName, 'return ' + key.replace(reg2, '["$1"]') + ';');
+                    return new Function(varName + ',$m', 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
                     if (!changeable) return;
-                    var _data = this.get(key)(data);
+                    var _data = this.get(key)(data, $m);
                     if (!$m.$same(_data, this._cache, true)) {
                         this.set(_data);
                         this._data = _data;
