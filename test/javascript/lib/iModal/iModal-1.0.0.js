@@ -280,10 +280,10 @@
         };
     } else {
         $m.$addEvent = function (node, event, fn) {
-            (node == _win ? document : node).attachEvent('on' + event, fn);
+            node.attachEvent('on' + event, fn);
         };
         $m.$removeEvent = function (node, event, fn) {
-            (node == _win ? document : node).detachEvent('on' + event, fn);
+            node.detachEvent('on' + event, fn);
         };
     }
 
@@ -1841,11 +1841,11 @@
 
 
     var _addResponsive = function () {
-        var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+        var _resizeEvt = 'orientationchange' in _win ? 'orientationchange' : 'resize';
         var _resizeFn = $m.$throttle(function () {
             this.$update();
         }.bind(this), _config.delay);
-        $m.$addEvent(window, _resizeEvt, _resizeFn);
+        $m.$addEvent(_win, _resizeEvt, _resizeFn);
     };
 
     $m.$tpl = $m.$module.$extend({
