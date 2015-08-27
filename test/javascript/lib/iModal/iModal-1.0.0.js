@@ -1825,6 +1825,7 @@
                     return new Function(varName + ',$m', 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
+                    console.log(this);
                     if (!changeable) return;
                     var _data = this.get(key)(data, $m);
                     if (!$m.$same(_data, this._cache, true)) {
@@ -1859,7 +1860,6 @@
             if (!!this['watchHash']) {
                 var _hashFn = function () {
                     this.data.hash = $m.$hash();
-                    console.log(this.data.hash);
                 }.bind(this);
                 $m.$watchHash(_hashFn);
                 _hashFn();
@@ -1870,12 +1870,10 @@
             var _bridge = _handler(_fragment_, _observer_, _jst_, undefined);
             this._watchers = [];
             this._ret = _bridge.call(this);
-            console.log(this._ret.watch);
             this.$update = function () {
                 this._ret.watch.$check();
             }.bind(this);
-            this.$update();
-            //if (!!this['responsive']) _addResponsive.call(this);
+            if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
 
             this.$on('update', this.$update);
