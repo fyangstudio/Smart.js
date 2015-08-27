@@ -46,6 +46,7 @@ define([
     //console.log(test)
 
     var t = new base({data: {t: 1, s: 2, x: {t: 1}}}).$inject('#test1');
+    t.data.t = 2;
     //console.log(json);
     //var parent = m.$extend({
     //    $init: function () {

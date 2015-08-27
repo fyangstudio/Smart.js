@@ -1801,9 +1801,9 @@
     _observer_.prototype.$add = function (item) {
         this.observers.push(item);
     };
-    _observer_.prototype.$check = function () {
+    _observer_.prototype.$check = function (data) {
         this.observers.forEach(function (item) {
-            item.check();
+            item.check(data);
         }, this);
     };
 
@@ -1812,7 +1812,7 @@
             var reg1 = /([^\x00\[\]\.=]*)/g;
             var reg2 = /\.([^\x00\.]*)/g;
             var _dom_ = $m.$text(null, data);
-            var varName = key.match(reg1)[0].replace(/\$[mM]/, '');
+            var varName = key.match(reg1)[0].replace(/\$[mM]/, '').replace('this', 'context');
             var changeable = reg2.test(key);
             return {
                 dom: _dom_,
@@ -1822,12 +1822,12 @@
                     $m.$text(_dom_, data);
                 },
                 get: function (key) {
-                    return new Function(varName , 'return ' + key.replace(reg2, '["$1"]') + ';');
+                    return new Function(varName, 'return ' + key.replace('this', 'context').replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
-                    console.log(this);
                     if (!changeable) return;
                     var _data = this.get(key)(data);
+                    console.log(data);
                     if (!$m.$same(_data, this._cache, true)) {
                         this.set(_data);
                         this._data = _data;
@@ -1870,9 +1870,11 @@
             var _bridge = _handler(_fragment_, _observer_, _jst_, undefined);
             this._watchers = [];
             this._ret = _bridge.call(this);
+            console.log(_bridge);
             this.$update = function () {
-                this._ret.watch.$check();
+                this._ret.watch.$check(this);
             }.bind(this);
+            // this.$update();
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
 
