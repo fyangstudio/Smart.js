@@ -1233,56 +1233,6 @@
         if (reset) this.children = [];
     };
 
-    // JST object observer
-    var _observer_ = function () {
-        this.observers = [];
-    };
-    _observer_.prototype.$add = function (item) {
-        this.observers.push(item);
-    };
-    _observer_.prototype.$check = function () {
-        this.observers.forEach(function (item) {
-            item.check();
-        }, this);
-    };
-
-    var _jst_ = {
-        'text': function (data, key) {
-            var reg1 = /([^\x00\[\]\.=]*)/g;
-            var reg2 = /\.([^\x00\.]*)/g;
-            var _dom_ = $m.$text(null, data);
-            var varName = key.match(reg1)[0];
-            var changeable = reg2.test(key);
-            return {
-                dom: _dom_,
-                _data: data,
-                _cache: $m.$clone(data, true),
-                set: function (data) {
-                    $m.$text(_dom_, data);
-                },
-                get: function (key) {
-                    return new Function(varName + ',$m', 'return ' + key.replace(reg2, '["$1"]') + ';');
-                },
-                check: function (data) {
-                    if (!changeable) return;
-                    var _data = this.get(key)(data, $m);
-                    if (!$m.$same(_data, this._cache, true)) {
-                        this.set(_data);
-                        this._data = _data;
-                        this._cache = $m.$clone(_data, true);
-                        console.log(this.dom);
-                    }
-                }
-            }
-        }
-    };
-
-    var data = {t: 1};
-    var x = new _jst_.text(1, '1');
-    data = {t: 2};
-    x.check(data);
-
-
     // Macro for TPL parse function
     var TPL_MACRO = {
         'BEGIN': '{{',
@@ -1843,6 +1793,51 @@
     var _testObj = {s: 1, t: 2};
     _watch(_testObj);
     _testObj.j = 2;
+
+    // JST object observer
+    var _observer_ = function () {
+        this.observers = [];
+    };
+    _observer_.prototype.$add = function (item) {
+        this.observers.push(item);
+    };
+    _observer_.prototype.$check = function () {
+        this.observers.forEach(function (item) {
+            item.check();
+        }, this);
+    };
+
+    var _jst_ = {
+        'text': function (data, key) {
+            var reg1 = /([^\x00\[\]\.=]*)/g;
+            var reg2 = /\.([^\x00\.]*)/g;
+            var _dom_ = $m.$text(null, data);
+            var varName = key.match(reg1)[0];
+            var changeable = reg2.test(key);
+            return {
+                dom: _dom_,
+                _data: data,
+                _cache: $m.$clone(data, true),
+                set: function (data) {
+                    $m.$text(_dom_, data);
+                },
+                get: function (key) {
+                    return new Function(varName + ',$m', 'return ' + key.replace(reg2, '["$1"]') + ';');
+                },
+                check: function (data) {
+                    if (!changeable) return;
+                    var _data = this.get(key)(data, $m);
+                    if (!$m.$same(_data, this._cache, true)) {
+                        this.set(_data);
+                        this._data = _data;
+                        this._cache = $m.$clone(_data, true);
+                        console.log(this.dom);
+                    }
+                }
+            }
+        }
+    };
+
 
     var _addResponsive = function () {
         var _resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
