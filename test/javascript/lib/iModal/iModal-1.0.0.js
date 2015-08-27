@@ -1812,7 +1812,7 @@
             var reg1 = /([^\x00\[\]\.=]*)/g;
             var reg2 = /\.([^\x00\.]*)/g;
             var _dom_ = $m.$text(null, data);
-            var varName = key.match(reg1)[0];
+            var varName = key.match(reg1)[0].replace(/\$[mM]/, '');
             var changeable = reg2.test(key);
             return {
                 dom: _dom_,
@@ -1822,12 +1822,12 @@
                     $m.$text(_dom_, data);
                 },
                 get: function (key) {
-                    return new Function(varName + ',$m', 'return ' + key.replace(reg2, '["$1"]') + ';');
+                    return new Function(varName , 'return ' + key.replace(reg2, '["$1"]') + ';');
                 },
                 check: function (data) {
                     console.log(this);
                     if (!changeable) return;
-                    var _data = this.get(key)(data, $m);
+                    var _data = this.get(key)(data);
                     if (!$m.$same(_data, this._cache, true)) {
                         this.set(_data);
                         this._data = _data;
