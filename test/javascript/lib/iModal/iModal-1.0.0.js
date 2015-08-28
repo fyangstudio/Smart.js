@@ -1768,7 +1768,7 @@
             if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
             //return '"+' + one + '+"';
         }.bind(this));
-        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ',"' + statement.VALUE + '");');
+        ret += ('var ' + sign2 + '=' + 'new _j_.text(' + statement.VALUE + ',"' + statement.VALUE.replace(/"/g, "'") + '");');
         ret += ('M_O.$add(' + sign2 + ');');
         return {
             sign1: sign1,
