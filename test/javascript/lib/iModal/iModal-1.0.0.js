@@ -1527,11 +1527,14 @@
                 this.state = 'TEXT';
                 var text = poll.value.trim().replace(/\n/g, '');
                 this.next();
-                if (!!text)
-                    return {
+                if (!!text) {
+                    var test = {
                         TYPE: 'text',
                         text: text
-                    };
+                    }
+                    window.test = test;
+                    return test;
+                }
                 return null;
             case 'JST_OPEN_START':
                 var name = poll.value;
