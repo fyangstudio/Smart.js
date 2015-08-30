@@ -1616,43 +1616,6 @@
         }
     };
 
-    _tp.jst = function (elem) {
-        //var operation = {
-        //    'TAG': function () {
-        //        var attrVal, buf, HOLDER, sign = 'M_DOM' + this.seed_var,
-        //            reg = eval(TPL_MACRO.EXPRESSION.toString() + 'g');
-        //        if (reg.test(value)) {
-        //            attrVal = value.replace(reg, function ($, one) {
-        //                buf = one.split('.')[0];
-        //                if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-        //                return '"+' + one + '+"';
-        //            }.bind(this));
-        //        } else {
-        //            buf = value.split('.')[0];
-        //            if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-        //            attrVal = '" + ' + value + ' + "';
-        //        }
-        //        HOLDER = '$m.$attr(' + sign + ', "' + elem.attr + '","' + attrVal + '");';
-        //        return {
-        //            type: 'jst',
-        //            HOLDER: HOLDER,
-        //            STATIC: ''
-        //        }
-        //    }.bind(this),
-        //    'TEXT': function () {
-        //        var sign = 'M_DOM' + (++this.seed_var), buf = value.split('.')[0];
-        //        // interpolate
-        //        if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
-        //        return {
-        //            type: 'jst',
-        //            sign: sign,
-        //            HOLDER: '$m.$text(' + sign + ', ' + value + ');',
-        //            STATIC: 'var ' + sign + '=$m.$text(null, "");'
-        //        }
-        //    }.bind(this)
-        //}
-    };
-
     _tp['if'] = function (tag) {
         var condition = this.match('JST_CONDITION').value;
         var children = [], alternate = [];
