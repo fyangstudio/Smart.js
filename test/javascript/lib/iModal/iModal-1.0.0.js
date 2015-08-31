@@ -1707,11 +1707,14 @@
             sign1 = '_dom' + (this.sign++) + '_',
             holder = '',
             ret = 'var ' + sign1 + '=' + '$m.$create("' + statement.NAME + '");';
+        var test = $m.$create(statement.NAME);
         if (attrs.length) {
             attrs.forEach(function (value) {
                 ret += ('$m.$attr(' + sign1 + ',"' + value.NAME + '","' + value.VALUE + '");');
+                $m.$attr(test, value.NAME, value.VALUE);
             });
         }
+        console.log(test);
         if (statement.CHILDREN.length) {
             body = this.process(statement.CHILDREN, sign1);
             ret += body.piece;
