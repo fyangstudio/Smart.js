@@ -1694,6 +1694,7 @@
 
     _tc['text'] = function (statement) {
         var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,' + statement.text + ');';
+        console.log($m.$text(null, statement.text));
         return {
             sign1: sign,
             piece: ret
