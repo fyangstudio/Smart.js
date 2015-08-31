@@ -1693,7 +1693,7 @@
     };
 
     _tc['text'] = function (statement) {
-        var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,' + statement.text + ');';
+        var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,"' + statement.text + '");';
         console.log($m.$text(null, statement.text));
         return {
             sign1: sign,
@@ -1781,7 +1781,7 @@
         'text': function (data, key) {
             var reg1 = /([^\x00\[\]\.=]*)/g;
             var reg2 = /\.([^\x00\.]*)/g;
-            var _dom_ = $m.$text(null, data);
+            var _dom_ = $m.$text(null, "" + data + "");
             var varName = key.match(reg1)[0].replace(/\$[mM]/, '').replace('this', 'context');
             var changeable = reg2.test(key);
             return {
@@ -1789,7 +1789,7 @@
                 _data: data,
                 _cache: $m.$clone(data, true),
                 set: function (data) {
-                    $m.$text(_dom_, data);
+                    $m.$text(_dom_, "" + data + "");
                 },
                 get: function (key) {
                     return new Function(varName, 'return ' + key.replace('this', 'context').replace(reg2, '["$1"]') + ';');
