@@ -1733,7 +1733,7 @@
         var ret = '',
             sign1 = '',
             sign2 = '_jst' + (this.sign++) + '_';
-        statement.VALUE.replace(/[^$]+/, function ($, one) {
+        statement.VALUE.replace(/[^$]+/, function ($) {
             var buf = $.split('.')[0];
             if (this.buffer.indexOf(buf) == -1) this.buffer.push(buf);
             //return '"+' + one + '+"';
