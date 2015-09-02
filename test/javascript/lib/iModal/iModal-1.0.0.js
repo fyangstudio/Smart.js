@@ -1670,7 +1670,7 @@
         _fn = _fn.replace(/<%STATIC%>/, STATIC);
         _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
 
-        return new Function('_f_,_o_,_j_,undefined', _fn);
+        return _NOOP;
     };
 
     var _tc = TPL_Compiling.prototype;
@@ -1838,12 +1838,12 @@
             var _fn = this.init;
             var _handler = new TPL_Parser(this.template);
             var _bridge = _handler(_fragment_, _observer_, _jst_, undefined);
-            this._watchers = [];
-            this._ret = _bridge.call(this);
-            console.log(_bridge);
-            this.$update = function () {
-                this._ret.watch.$check(this);
-            }.bind(this);
+            //this._watchers = [];
+            //this._ret = _bridge.call(this);
+            //console.log(_bridge);
+            //this.$update = function () {
+            //    this._ret.watch.$check(this);
+            //}.bind(this);
             // this.$update();
             if (!!this['responsive']) _addResponsive.call(this);
             if (_fn && $m.$isFunction(_fn)) _fn.apply(this, arguments);
@@ -1855,7 +1855,7 @@
             if (!parentNode) _ERROR('$tpl: Inject function need a parentNode!');
             var _target = parentNode.nodeType == 1 ? parentNode : $m.$get(parentNode)[0];
             if (!_target) _ERROR('$tpl: Inject node is not found!');
-            _target.appendChild(this._ret.dom);
+            //_target.appendChild(this._ret.dom);
             this.$emit('inject');
             return this;
         }
