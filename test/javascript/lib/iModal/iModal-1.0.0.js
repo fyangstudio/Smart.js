@@ -1655,20 +1655,8 @@
 
     var TPL_Compiling = function (statements) {
 
-        this.sign = 0;
-        this.buffer = [];
-
-        var _fn = '', STATIC = '', HOLDER = '', statements = this.process(statements, 'M_DOM') || {};
-        _fn += '"use strict";';
-        _fn += 'var M_O=new _o_();var M_DOM=$m.$fragment();';
-        _fn += 'try{<%STATIC%>return function(){<%HOLDER%>return {dom:M_DOM,watch:M_O};}}catch(e){throw new Error("$tpl: "+e.message);}';
-
-        STATIC += statements.piece || '';
-        STATIC += statements.sign1 || '';
-        HOLDER += statements.holder || '';
-
-        _fn = _fn.replace(/<%STATIC%>/, STATIC);
-        _fn = _fn.replace(/<%HOLDER%>/, HOLDER);
+        var statements = this.process(statements) || {};
+        console.log(statements);
 
         return _NOOP;
     };
@@ -1676,29 +1664,16 @@
     var _tc = TPL_Compiling.prototype;
 
     _tc.process = function (statements, parent) {
-        var sign1 = '', piece = '', holder = '';
+        var cnt = parent || $m.$fragment();
         statements.forEach(function (statement) {
             var item = this[statement.TYPE](statement);
-            piece += item.piece;
-            sign1 += (!item.sign1 ? '' : parent + '.appendChild(' + item.sign1 + ');');
-            holder += item.holder || '';
-            holder += (!item.sign2 ? '' : parent + '.appendChild(' + item.sign2 + '.dom);');
+            cnt.appendChild(item);
         }, this);
-        return {
-            sign1: sign1,
-            sign2: '',
-            piece: piece,
-            holder: holder
-        };
+        return cnt;
     };
 
     _tc['text'] = function (statement) {
-        var sign = '_text' + (this.sign++) + '_', ret = 'var ' + sign + '=' + '$m.$text(null,"' + statement.text + '");';
-        console.log($m.$text(null, statement.text));
-        return {
-            sign1: sign,
-            piece: ret
-        };
+        return $m.$text(null, statement.text);
     };
 
     _tc['element'] = function (statement) {
