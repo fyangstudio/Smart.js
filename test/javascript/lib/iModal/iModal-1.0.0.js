@@ -868,9 +868,12 @@
                 var _d2s = function (data) {
                     return $m.$o2s(data, '&').replace(/^"|"$/g, '');
                 };
-                if (_data != null && _method == 'get') {
-                    _url += ('?' + _d2s(_data));
-                    _data = null;
+                if (_data != null) {
+                    _data = _d2s(_data);
+                    if (_method == 'get') {
+                        _url += ('?' + _data);
+                        _data = null;
+                    }
                 }
                 // On xhr ready state change
                 _xhr.onreadystatechange = function () {
